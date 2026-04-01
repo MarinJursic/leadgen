@@ -1,0 +1,22 @@
+Leadgen Lab 1 Agent Log
+=======================
+
+Purpose
+-------
+This tracked log summarizes how the AI agent was used while planning and implementing Lab 1.
+
+Summary
+-------
+- Reviewed the Leadgen PRDs and the lab brief.
+- Created a final implementation plan tied to the actual product requirements.
+- Implemented the shared Leadgen domain model in `Leadgen.Model`.
+- Implemented the `Leadgen.Lab1Runner` console app.
+- Seeded three product-relevant missions.
+- Added ten LINQ queries over the Leadgen object graph.
+- Added an async swarm simulation aligned with the future product flow.
+- Added repository-facing documentation and ignore rules.
+
+Notes
+-----
+- Markdown working notes are intentionally ignored by `.gitignore`.
+- This `.txt` file exists so the `lab-1` folder still contains a tracked agent log artifact in GitHub.
