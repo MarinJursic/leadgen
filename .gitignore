@@ -1,0 +1,26 @@
+# macOS
+.DS_Store
+
+# Codex local workspace data
+.codex/
+
+# Local hook logs
+.github/hooks/agent_log.txt
+
+# Build outputs
+bin/
+obj/
+**/bin/
+**/obj/
+
+# IDE and user-specific files
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Local markdown working docs
+*.md
+!/README.md
+
