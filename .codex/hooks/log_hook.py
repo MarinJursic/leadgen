@@ -164,6 +164,10 @@ def export_stop_capture(payload: dict, text_log_path: Path, raw_log_path: Path) 
     export_dir = repo_root() / "lab-2" / "hook-capture"
     export_dir.mkdir(parents=True, exist_ok=True)
 
+    transcript_dest = export_dir / transcript_path.name
+    if transcript_dest.exists():
+        return
+
     exported_files: list[Path] = []
 
     if text_log_path.exists():
@@ -176,7 +180,6 @@ def export_stop_capture(payload: dict, text_log_path: Path, raw_log_path: Path) 
         shutil.copy2(raw_log_path, raw_dest)
         exported_files.append(raw_dest)
 
-    transcript_dest = export_dir / transcript_path.name
     shutil.copy2(transcript_path, transcript_dest)
     exported_files.append(transcript_dest)
 
