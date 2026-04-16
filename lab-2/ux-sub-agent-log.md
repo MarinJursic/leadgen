@@ -46,6 +46,24 @@ The main agent applied the recommendation directly:
 - counts and graph navigation were moved lower on the page in [Views/Home/Index.cshtml](/Users/marinjursic/Desktop/leadgen/Views/Home/Index.cshtml:110)
 - active-state navigation styling was added in [Views/Shared/_Layout.cshtml](/Users/marinjursic/Desktop/leadgen/Views/Shared/_Layout.cshtml:1) and [wwwroot/css/site.css](/Users/marinjursic/Desktop/leadgen/wwwroot/css/site.css:1)
 
-## Submission Note
+## Hook Capture
 
-The project hook file [.github/hooks/agent_log.txt](/Users/marinjursic/Desktop/leadgen/.github/hooks/agent_log.txt:1) currently records user prompts and Bash tool usage, but not `spawn_agent` tool calls. This file exists to preserve explicit repository-local proof of the UX sub-agent invocation required by Lab 2.
+The canonical hook-generated export for Lab 2 now lives in [lab-2/hook-capture/README.md](/Users/marinjursic/Desktop/leadgen/lab-2/hook-capture/README.md:1).
+
+That folder contains:
+
+- exported hook log snapshot in [lab-2/hook-capture/agent_log.txt](/Users/marinjursic/Desktop/leadgen/lab-2/hook-capture/agent_log.txt:1)
+- raw hook payloads in [lab-2/hook-capture/agent_log.jsonl](/Users/marinjursic/Desktop/leadgen/lab-2/hook-capture/agent_log.jsonl:1)
+- exported parent session transcript in [lab-2/hook-capture/rollout-2026-04-16T09-36-55-019d9538-b84f-7d71-ab41-d874b8cb0257.jsonl](/Users/marinjursic/Desktop/leadgen/lab-2/hook-capture/rollout-2026-04-16T09-36-55-019d9538-b84f-7d71-ab41-d874b8cb0257.jsonl:727)
+- exported child UX sub-agent transcript in [lab-2/hook-capture/rollout-2026-04-16T09-59-11-019d954d-1ae7-74d3-b278-cfee8dd73078.jsonl](/Users/marinjursic/Desktop/leadgen/lab-2/hook-capture/rollout-2026-04-16T09-59-11-019d954d-1ae7-74d3-b278-cfee8dd73078.jsonl:1)
+
+Key proof lines in the exported parent transcript:
+
+- `spawn_agent` call at [lab-2/hook-capture/rollout-2026-04-16T09-36-55-019d9538-b84f-7d71-ab41-d874b8cb0257.jsonl](/Users/marinjursic/Desktop/leadgen/lab-2/hook-capture/rollout-2026-04-16T09-36-55-019d9538-b84f-7d71-ab41-d874b8cb0257.jsonl:727)
+- spawn completion event at [lab-2/hook-capture/rollout-2026-04-16T09-36-55-019d9538-b84f-7d71-ab41-d874b8cb0257.jsonl](/Users/marinjursic/Desktop/leadgen/lab-2/hook-capture/rollout-2026-04-16T09-36-55-019d9538-b84f-7d71-ab41-d874b8cb0257.jsonl:729)
+- `wait_agent` call at [lab-2/hook-capture/rollout-2026-04-16T09-36-55-019d9538-b84f-7d71-ab41-d874b8cb0257.jsonl](/Users/marinjursic/Desktop/leadgen/lab-2/hook-capture/rollout-2026-04-16T09-36-55-019d9538-b84f-7d71-ab41-d874b8cb0257.jsonl:732)
+
+Runtime note:
+
+- the shell lifecycle hooks directly capture prompt and Bash activity
+- non-shell tool calls such as `spawn_agent` are preserved by the `Stop` hook exporting the session transcript into `lab-2/hook-capture/`

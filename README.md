@@ -46,13 +46,30 @@ leadgen/
 └── leadgen.sln          solution containing only `leadgen`
 ```
 
-## Running the app
+## Prerequisites
+
+- .NET SDK 10.0
+
+## How to start
+
+From the repository root:
 
 ```bash
+dotnet restore
+dotnet build leadgen.sln
 dotnet run --project leadgen.csproj
 ```
 
-Then open the local ASP.NET Core URL printed in the terminal.
+Development URLs from [Properties/launchSettings.json](/Users/marinjursic/Desktop/leadgen/Properties/launchSettings.json:1):
+
+- `https://localhost:7135`
+- `http://localhost:5267`
+
+If you want automatic reload while editing, run:
+
+```bash
+dotnet watch run --project leadgen.csproj
+```
 
 ## Lab 2 coverage
 
@@ -83,10 +100,29 @@ The visual direction is:
 Supporting Lab 2 UX files live in:
 
 - `.agents/skills/leadgen-ux/`
+- `lab-2/hook-capture/`
 - `lab-2/implementation-plan.md`
 - `lab-2/ux-agent-prompt.md`
 - `lab-2/ux-sub-agent-log.md`
 - `lab-2/stitch-workflow.md`
+
+## Lab 2 agent log
+
+The narrative Lab 2 UX sub-agent note is in [lab-2/ux-sub-agent-log.md](/Users/marinjursic/Desktop/leadgen/lab-2/ux-sub-agent-log.md:1).
+
+The hook-generated capture bundle is in [lab-2/hook-capture/README.md](/Users/marinjursic/Desktop/leadgen/lab-2/hook-capture/README.md:1). That folder includes:
+
+- `agent_log.txt` for the human-readable hook log snapshot
+- `agent_log.jsonl` for raw hook payloads
+- the exported parent session transcript
+- the exported child UX sub-agent transcript
+
+The exported parent transcript contains the recorded `spawn_agent` / spawn completion / `wait_agent` evidence for the Lab 2 UX review flow.
+
+The repo-local UX agent definition used for that log is in:
+
+- [.agents/skills/leadgen-ux/SKILL.md](/Users/marinjursic/Desktop/leadgen/.agents/skills/leadgen-ux/SKILL.md:1)
+- [.agents/skills/leadgen-ux/agents/openai.yaml](/Users/marinjursic/Desktop/leadgen/.agents/skills/leadgen-ux/agents/openai.yaml:1)
 
 ## Next steps after Lab 2
 

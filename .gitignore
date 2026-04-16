@@ -2,10 +2,16 @@
 .DS_Store
 
 # Local workspace data
-.co?ex/
+.co?ex/*
+!/.codex/config.toml
+!/.codex/hooks.json
+!/.codex/hooks/
+.co?ex/hooks/*
+!/.codex/hooks/log_hook.py
 
 # Local hook logs
 .github/hooks/agent_log.txt
+.github/hooks/agent_log.jsonl
 
 # Build outputs
 bin/
