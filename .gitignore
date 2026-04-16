@@ -23,4 +23,6 @@ obj/
 # Local markdown working docs
 *.md
 !/README.md
-
+!/.agents/**/*.md
+!/lab-1/*.md
+!/lab-2/*.md

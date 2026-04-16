@@ -1,0 +1,33 @@
+﻿@model ClarificationQuestionDetailsViewModel
+@{
+    ViewData["Title"] = Model.Question.SlotName;
+}
+
+<div class="page-header">
+    <div class="breadcrumb">
+        <a asp-controller="Home" asp-action="Index">Home</a><span>/</span>
+        <a asp-controller="ClarificationQuestions" asp-action="Index">Clarification Questions</a><span>/</span>
+        <strong>@Model.Question.SlotName</strong>
+    </div>
+    <h1 class="page-heading">@Model.Question.SlotName</h1>
+</div>
+
+<section class="detail-grid">
+    <article class="detail-panel">
+        <div class="section-header__eyebrow">Question</div>
+        <h2 class="detail-panel__title">@Model.Question.Prompt</h2>
+        <p class="detail-panel__summary">@Model.Question.Reason</p>
+        @if (!string.IsNullOrWhiteSpace(Model.Question.Answer))
+        {
+            <p class="detail-panel__summary"><strong>Answer:</strong> @Model.Question.Answer</p>
+        }
+    </article>
+    <article class="detail-panel">
+        <div class="section-header__eyebrow">Context</div>
+        <ul class="stack-list">
+            <li><strong>Mission</strong><br />@(Model.Mission?.MissionName ?? "Unknown")</li>
+            <li><strong>Answered</strong><br />@(Model.Question.IsAnswered ? "Yes" : "No")</li>
+            <li><strong>Created</strong><br />@Model.Question.CreatedAtUtc.ToString("yyyy-MM-dd")</li>
+        </ul>
+    </article>
+</section>

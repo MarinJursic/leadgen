@@ -1,0 +1,29 @@
+﻿@model IReadOnlyList<TargetContact>
+@{
+    ViewData["Title"] = "Target Contacts";
+}
+
+<div class="page-header">
+    <div class="breadcrumb"><a asp-controller="Home" asp-action="Index">Home</a><span>/</span><strong>Contacts</strong></div>
+    <h1 class="page-heading">Target contacts</h1>
+</div>
+
+<section class="surface-panel">
+    <table class="list-table">
+        <thead>
+            <tr><th>Contact</th><th>Role</th><th>Department</th><th>Decision maker</th><th></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var contact in Model)
+            {
+                <tr>
+                    <td><strong>@contact.FullName</strong><br /><span>@contact.OpportunitySummary</span></td>
+                    <td>@contact.JobTitle</td>
+                    <td>@contact.Department</td>
+                    <td>@(contact.IsDecisionMaker ? "Yes" : "No")</td>
+                    <td><a asp-action="Details" asp-route-id="@contact.Id" class="button-link">Details</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</section>

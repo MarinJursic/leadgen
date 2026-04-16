@@ -1,0 +1,29 @@
+﻿@model IReadOnlyList<LeadDossier>
+@{
+    ViewData["Title"] = "Lead Dossiers";
+}
+
+<div class="page-header">
+    <div class="breadcrumb"><a asp-controller="Home" asp-action="Index">Home</a><span>/</span><strong>Dossiers</strong></div>
+    <h1 class="page-heading">Lead dossiers</h1>
+</div>
+
+<section class="surface-panel">
+    <table class="list-table">
+        <thead>
+            <tr><th>Score</th><th>Advantage point</th><th>Ready</th><th>Updated</th><th></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var dossier in Model)
+            {
+                <tr>
+                    <td><strong>@dossier.LeadgenScore</strong></td>
+                    <td>@dossier.AdvantagePoint</td>
+                    <td>@(dossier.IsReadyForOutreach ? "Yes" : "No")</td>
+                    <td>@dossier.LastUpdatedAtUtc.ToString("yyyy-MM-dd")</td>
+                    <td><a asp-action="Details" asp-route-id="@dossier.Id" class="button-link">Details</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</section>

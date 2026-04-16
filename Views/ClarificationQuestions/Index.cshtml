@@ -1,0 +1,31 @@
+﻿@model IReadOnlyList<ClarificationQuestion>
+@{
+    ViewData["Title"] = "Clarification Questions";
+}
+
+<div class="page-header">
+    <div class="breadcrumb">
+        <a asp-controller="Home" asp-action="Index">Home</a><span>/</span><strong>Clarification Questions</strong>
+    </div>
+    <h1 class="page-heading">Clarification questions</h1>
+</div>
+
+<section class="surface-panel">
+    <table class="list-table">
+        <thead>
+            <tr><th>Slot</th><th>Prompt</th><th>Answered</th><th>Created</th><th></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var question in Model)
+            {
+                <tr>
+                    <td><strong>@question.SlotName</strong></td>
+                    <td>@question.Prompt</td>
+                    <td>@(question.IsAnswered ? "Yes" : "No")</td>
+                    <td>@question.CreatedAtUtc.ToString("yyyy-MM-dd")</td>
+                    <td><a asp-action="Details" asp-route-id="@question.Id" class="button-link">Details</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</section>

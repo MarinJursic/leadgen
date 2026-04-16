@@ -1,0 +1,29 @@
+﻿@model IReadOnlyList<TargetCompany>
+@{
+    ViewData["Title"] = "Target Companies";
+}
+
+<div class="page-header">
+    <div class="breadcrumb"><a asp-controller="Home" asp-action="Index">Home</a><span>/</span><strong>Companies</strong></div>
+    <h1 class="page-heading">Target companies</h1>
+</div>
+
+<section class="surface-panel">
+    <table class="list-table">
+        <thead>
+            <tr><th>Company</th><th>Industry</th><th>Location</th><th>Score</th><th></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var company in Model)
+            {
+                <tr>
+                    <td><strong>@company.Name</strong><br /><span>@company.Domain</span></td>
+                    <td>@company.Industry</td>
+                    <td>@company.HeadquartersCity, @company.HeadquartersCountry</td>
+                    <td>@company.MatchScore.ToString("0.00")</td>
+                    <td><a asp-action="Details" asp-route-id="@company.Id" class="button-link">Details</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</section>

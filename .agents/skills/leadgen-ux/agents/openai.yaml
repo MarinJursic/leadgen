@@ -1,0 +1,4 @@
+interface:
+  display_name: "Leadgen UX"
+  short_description: "Review and refine the Leadgen Lab 2 MVC UX"
+  default_prompt: "Use $leadgen-ux to critique and refine the Leadgen MVC interface so it feels premium, mission-first, and non-template while preserving the mock-repository structure."

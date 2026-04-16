@@ -1,7 +1,11 @@
+using leadgen.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddSingleton<ILeadgenReadRepository, LeadgenMockRepository>();
+builder.Services.AddSingleton<ILeadgenDashboardService, LeadgenDashboardService>();
 
 var app = builder.Build();
 

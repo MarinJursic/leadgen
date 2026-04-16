@@ -1,0 +1,30 @@
+﻿@model IReadOnlyList<MissionRun>
+@{
+    ViewData["Title"] = "Mission Runs";
+}
+
+<div class="page-header">
+    <div class="breadcrumb"><a asp-controller="Home" asp-action="Index">Home</a><span>/</span><strong>Runs</strong></div>
+    <h1 class="page-heading">Mission runs</h1>
+</div>
+
+<section class="surface-panel">
+    <table class="list-table">
+        <thead>
+            <tr><th>Run</th><th>Status</th><th>Region</th><th>Budget</th><th>Cost</th><th></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var run in Model)
+            {
+                <tr>
+                    <td><strong>@run.RunCode</strong><br /><span>@run.StartedAtUtc.ToString("yyyy-MM-dd")</span></td>
+                    <td>@run.Status</td>
+                    <td>@run.SearchRegion</td>
+                    <td>@run.TokenBudget</td>
+                    <td>$@run.EstimatedCostUsd.ToString("0.00")</td>
+                    <td><a asp-action="Details" asp-route-id="@run.Id" class="button-link">Details</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</section>

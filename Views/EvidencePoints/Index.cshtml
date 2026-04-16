@@ -1,0 +1,29 @@
+﻿@model IReadOnlyList<EvidencePoint>
+@{
+    ViewData["Title"] = "Evidence Points";
+}
+
+<div class="page-header">
+    <div class="breadcrumb"><a asp-controller="Home" asp-action="Index">Home</a><span>/</span><strong>Evidence</strong></div>
+    <h1 class="page-heading">Evidence points</h1>
+</div>
+
+<section class="surface-panel">
+    <table class="list-table">
+        <thead>
+            <tr><th>Label</th><th>Kind</th><th>Source</th><th>Captured</th><th></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var evidence in Model)
+            {
+                <tr>
+                    <td><strong>@evidence.Label</strong><br /><span>@evidence.Summary</span></td>
+                    <td>@evidence.Kind</td>
+                    <td>@evidence.SourcePlatform</td>
+                    <td>@evidence.CapturedAtUtc.ToString("yyyy-MM-dd")</td>
+                    <td><a asp-action="Details" asp-route-id="@evidence.Id" class="button-link">Details</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</section>

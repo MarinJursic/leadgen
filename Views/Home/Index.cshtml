@@ -1,8 +1,191 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model HomeDashboardViewModel
+@{
+    ViewData["Title"] = "Leadgen Control Deck";
+    var leadMission = Model.FeaturedMissions.FirstOrDefault();
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="dashboard">
+    <section class="hero-panel">
+        <div class="hero-grid">
+            <div class="hero-copy">
+                <div class="eyebrow">Mission Control</div>
+                <h1>Map the mission. Resolve the buyer. Ship the dossier.</h1>
+                <p>
+                    Leadgen starts with Business DNA, coordinates a research swarm across companies and decision-makers,
+                    and returns evidence-backed dossiers that explain why a lead matters now.
+                </p>
+                @if (leadMission is not null)
+                {
+                    <div class="hero-highlight">
+                        <div class="section-header__eyebrow">Current mission focus</div>
+                        <div class="hero-highlight__title">@leadMission.MissionName</div>
+                        <div class="hero-highlight__copy">@leadMission.ProductName for @leadMission.Persona.</div>
+                        <div class="detail-metrics">
+                            <span class="status-pill">@leadMission.Status</span>
+                            <span class="mission-chip">@leadMission.RunCount run(s)</span>
+                            <span class="mission-chip">@leadMission.ConfidenceScore.ToString("0.00") confidence</span>
+                        </div>
+                    </div>
+                }
+                <div class="hero-actions">
+                    <a asp-controller="Missions" asp-action="Index" class="button-link button-link--primary">Open Mission Board</a>
+                    <a href="#signals" class="button-link">Review Signal Trail</a>
+                </div>
+            </div>
+            <div class="hero-aside">
+                <div class="metric-block">
+                    <div class="metric-label">Swarm capacity</div>
+                    <div class="metric-value">@Model.AgentCount agents</div>
+                    <div class="kpi-copy">@Model.MissionCount missions routed through the current control deck.</div>
+                </div>
+                <div class="metric-block">
+                    <div class="metric-label">Signal velocity</div>
+                    <div class="metric-value">@Model.RecentSignals.Count live signals</div>
+                    <div class="kpi-copy">@Model.DossierCount dossiers and @Model.CompanyCount qualified companies in the current mock graph.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="section-header">
+            <div>
+                <div class="section-header__eyebrow">Mission board</div>
+                <h2 class="section-header__title">Featured missions</h2>
+            </div>
+            <a asp-controller="Missions" asp-action="Index" class="button-link">See all missions</a>
+        </div>
+
+        <div class="cards-grid">
+            @foreach (var mission in Model.FeaturedMissions)
+            {
+                <article class="mission-card">
+                    <div class="mission-card__meta">
+                        <span class="mission-chip">@mission.Status</span>
+                        <span class="mission-chip">Confidence @mission.ConfidenceScore.ToString("0.00")</span>
+                    </div>
+                    <h3 class="mission-card__title">@mission.MissionName</h3>
+                    <p class="mission-card__summary">@mission.ProductName targets @mission.Persona through a @mission.Surface surface.</p>
+                    <div class="detail-metrics">
+                        <span class="mission-chip">@mission.RunCount run(s)</span>
+                    </div>
+                    <div class="hero-actions">
+                        <a asp-controller="Missions" asp-action="Details" asp-route-id="@mission.MissionId" class="button-link button-link--primary">Open dossier path</a>
+                    </div>
+                </article>
+            }
+        </div>
+    </section>
+
+    <section>
+        <div class="section-header">
+            <div>
+                <div class="section-header__eyebrow">Priority leads</div>
+                <h2 class="section-header__title">Top dossiers</h2>
+            </div>
+        </div>
+
+        <div class="cards-grid">
+            @foreach (var lead in Model.TopLeads)
+            {
+                <article class="lead-card">
+                    <div class="lead-card__meta">
+                        <span class="score-pill score-pill--high">Score @lead.LeadgenScore</span>
+                        <span class="mission-chip">@lead.MissionName</span>
+                    </div>
+                    <h3 class="lead-card__title">@lead.ContactName</h3>
+                    <p class="lead-card__summary">@lead.CompanyName</p>
+                    <p class="lead-card__summary">@lead.AdvantagePoint</p>
+                </article>
+            }
+        </div>
+    </section>
+
+    <section class="stats-grid" aria-label="Leadgen counts">
+        <article class="stat-card">
+            <div class="stat-card__label">Missions</div>
+            <span class="stat-card__value">@Model.MissionCount</span>
+        </article>
+        <article class="stat-card">
+            <div class="stat-card__label">Agents</div>
+            <span class="stat-card__value">@Model.AgentCount</span>
+        </article>
+        <article class="stat-card">
+            <div class="stat-card__label">Companies</div>
+            <span class="stat-card__value">@Model.CompanyCount</span>
+        </article>
+        <article class="stat-card">
+            <div class="stat-card__label">Contacts</div>
+            <span class="stat-card__value">@Model.ContactCount</span>
+        </article>
+        <article class="stat-card">
+            <div class="stat-card__label">Dossiers</div>
+            <span class="stat-card__value">@Model.DossierCount</span>
+        </article>
+    </section>
+
+    <section>
+        <div class="section-header">
+            <div>
+                <div class="section-header__eyebrow">Explore the graph</div>
+                <h2 class="section-header__title">All research surfaces</h2>
+            </div>
+        </div>
+
+        <div class="entity-grid">
+            @foreach (var entity in Model.EntityNavigation)
+            {
+                <a asp-controller="@entity.Controller" asp-action="Index" class="entity-card">
+                    <div class="entity-card__meta">
+                        <span class="stat-card__label">@entity.Label</span>
+                        <span class="mission-chip">@entity.Count item(s)</span>
+                    </div>
+                    <h3 class="mission-card__title">@entity.Label</h3>
+                    <p class="lead-card__summary">@entity.Description</p>
+                </a>
+            }
+        </div>
+    </section>
+
+    <section id="signals">
+        <div class="section-header">
+            <div>
+                <div class="section-header__eyebrow">Evidence vault</div>
+                <h2 class="section-header__title">Recent signals</h2>
+            </div>
+        </div>
+
+        <div class="surface-panel">
+            <ul class="signal-list">
+                @foreach (var signal in Model.RecentSignals)
+                {
+                    <li class="signal-item">
+                        <div class="signal-item__meta">@signal.CapturedAtUtc.ToString("yyyy-MM-dd") · @signal.SourcePlatform · @signal.MissionName</div>
+                        <h3 class="mission-card__title">@signal.Label</h3>
+                        <p class="signal-item__summary">@signal.ContactName at @signal.CompanyName</p>
+                    </li>
+                }
+            </ul>
+        </div>
+    </section>
+
+    <section>
+        <div class="section-header">
+            <div>
+                <div class="section-header__eyebrow">Surface quality</div>
+                <h2 class="section-header__title">Average lead scores</h2>
+            </div>
+        </div>
+
+        <div class="surface-score-grid">
+            @foreach (var surface in Model.SurfaceScores)
+            {
+                <article class="surface-score-card">
+                    <div class="stat-card__label">@surface.Surface</div>
+                    <div class="stat-card__value">@surface.AverageScore.ToString("0.00")</div>
+                    <div class="kpi-copy">@surface.DossierCount dossier(s)</div>
+                </article>
+            }
+        </div>
+    </section>
 </div>

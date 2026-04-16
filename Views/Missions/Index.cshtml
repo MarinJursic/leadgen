@@ -1,0 +1,51 @@
+﻿@model IReadOnlyList<BusinessDnaMission>
+@{
+    ViewData["Title"] = "Missions";
+}
+
+<div class="page-header">
+    <div class="breadcrumb">
+        <a asp-controller="Home" asp-action="Index">Home</a>
+        <span>/</span>
+        <strong>Missions</strong>
+    </div>
+    <div class="section-header">
+        <div>
+            <div class="section-header__eyebrow">Entity index</div>
+            <h1 class="page-heading">Business DNA missions</h1>
+        </div>
+    </div>
+</div>
+
+<section class="surface-panel">
+    <table class="list-table">
+        <thead>
+            <tr>
+                <th>Mission</th>
+                <th>Product</th>
+                <th>Status</th>
+                <th>Confidence</th>
+                <th>Runs</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var mission in Model)
+            {
+                <tr>
+                    <td>
+                        <strong>@mission.MissionName</strong><br />
+                        <span>@mission.Persona</span>
+                    </td>
+                    <td>@mission.ProductName</td>
+                    <td>@mission.Status</td>
+                    <td>@mission.ConfidenceScore.ToString("0.00")</td>
+                    <td>@mission.Runs.Count</td>
+                    <td>
+                        <a asp-controller="Missions" asp-action="Details" asp-route-id="@mission.Id" class="button-link">Details</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</section>

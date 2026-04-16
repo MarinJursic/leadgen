@@ -1,0 +1,32 @@
+﻿@model ContactChannelDetailsViewModel
+@{
+    ViewData["Title"] = Model.Channel.Type.ToString();
+}
+
+<div class="page-header">
+    <div class="breadcrumb">
+        <a asp-controller="Home" asp-action="Index">Home</a><span>/</span>
+        <a asp-controller="ContactChannels" asp-action="Index">Contact Channels</a><span>/</span>
+        <strong>@Model.Channel.Type</strong>
+    </div>
+    <h1 class="page-heading">@Model.Channel.Type</h1>
+</div>
+
+<section class="detail-grid">
+    <article class="detail-panel">
+        <div class="section-header__eyebrow">Channel</div>
+        <ul class="stack-list">
+            <li><strong>Value</strong><br />@Model.Channel.Value</li>
+            <li><strong>Verified</strong><br />@(Model.Channel.IsVerified ? "Yes" : "No")</li>
+            <li><strong>Source</strong><br />@Model.Channel.Source</li>
+            <li><strong>Confidence</strong><br />@Model.Channel.ConfidenceScore.ToString("0.00")</li>
+        </ul>
+    </article>
+    <article class="detail-panel">
+        <div class="section-header__eyebrow">Parent</div>
+        <ul class="stack-list">
+            <li><strong>Contact</strong><br />@(Model.Contact?.FullName ?? "Unknown")</li>
+            <li><strong>Company</strong><br />@(Model.Company?.Name ?? "Unknown")</li>
+        </ul>
+    </article>
+</section>

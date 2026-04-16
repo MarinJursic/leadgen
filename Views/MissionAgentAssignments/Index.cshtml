@@ -1,0 +1,29 @@
+﻿@model IReadOnlyList<MissionAgentAssignment>
+@{
+    ViewData["Title"] = "Mission Agent Assignments";
+}
+
+<div class="page-header">
+    <div class="breadcrumb"><a asp-controller="Home" asp-action="Index">Home</a><span>/</span><strong>Assignments</strong></div>
+    <h1 class="page-heading">Mission agent assignments</h1>
+</div>
+
+<section class="surface-panel">
+    <table class="list-table">
+        <thead>
+            <tr><th>Responsibility</th><th>Status</th><th>Assigned</th><th>Budget</th><th></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var assignment in Model)
+            {
+                <tr>
+                    <td><strong>@assignment.Responsibility</strong></td>
+                    <td>@assignment.Status</td>
+                    <td>@assignment.AssignedAtUtc.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>@assignment.TokenBudget</td>
+                    <td><a asp-action="Details" asp-route-id="@assignment.Id" class="button-link">Details</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</section>

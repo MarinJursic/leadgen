@@ -1,14 +1,23 @@
 using System.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
 using leadgen.Models;
+using leadgen.Services;
+using Microsoft.AspNetCore.Mvc;
 
 namespace leadgen.Controllers;
 
-public class HomeController : Controller
+public sealed class HomeController : Controller
 {
+    private readonly ILeadgenDashboardService _dashboardService;
+
+    public HomeController(ILeadgenDashboardService dashboardService)
+    {
+        _dashboardService = dashboardService;
+    }
+
     public IActionResult Index()
     {
-        return View();
+        var model = _dashboardService.BuildDashboard();
+        return View(model);
     }
 
     public IActionResult Privacy()

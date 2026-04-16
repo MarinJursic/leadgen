@@ -1,4 +1,7 @@
-﻿<!DOCTYPE html>
+﻿@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -10,38 +13,46 @@
     <link rel="stylesheet" href="~/leadgen.styles.css" asp-append-version="true" />
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">leadgen</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                </div>
+    <div class="page-chrome">
+        <header class="site-header">
+            <div class="shell site-header__inner">
+                <a class="brandmark" asp-area="" asp-controller="Home" asp-action="Index">
+                    <span class="brandmark__eyebrow">Leadgen</span>
+                    <span class="brandmark__title">Intelligence Swarm</span>
+                </a>
+                <nav class="site-nav" aria-label="Primary">
+                    <a asp-area="" asp-controller="Home" asp-action="Index" class="site-nav__link @(currentController == "Home" ? "site-nav__link--active" : null)">Home</a>
+                    <a asp-area="" asp-controller="Missions" asp-action="Index" class="site-nav__link @(currentController == "Missions" ? "site-nav__link--active" : null)">Missions</a>
+                    <a asp-area="" asp-controller="ClarificationQuestions" asp-action="Index" class="site-nav__link @(currentController == "ClarificationQuestions" ? "site-nav__link--active" : null)">Questions</a>
+                    <a asp-area="" asp-controller="MissionRuns" asp-action="Index" class="site-nav__link @(currentController == "MissionRuns" ? "site-nav__link--active" : null)">Runs</a>
+                    <a asp-area="" asp-controller="MissionAgentAssignments" asp-action="Index" class="site-nav__link @(currentController == "MissionAgentAssignments" ? "site-nav__link--active" : null)">Assignments</a>
+                    <a asp-area="" asp-controller="SwarmAgents" asp-action="Index" class="site-nav__link @(currentController == "SwarmAgents" ? "site-nav__link--active" : null)">Agents</a>
+                    <a asp-area="" asp-controller="TargetCompanies" asp-action="Index" class="site-nav__link @(currentController == "TargetCompanies" ? "site-nav__link--active" : null)">Companies</a>
+                    <a asp-area="" asp-controller="TargetContacts" asp-action="Index" class="site-nav__link @(currentController == "TargetContacts" ? "site-nav__link--active" : null)">Contacts</a>
+                    <a asp-area="" asp-controller="ContactChannels" asp-action="Index" class="site-nav__link @(currentController == "ContactChannels" ? "site-nav__link--active" : null)">Channels</a>
+                    <a asp-area="" asp-controller="EvidencePoints" asp-action="Index" class="site-nav__link @(currentController == "EvidencePoints" ? "site-nav__link--active" : null)">Evidence</a>
+                    <a asp-area="" asp-controller="LeadDossiers" asp-action="Index" class="site-nav__link @(currentController == "LeadDossiers" ? "site-nav__link--active" : null)">Dossiers</a>
+                </nav>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
+        </header>
+
+        <main role="main" class="site-main">
+            <div class="shell">
+                @RenderBody()
+            </div>
         </main>
+
+        <footer class="site-footer">
+            <div class="shell site-footer__inner">
+                <div>
+                    <div class="site-footer__title">Leadgen</div>
+                    <div class="site-footer__copy">Agentic B2B lead research rendered as a mission-first MVC app.</div>
+                </div>
+                <a asp-area="" asp-controller="Home" asp-action="Privacy" class="site-footer__link">Privacy</a>
+            </div>
+        </footer>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - leadgen - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

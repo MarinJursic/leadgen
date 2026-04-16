@@ -1,0 +1,29 @@
+﻿@model IReadOnlyList<SwarmAgent>
+@{
+    ViewData["Title"] = "Swarm Agents";
+}
+
+<div class="page-header">
+    <div class="breadcrumb"><a asp-controller="Home" asp-action="Index">Home</a><span>/</span><strong>Agents</strong></div>
+    <h1 class="page-heading">Swarm agents</h1>
+</div>
+
+<section class="surface-panel">
+    <table class="list-table">
+        <thead>
+            <tr><th>Code name</th><th>Role</th><th>Provider</th><th>Capacity</th><th></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var agent in Model)
+            {
+                <tr>
+                    <td><strong>@agent.CodeName</strong><br /><span>@agent.CurrentFocus</span></td>
+                    <td>@agent.Role</td>
+                    <td>@agent.Provider</td>
+                    <td>@agent.MaxConcurrentTasks</td>
+                    <td><a asp-action="Details" asp-route-id="@agent.Id" class="button-link">Details</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</section>

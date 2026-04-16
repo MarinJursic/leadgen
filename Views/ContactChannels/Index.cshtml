@@ -1,0 +1,29 @@
+﻿@model IReadOnlyList<ContactChannel>
+@{
+    ViewData["Title"] = "Contact Channels";
+}
+
+<div class="page-header">
+    <div class="breadcrumb"><a asp-controller="Home" asp-action="Index">Home</a><span>/</span><strong>Contact Channels</strong></div>
+    <h1 class="page-heading">Contact channels</h1>
+</div>
+
+<section class="surface-panel">
+    <table class="list-table">
+        <thead>
+            <tr><th>Type</th><th>Value</th><th>Verified</th><th>Source</th><th></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var channel in Model)
+            {
+                <tr>
+                    <td><strong>@channel.Type</strong></td>
+                    <td>@channel.Value</td>
+                    <td>@(channel.IsVerified ? "Yes" : "No")</td>
+                    <td>@channel.Source</td>
+                    <td><a asp-action="Details" asp-route-id="@channel.Id" class="button-link">Details</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</section>

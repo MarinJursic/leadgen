@@ -1,0 +1,34 @@
+﻿@model MissionRunDetailsViewModel
+@{
+    ViewData["Title"] = Model.Run.RunCode;
+}
+
+<div class="page-header">
+    <div class="breadcrumb">
+        <a asp-controller="Home" asp-action="Index">Home</a><span>/</span>
+        <a asp-controller="MissionRuns" asp-action="Index">Runs</a><span>/</span>
+        <strong>@Model.Run.RunCode</strong>
+    </div>
+    <h1 class="page-heading">@Model.Run.RunCode</h1>
+</div>
+
+<section class="detail-grid">
+    <article class="detail-panel">
+        <div class="section-header__eyebrow">Run profile</div>
+        <ul class="stack-list">
+            <li><strong>Mission</strong><br />@(Model.Mission?.MissionName ?? "Unknown")</li>
+            <li><strong>Status</strong><br />@Model.Run.Status</li>
+            <li><strong>Search region</strong><br />@Model.Run.SearchRegion</li>
+            <li><strong>Token budget</strong><br />@Model.Run.TokenBudget</li>
+            <li><strong>Estimated cost</strong><br />$@Model.Run.EstimatedCostUsd.ToString("0.00")</li>
+        </ul>
+    </article>
+    <article class="detail-panel">
+        <div class="section-header__eyebrow">Run outputs</div>
+        <ul class="stack-list">
+            <li><strong>Assignments</strong><br />@Model.Assignments.Count</li>
+            <li><strong>Companies</strong><br />@Model.Companies.Count</li>
+            <li><strong>Dossiers</strong><br />@Model.Dossiers.Count</li>
+        </ul>
+    </article>
+</section>
