@@ -184,6 +184,6 @@ Lab 2 is considered complete when all of the following are true:
 
 These are valid next steps, but not blockers for the lab:
 
-- live Stitch MCP execution from Codex once credentials are configured
+- live Stitch MCP execution once credentials are configured
 - persistence instead of the mock repository
 - real mission orchestration and real-time updates

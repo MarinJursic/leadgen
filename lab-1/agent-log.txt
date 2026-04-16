@@ -550,7 +550,7 @@ Path:                  /Library/Frameworks/Python.framework/Versions/3.12/Resour
 Identifier:            org.python.python
 Version:               3.12.2 (3.12.2)
 Code Type:             ARM-64 (Native)
-Parent Process:        codex [13814]
+Parent Process:        ai-agent [13814]
 Responsible:           Code [26746]
 User ID:               501
 
@@ -761,7 +761,7 @@ Full Report
   "procPath" : "\/Library\/Frameworks\/Python.framework\/Versions\/3.12\/Resources\/Python.app\/Contents\/MacOS\/Python",
   "bundleInfo" : {"CFBundleShortVersionString":"3.12.2","CFBundleVersion":"3.12.2","CFBundleIdentifier":"org.python.python"},
   "storeInfo" : {"deviceIdentifierForVendor":"CDFAC5D9-C67B-5F95-BBA6-8D375865C65B","thirdParty":true},
-  "parentProc" : "codex",
+  "parentProc" : "ai-agent",
   "parentPid" : 13814,
   "coalitionName" : "com.microsoft.VSCode",
   "crashReporterKey" : "A20329D7-A9D4-C7D8-98CD-E9D049808BA1",
@@ -2047,14 +2047,14 @@ turn_id: 019d4ad6-0a2c-7d60-8ac3-08fcec39d6de
 tool_name: Bash
 tool_use_id: call_MGK9CrvJo7ijea61HjwyahFl
 command:
-sed -n '1,220p' '/Users/marinjursic/.codex/plugins/cache/openai-curated/github/f78e3ad49297672a905eb7afb6aa0cef34edc79e/skills/yeet/SKILL.md'
+sed -n '1,220p' '/Users/marinjursic/.agent-tools/plugins/cache/openai-curated/github/f78e3ad49297672a905eb7afb6aa0cef34edc79e/skills/yeet/SKILL.md'
 ------------------------------------------------------------
 [2026-04-01 22:57:29] PreToolUse
 turn_id: 019d4ad6-0a2c-7d60-8ac3-08fcec39d6de
 tool_name: Bash
 tool_use_id: call_0AsB0z3SJ6SWde53cEmO2L9C
 command:
-sed -n '1,220p' '/Users/marinjursic/.codex/plugins/cache/openai-curated/github/f78e3ad49297672a905eb7afb6aa0cef34edc79e/skills/github/SKILL.md'
+sed -n '1,220p' '/Users/marinjursic/.agent-tools/plugins/cache/openai-curated/github/f78e3ad49297672a905eb7afb6aa0cef34edc79e/skills/github/SKILL.md'
 ------------------------------------------------------------
 [2026-04-01 22:57:52] PreToolUse
 turn_id: 019d4ad6-0a2c-7d60-8ac3-08fcec39d6de
@@ -2620,7 +2620,7 @@ font-bj-cree
 font-saira-stencil
 incident-io: Incident management platform
 jiba: Apple Music metadata localisation tool
-nimbalyst: Visual workspace for building with Codex and Claude Code
+nimbalyst: Visual workspace for building with AI coding assistants
 notchi: Notch companion for Claude Code
 nvidia-sync: Utility for launching applications and containers on remote Linux systems
 ob-xf: Virtual analog synthesizer

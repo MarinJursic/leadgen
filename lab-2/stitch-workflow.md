@@ -4,11 +4,11 @@
 
 - the repo has a dedicated UX sub-agent prompt
 - the MVC implementation can proceed without live Stitch access
-- live Stitch connection is intentionally deferred until local Codex setup is finished
+- live Stitch connection is intentionally deferred until the local MCP setup is finished
 
 ## Remaining prerequisite
 
-Live Stitch MCP usage still depends on a working local Codex plugin setup and a valid API key.
+Live Stitch MCP usage still depends on a working local Stitch plugin setup and a valid API key.
 
 Until that is finished, the repo can still proceed with:
 

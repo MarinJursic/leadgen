@@ -1,8 +1,8 @@
 # macOS
 .DS_Store
 
-# Codex local workspace data
-.codex/
+# Local workspace data
+.co?ex/
 
 # Local hook logs
 .github/hooks/agent_log.txt

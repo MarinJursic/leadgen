@@ -90,6 +90,6 @@ Supporting Lab 2 UX files live in:
 
 ## Next steps after Lab 2
 
-- connect Stitch live through Codex once local MCP credentials are ready
+- connect Stitch live once the local MCP credentials are ready
 - replace the mock repository with persistence
 - add real mission orchestration and real-time swarm updates
