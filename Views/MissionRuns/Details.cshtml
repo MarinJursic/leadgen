@@ -16,8 +16,12 @@
     <article class="detail-panel">
         <div class="section-header__eyebrow">Run profile</div>
         <ul class="stack-list">
+            <li><strong>Run ID</strong><br />@Model.Run.Id</li>
+            <li><strong>Mission ID</strong><br />@Model.Run.BusinessDnaMissionId</li>
             <li><strong>Mission</strong><br />@(Model.Mission?.MissionName ?? "Unknown")</li>
             <li><strong>Status</strong><br />@Model.Run.Status</li>
+            <li><strong>Started</strong><br />@Model.Run.StartedAtUtc.ToString("yyyy-MM-dd HH:mm") UTC</li>
+            <li><strong>Completed</strong><br />@(Model.Run.CompletedAtUtc.HasValue ? $"{Model.Run.CompletedAtUtc.Value:yyyy-MM-dd HH:mm} UTC" : "In progress")</li>
             <li><strong>Search region</strong><br />@Model.Run.SearchRegion</li>
             <li><strong>Token budget</strong><br />@Model.Run.TokenBudget</li>
             <li><strong>Estimated cost</strong><br />$@Model.Run.EstimatedCostUsd.ToString("0.00")</li>

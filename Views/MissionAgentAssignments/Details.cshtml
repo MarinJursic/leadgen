@@ -21,9 +21,14 @@
     <article class="detail-panel">
         <div class="section-header__eyebrow">Context</div>
         <ul class="stack-list">
+            <li><strong>Assignment ID</strong><br />@Model.Assignment.Id</li>
+            <li><strong>Run ID</strong><br />@Model.Assignment.MissionRunId</li>
+            <li><strong>Agent ID</strong><br />@Model.Assignment.SwarmAgentId</li>
             <li><strong>Mission</strong><br />@(Model.Mission?.MissionName ?? "Unknown")</li>
             <li><strong>Run</strong><br />@(Model.Run?.RunCode ?? "Unknown")</li>
             <li><strong>Agent</strong><br />@(Model.Agent?.CodeName ?? "Unknown")</li>
+            <li><strong>Assigned at</strong><br />@Model.Assignment.AssignedAtUtc.ToString("yyyy-MM-dd HH:mm") UTC</li>
+            <li><strong>Token budget</strong><br />@Model.Assignment.TokenBudget</li>
             <li><strong>Status</strong><br />@Model.Assignment.Status</li>
         </ul>
     </article>

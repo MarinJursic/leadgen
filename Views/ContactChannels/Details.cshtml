@@ -16,8 +16,11 @@
     <article class="detail-panel">
         <div class="section-header__eyebrow">Channel</div>
         <ul class="stack-list">
+            <li><strong>Channel ID</strong><br />@Model.Channel.Id</li>
+            <li><strong>Type</strong><br />@Model.Channel.Type</li>
             <li><strong>Value</strong><br />@Model.Channel.Value</li>
             <li><strong>Verified</strong><br />@(Model.Channel.IsVerified ? "Yes" : "No")</li>
+            <li><strong>Verified at</strong><br />@(Model.Channel.VerifiedAtUtc.HasValue ? $"{Model.Channel.VerifiedAtUtc.Value:yyyy-MM-dd HH:mm} UTC" : "Pending")</li>
             <li><strong>Source</strong><br />@Model.Channel.Source</li>
             <li><strong>Confidence</strong><br />@Model.Channel.ConfidenceScore.ToString("0.00")</li>
         </ul>

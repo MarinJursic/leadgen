@@ -41,10 +41,10 @@ Replace the top home-page hero so it opens with a mission summary, one primary C
 
 The main agent applied the recommendation directly:
 
-- the home hero now opens with mission-first product language and a current mission focus block in [Views/Home/Index.cshtml](/Users/marinjursic/Desktop/leadgen/Views/Home/Index.cshtml:7)
-- implementation-detail copy such as `Lab 2 / HTML + Binding`, `MVC + Mock Repository`, and `entity coverage` was removed from the primary surface in [Views/Home/Index.cshtml](/Users/marinjursic/Desktop/leadgen/Views/Home/Index.cshtml:7)
-- counts and graph navigation were moved lower on the page in [Views/Home/Index.cshtml](/Users/marinjursic/Desktop/leadgen/Views/Home/Index.cshtml:110)
-- active-state navigation styling was added in [Views/Shared/_Layout.cshtml](/Users/marinjursic/Desktop/leadgen/Views/Shared/_Layout.cshtml:1) and [wwwroot/css/site.css](/Users/marinjursic/Desktop/leadgen/wwwroot/css/site.css:1)
+- the landing page now opens with a mission-initiation hero and single primary CTA in [Views/Home/Index.cshtml](/Users/marinjursic/Desktop/leadgen/Views/Home/Index.cshtml:20)
+- the mission workflow now continues into an immersive swarm canvas in [Views/Home/Mission.cshtml](/Users/marinjursic/Desktop/leadgen/Views/Home/Mission.cshtml:61)
+- the custom vault surfaces now expose every Lab 2 entity section from both immersive screens in [Views/Home/Index.cshtml](/Users/marinjursic/Desktop/leadgen/Views/Home/Index.cshtml:73) and [Views/Home/Mission.cshtml](/Users/marinjursic/Desktop/leadgen/Views/Home/Mission.cshtml:186)
+- active immersive layout handling and supporting styling live in [Views/Shared/_Layout.cshtml](/Users/marinjursic/Desktop/leadgen/Views/Shared/_Layout.cshtml:1) and [wwwroot/css/site.css](/Users/marinjursic/Desktop/leadgen/wwwroot/css/site.css:1)
 
 ## Hook Capture
 

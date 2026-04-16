@@ -22,11 +22,18 @@
     <article class="detail-panel">
         <div class="section-header__eyebrow">Context</div>
         <ul class="stack-list">
+            <li><strong>Dossier ID</strong><br />@Model.Dossier.Id</li>
+            <li><strong>Run ID</strong><br />@Model.Dossier.MissionRunId</li>
+            <li><strong>Company ID</strong><br />@Model.Dossier.TargetCompanyId</li>
+            <li><strong>Contact ID</strong><br />@Model.Dossier.TargetContactId</li>
             <li><strong>Mission</strong><br />@(Model.Mission?.MissionName ?? "Unknown")</li>
             <li><strong>Run</strong><br />@(Model.Run?.RunCode ?? "Unknown")</li>
             <li><strong>Company</strong><br />@(Model.Company?.Name ?? "Unknown")</li>
             <li><strong>Contact</strong><br />@(Model.Contact?.FullName ?? "Unknown")</li>
             <li><strong>Ready for outreach</strong><br />@(Model.Dossier.IsReadyForOutreach ? "Yes" : "No")</li>
+            <li><strong>Supporting evidence</strong><br />@Model.Dossier.SupportingEvidenceCount</li>
+            <li><strong>Created</strong><br />@Model.Dossier.CreatedAtUtc.ToString("yyyy-MM-dd HH:mm") UTC</li>
+            <li><strong>Updated</strong><br />@Model.Dossier.LastUpdatedAtUtc.ToString("yyyy-MM-dd HH:mm") UTC</li>
         </ul>
     </article>
 </section>

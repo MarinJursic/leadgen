@@ -16,10 +16,13 @@
     <article class="detail-panel">
         <div class="section-header__eyebrow">Agent profile</div>
         <ul class="stack-list">
+            <li><strong>Agent ID</strong><br />@Model.Agent.Id</li>
             <li><strong>Role</strong><br />@Model.Agent.Role</li>
             <li><strong>Provider</strong><br />@Model.Agent.Provider</li>
             <li><strong>Temperature</strong><br />@Model.Agent.Temperature</li>
             <li><strong>Max concurrent tasks</strong><br />@Model.Agent.MaxConcurrentTasks</li>
+            <li><strong>Active</strong><br />@(Model.Agent.IsActive ? "Yes" : "No")</li>
+            <li><strong>Last heartbeat</strong><br />@Model.Agent.LastHeartbeatUtc.ToString("yyyy-MM-dd HH:mm") UTC</li>
             <li><strong>Current focus</strong><br />@Model.Agent.CurrentFocus</li>
         </ul>
     </article>

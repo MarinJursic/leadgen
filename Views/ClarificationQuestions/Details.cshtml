@@ -25,9 +25,12 @@
     <article class="detail-panel">
         <div class="section-header__eyebrow">Context</div>
         <ul class="stack-list">
+            <li><strong>Question ID</strong><br />@Model.Question.Id</li>
+            <li><strong>Slot</strong><br />@Model.Question.SlotName</li>
             <li><strong>Mission</strong><br />@(Model.Mission?.MissionName ?? "Unknown")</li>
             <li><strong>Answered</strong><br />@(Model.Question.IsAnswered ? "Yes" : "No")</li>
             <li><strong>Created</strong><br />@Model.Question.CreatedAtUtc.ToString("yyyy-MM-dd")</li>
+            <li><strong>Answered at</strong><br />@(Model.Question.AnsweredAtUtc.HasValue ? $"{Model.Question.AnsweredAtUtc.Value:yyyy-MM-dd HH:mm} UTC" : "Pending")</li>
         </ul>
     </article>
 </section>

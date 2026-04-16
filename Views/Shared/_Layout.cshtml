@@ -1,5 +1,7 @@
 ﻿@{
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+    var isImmersiveHome = currentController == "Home" && (currentAction == "Index" || currentAction == "Mission");
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -12,45 +14,61 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/leadgen.styles.css" asp-append-version="true" />
 </head>
-<body>
-    <div class="page-chrome">
-        <header class="site-header">
-            <div class="shell site-header__inner">
-                <a class="brandmark" asp-area="" asp-controller="Home" asp-action="Index">
-                    <span class="brandmark__eyebrow">Leadgen</span>
-                    <span class="brandmark__title">Intelligence Swarm</span>
-                </a>
-                <nav class="site-nav" aria-label="Primary">
-                    <a asp-area="" asp-controller="Home" asp-action="Index" class="site-nav__link @(currentController == "Home" ? "site-nav__link--active" : null)">Home</a>
-                    <a asp-area="" asp-controller="Missions" asp-action="Index" class="site-nav__link @(currentController == "Missions" ? "site-nav__link--active" : null)">Missions</a>
-                    <a asp-area="" asp-controller="ClarificationQuestions" asp-action="Index" class="site-nav__link @(currentController == "ClarificationQuestions" ? "site-nav__link--active" : null)">Questions</a>
-                    <a asp-area="" asp-controller="MissionRuns" asp-action="Index" class="site-nav__link @(currentController == "MissionRuns" ? "site-nav__link--active" : null)">Runs</a>
-                    <a asp-area="" asp-controller="MissionAgentAssignments" asp-action="Index" class="site-nav__link @(currentController == "MissionAgentAssignments" ? "site-nav__link--active" : null)">Assignments</a>
-                    <a asp-area="" asp-controller="SwarmAgents" asp-action="Index" class="site-nav__link @(currentController == "SwarmAgents" ? "site-nav__link--active" : null)">Agents</a>
-                    <a asp-area="" asp-controller="TargetCompanies" asp-action="Index" class="site-nav__link @(currentController == "TargetCompanies" ? "site-nav__link--active" : null)">Companies</a>
-                    <a asp-area="" asp-controller="TargetContacts" asp-action="Index" class="site-nav__link @(currentController == "TargetContacts" ? "site-nav__link--active" : null)">Contacts</a>
-                    <a asp-area="" asp-controller="ContactChannels" asp-action="Index" class="site-nav__link @(currentController == "ContactChannels" ? "site-nav__link--active" : null)">Channels</a>
-                    <a asp-area="" asp-controller="EvidencePoints" asp-action="Index" class="site-nav__link @(currentController == "EvidencePoints" ? "site-nav__link--active" : null)">Evidence</a>
-                    <a asp-area="" asp-controller="LeadDossiers" asp-action="Index" class="site-nav__link @(currentController == "LeadDossiers" ? "site-nav__link--active" : null)">Dossiers</a>
-                </nav>
-            </div>
-        </header>
+<body class="@(isImmersiveHome ? "body--immersive" : null)">
+    <div class="page-chrome @(isImmersiveHome ? "page-chrome--immersive" : null)">
+        @if (!isImmersiveHome)
+        {
+            <header class="site-header">
+                <div class="shell site-header__inner">
+                    <a class="brandmark" asp-area="" asp-controller="Home" asp-action="Index">
+                        <span class="brandmark__seal">LG</span>
+                        <span class="brandmark__body">
+                            <span class="brandmark__eyebrow">Leadgen 2026</span>
+                            <span class="brandmark__title">Intelligence Swarm</span>
+                        </span>
+                    </a>
+                    <nav class="site-nav" aria-label="Primary">
+                        <a asp-area="" asp-controller="Home" asp-action="Index" class="site-nav__link @(currentController == "Home" ? "site-nav__link--active" : null)">Home</a>
+                        <a asp-area="" asp-controller="Missions" asp-action="Index" class="site-nav__link @(currentController == "Missions" ? "site-nav__link--active" : null)">Missions</a>
+                        <a asp-area="" asp-controller="ClarificationQuestions" asp-action="Index" class="site-nav__link @(currentController == "ClarificationQuestions" ? "site-nav__link--active" : null)">Questions</a>
+                        <a asp-area="" asp-controller="MissionRuns" asp-action="Index" class="site-nav__link @(currentController == "MissionRuns" ? "site-nav__link--active" : null)">Runs</a>
+                        <a asp-area="" asp-controller="MissionAgentAssignments" asp-action="Index" class="site-nav__link @(currentController == "MissionAgentAssignments" ? "site-nav__link--active" : null)">Assignments</a>
+                        <a asp-area="" asp-controller="SwarmAgents" asp-action="Index" class="site-nav__link @(currentController == "SwarmAgents" ? "site-nav__link--active" : null)">Agents</a>
+                        <a asp-area="" asp-controller="TargetCompanies" asp-action="Index" class="site-nav__link @(currentController == "TargetCompanies" ? "site-nav__link--active" : null)">Companies</a>
+                        <a asp-area="" asp-controller="TargetContacts" asp-action="Index" class="site-nav__link @(currentController == "TargetContacts" ? "site-nav__link--active" : null)">Contacts</a>
+                        <a asp-area="" asp-controller="ContactChannels" asp-action="Index" class="site-nav__link @(currentController == "ContactChannels" ? "site-nav__link--active" : null)">Channels</a>
+                        <a asp-area="" asp-controller="EvidencePoints" asp-action="Index" class="site-nav__link @(currentController == "EvidencePoints" ? "site-nav__link--active" : null)">Evidence</a>
+                        <a asp-area="" asp-controller="LeadDossiers" asp-action="Index" class="site-nav__link @(currentController == "LeadDossiers" ? "site-nav__link--active" : null)">Dossiers</a>
+                    </nav>
+                </div>
+            </header>
+        }
 
-        <main role="main" class="site-main">
-            <div class="shell">
+        <main role="main" class="site-main @(isImmersiveHome ? "site-main--immersive" : null)">
+            @if (isImmersiveHome)
+            {
                 @RenderBody()
-            </div>
+            }
+            else
+            {
+                <div class="shell">
+                    @RenderBody()
+                </div>
+            }
         </main>
 
-        <footer class="site-footer">
-            <div class="shell site-footer__inner">
-                <div>
-                    <div class="site-footer__title">Leadgen</div>
-                    <div class="site-footer__copy">Agentic B2B lead research rendered as a mission-first MVC app.</div>
+        @if (!isImmersiveHome)
+        {
+            <footer class="site-footer">
+                <div class="shell site-footer__inner">
+                    <div>
+                        <div class="site-footer__title">Leadgen</div>
+                        <div class="site-footer__copy">Agentic B2B lead research rendered as a mission-first MVC app.</div>
+                    </div>
+                    <a asp-area="" asp-controller="Home" asp-action="Privacy" class="site-footer__link">Privacy</a>
                 </div>
-                <a asp-area="" asp-controller="Home" asp-action="Privacy" class="site-footer__link">Privacy</a>
-            </div>
-        </footer>
+            </footer>
+        }
     </div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

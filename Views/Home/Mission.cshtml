@@ -1,0 +1,199 @@
+﻿@model MissionCanvasViewModel
+@{
+    ViewData["Title"] = "Mission Canvas";
+
+    var nodePositions = Model.SwarmNodes.ToDictionary(
+        node => node.Role,
+        node => (
+            X: node.Role switch
+            {
+                "Soul" => 24,
+                "Scout" => 37,
+                "Strategist" => 50,
+                "Sentinel" => 63,
+                "Sniper" => 76,
+                "Anchor" => 51,
+                "Stitcher" => 37,
+                _ => 50
+            },
+            Y: node.Role switch
+            {
+                "Soul" => 22,
+                "Scout" => 32,
+                "Strategist" => 49,
+                "Sentinel" => 32,
+                "Sniper" => 22,
+                "Anchor" => 70,
+                "Stitcher" => 84,
+                _ => 50
+            }
+        )
+    );
+
+    var swarmConnections = new (string Source, string Target)[]
+    {
+        ("Soul", "Scout"),
+        ("Scout", "Strategist"),
+        ("Sentinel", "Strategist"),
+        ("Sniper", "Sentinel"),
+        ("Strategist", "Anchor"),
+        ("Anchor", "Stitcher")
+    };
+
+    string GetNodeMonogram(string role)
+    {
+        var tokens = role.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (tokens.Length == 0)
+        {
+            return "AG";
+        }
+
+        if (tokens.Length == 1)
+        {
+            var token = tokens[0].ToUpperInvariant();
+            return token[..Math.Min(2, token.Length)];
+        }
+
+        return string.Concat(tokens.Select(token => char.ToUpperInvariant(token[0])).Take(2));
+    }
+}
+
+<div class="immersive-page immersive-page--mission" data-mission-canvas data-starting-progress="@Model.StartingProgress">
+    <header class="immersive-topbar">
+        <a asp-controller="Home" asp-action="Index" class="immersive-brand">
+            <span class="immersive-brand__seal">LG</span>
+            <span class="immersive-brand__label">Leadgen 2026</span>
+        </a>
+
+        <button type="button" class="immersive-vault-trigger" data-vault-open="mission-vault">
+            Vault
+        </button>
+    </header>
+
+    <div class="immersive-grid"></div>
+
+    <main class="mission-stage-canvas">
+        <div class="mission-canvas" data-mission-viewport>
+            <svg class="mission-canvas__lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                @foreach (var connection in swarmConnections)
+                {
+                    if (nodePositions.TryGetValue(connection.Source, out var source) &&
+                        nodePositions.TryGetValue(connection.Target, out var target))
+                    {
+                        <line x1="@source.X" y1="@source.Y" x2="@target.X" y2="@target.Y"></line>
+                    }
+                }
+            </svg>
+
+            @foreach (var node in Model.SwarmNodes)
+            {
+                var position = nodePositions[node.Role];
+                <a asp-controller="SwarmAgents"
+                   asp-action="Details"
+                   asp-route-id="@node.AgentId"
+                   class="mission-node @(node.Role == "Strategist" ? "mission-node--core" : null)"
+                   data-node-role="@node.Role"
+                   style="left: @(position.X)%; top: @(position.Y)%;">
+                    <span class="mission-node__orb">@GetNodeMonogram(node.Role)</span>
+                    <span class="mission-node__badge">@node.MaxConcurrentTasks</span>
+                    <span class="mission-node__label">@node.Role</span>
+                </a>
+            }
+        </div>
+
+        <section class="mission-hud">
+            <div class="mission-hud__eyebrow">Mission pipeline</div>
+            <div class="mission-hud__row">
+                <div>
+                    <div class="mission-hud__title">@Model.OperationLabel</div>
+                    <div class="mission-hud__dna">@Model.SubmittedMissionDna</div>
+                </div>
+                <div class="mission-hud__value" data-progress-value>@Model.StartingProgress%</div>
+            </div>
+            <div class="mission-hud__bar">
+                <div class="mission-hud__bar-fill" data-progress-bar></div>
+            </div>
+            <div class="mission-hud__footer">
+                <div class="mission-hud__status">
+                    <span class="mission-hud__dot"></span>
+                    <span data-progress-phase>Deep research</span>
+                </div>
+                <a asp-controller="Home" asp-action="Index" class="mission-hud__abort">Abort</a>
+            </div>
+        </section>
+
+        <div class="mission-controls">
+            <button type="button" class="mission-controls__button" data-zoom="in" aria-label="Zoom in">+</button>
+            <button type="button" class="mission-controls__button" data-zoom="out" aria-label="Zoom out">−</button>
+            <button type="button" class="mission-controls__button" data-zoom="reset" aria-label="Reset view">□</button>
+        </div>
+    </main>
+
+    <button type="button" class="vault-overlay" data-vault-close="mission-vault" aria-label="Close vault"></button>
+    <aside class="vault-sheet vault-sheet--mission" id="mission-vault" aria-hidden="true">
+        <div class="vault-sheet__header">
+            <div>
+                <div class="section-header__eyebrow">Resolution archive</div>
+                <h2 class="vault-sheet__title">Vault</h2>
+            </div>
+            <button type="button" class="vault-sheet__close" data-vault-close="mission-vault" aria-label="Close vault">×</button>
+        </div>
+
+        <section class="vault-sheet__section">
+            <div class="section-header__eyebrow">Mission</div>
+            <article class="vault-sheet__card vault-sheet__card--dark">
+                <h3 class="vault-sheet__card-title">@Model.MissionName</h3>
+                <p class="vault-sheet__card-copy">@Model.SubmittedMissionDna</p>
+                <div class="detail-metrics">
+                    <span class="status-pill">@Model.MissionStatus</span>
+                    <span class="mission-chip">@Model.ConfidenceScore.ToString("0.00") confidence</span>
+                </div>
+            </article>
+        </section>
+
+        <section class="vault-sheet__section">
+            <div class="section-header__eyebrow">Priority leads</div>
+            <div class="vault-sheet__stack">
+                @foreach (var lead in Model.TopLeads)
+                {
+                    <article class="vault-sheet__card">
+                        <div class="lead-card__meta">
+                            <span class="score-pill score-pill--high">Score @lead.LeadgenScore</span>
+                            <span class="mission-chip">@lead.MissionName</span>
+                        </div>
+                        <h3 class="vault-sheet__card-title">@lead.ContactName</h3>
+                        <p class="vault-sheet__card-copy">@lead.CompanyName</p>
+                        <p class="vault-sheet__card-copy">@lead.AdvantagePoint</p>
+                    </article>
+                }
+            </div>
+        </section>
+
+        <section class="vault-sheet__section">
+            <div class="section-header__eyebrow">Recent signals</div>
+            <div class="vault-sheet__stack">
+                @foreach (var signal in Model.RecentSignals)
+                {
+                    <article class="vault-sheet__card">
+                        <div class="signal-item__meta">@signal.SourcePlatform · @signal.CapturedAtUtc.ToString("yyyy-MM-dd")</div>
+                        <h3 class="vault-sheet__card-title">@signal.Label</h3>
+                        <p class="vault-sheet__card-copy">@signal.ContactName at @signal.CompanyName</p>
+                    </article>
+                }
+            </div>
+        </section>
+
+        <section class="vault-sheet__section">
+            <div class="section-header__eyebrow">Open views</div>
+            <div class="vault-sheet__links">
+                @foreach (var entity in Model.EntityNavigation)
+                {
+                    <a asp-controller="@entity.Controller" asp-action="Index" class="vault-sheet__link">
+                        <span>@entity.Label</span>
+                        <span>@entity.Count</span>
+                    </a>
+                }
+            </div>
+        </section>
+    </aside>
+</div>

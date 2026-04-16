@@ -16,10 +16,16 @@
     <article class="detail-panel">
         <div class="section-header__eyebrow">Company profile</div>
         <ul class="stack-list">
+            <li><strong>Company ID</strong><br />@Model.Company.Id</li>
             <li><strong>Mission</strong><br />@(Model.Mission?.MissionName ?? "Unknown")</li>
             <li><strong>Run</strong><br />@(Model.Run?.RunCode ?? "Unknown")</li>
+            <li><strong>Domain</strong><br />@Model.Company.Domain</li>
             <li><strong>Industry</strong><br />@Model.Company.Industry</li>
             <li><strong>Location</strong><br />@Model.Company.HeadquartersCity, @Model.Company.HeadquartersCountry</li>
+            <li><strong>Stage</strong><br />@(Model.Company.OrganizationStageLabel ?? "Unknown")</li>
+            <li><strong>Employees</strong><br />@Model.Company.EmployeeCount</li>
+            <li><strong>HQ verified</strong><br />@(Model.Company.IsHeadquartersVerified ? "Yes" : "No")</li>
+            <li><strong>Last signal</strong><br />@(Model.Company.LastSignalAtUtc.HasValue ? $"{Model.Company.LastSignalAtUtc.Value:yyyy-MM-dd HH:mm} UTC" : "No signal")</li>
             <li><strong>Match score</strong><br />@Model.Company.MatchScore.ToString("0.00")</li>
         </ul>
     </article>

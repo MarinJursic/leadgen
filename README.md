@@ -25,7 +25,7 @@ What is inside the web app:
 - static mock dataset from Lab 1
 - LINQ query catalog used by the dashboard
 - entity index and details pages for the full Leadgen object graph
-- custom home page with mission, dossier, and evidence summaries
+- custom immersive landing page and mission canvas flow
 - complete navigation across all Lab 2 entity pages
 
 ## Repository structure

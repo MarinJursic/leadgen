@@ -20,6 +20,13 @@ public sealed class HomeController : Controller
         return View(model);
     }
 
+    [HttpGet]
+    public IActionResult Mission(string? dna)
+    {
+        var model = _dashboardService.BuildMissionCanvas(dna);
+        return View(model);
+    }
+
     public IActionResult Privacy()
     {
         return View();
