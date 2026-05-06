@@ -10,6 +10,10 @@
         <strong>@Model.Question.SlotName</strong>
     </div>
     <h1 class="page-heading">@Model.Question.SlotName</h1>
+    <div class="page-actions">
+        <a asp-action="Edit" asp-route-id="@Model.Question.Id" class="button-link button-link--solid">Edit</a>
+        <a asp-action="Delete" asp-route-id="@Model.Question.Id" class="button-link button-link--danger">Delete</a>
+    </div>
 </div>
 
 <section class="detail-grid">

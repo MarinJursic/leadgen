@@ -1,0 +1,31 @@
+@model IReadOnlyList<OutreachQueueItemViewModel>
+@{
+    ViewData["Title"] = "Outreach Queue";
+}
+
+<div class="page-header">
+    <div class="breadcrumb">
+        <a asp-controller="Home" asp-action="Index">Home</a><span>/</span><strong>Outreach Queue</strong>
+    </div>
+    <h1 class="page-heading">Outreach queue</h1>
+</div>
+
+<section class="queue-grid">
+    @foreach (var item in Model)
+    {
+        <article class="detail-panel queue-card">
+            <div class="lead-card__meta">
+                <span class="score-pill score-pill--high">Score @item.LeadgenScore</span>
+                <span class="mission-chip">@item.MissionName</span>
+            </div>
+            <h2 class="detail-panel__title">@item.ContactName</h2>
+            <p class="detail-panel__summary">@item.CompanyName</p>
+            <p class="detail-panel__summary">@item.AdvantagePoint</p>
+            <p class="detail-panel__summary">@item.SuggestedApproach</p>
+            <div class="queue-card__footer">
+                <span class="signal-item__meta">Updated @item.LastUpdatedAtUtc.ToString("yyyy-MM-dd HH:mm") UTC</span>
+                <a asp-controller="LeadDossiers" asp-action="Details" asp-route-id="@item.DossierId" class="button-link">Open dossier</a>
+            </div>
+        </article>
+    }
+</section>

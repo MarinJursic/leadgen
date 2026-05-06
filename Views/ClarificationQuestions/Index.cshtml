@@ -8,6 +8,9 @@
         <a asp-controller="Home" asp-action="Index">Home</a><span>/</span><strong>Clarification Questions</strong>
     </div>
     <h1 class="page-heading">Clarification questions</h1>
+    <div class="page-actions">
+        <a asp-action="Create" class="button-link button-link--solid">New question</a>
+    </div>
 </div>
 
 <section class="surface-panel">
@@ -23,7 +26,11 @@
                     <td>@question.Prompt</td>
                     <td>@(question.IsAnswered ? "Yes" : "No")</td>
                     <td>@question.CreatedAtUtc.ToString("yyyy-MM-dd")</td>
-                    <td><a asp-action="Details" asp-route-id="@question.Id" class="button-link">Details</a></td>
+                    <td class="table-actions">
+                        <a asp-action="Details" asp-route-id="@question.Id" class="button-link">Details</a>
+                        <a asp-action="Edit" asp-route-id="@question.Id" class="button-link">Edit</a>
+                        <a asp-action="Delete" asp-route-id="@question.Id" class="button-link button-link--danger">Delete</a>
+                    </td>
                 </tr>
             }
         </tbody>

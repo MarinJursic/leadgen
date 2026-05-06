@@ -18,6 +18,9 @@ bin/
 obj/
 **/bin/
 **/obj/
+leadgen-lab3.db
+leadgen-lab3.db-shm
+leadgen-lab3.db-wal
 
 # IDE and user-specific files
 .vs/
@@ -32,3 +35,4 @@ obj/
 !/.agents/**/*.md
 !/lab-1/*.md
 !/lab-2/*.md
+!/lab-3/*.md

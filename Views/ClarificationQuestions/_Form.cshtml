@@ -1,0 +1,47 @@
+@model ClarificationQuestionFormViewModel
+
+@if (Model.Id.HasValue)
+{
+    <input asp-for="Id" type="hidden" />
+}
+
+<div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+<div class="form-grid">
+    <label class="form-field">
+        <span class="form-label">Mission</span>
+        <select asp-for="BusinessDnaMissionId" asp-items="Model.MissionOptions" class="form-input">
+            <option value="">Select a mission</option>
+        </select>
+        <span asp-validation-for="BusinessDnaMissionId" class="field-validation"></span>
+    </label>
+
+    <label class="form-field">
+        <span class="form-label">Slot</span>
+        <input asp-for="SlotName" class="form-input" />
+        <span asp-validation-for="SlotName" class="field-validation"></span>
+    </label>
+
+    <label class="form-field form-field--full">
+        <span class="form-label">Prompt</span>
+        <textarea asp-for="Prompt" class="form-input form-input--textarea"></textarea>
+        <span asp-validation-for="Prompt" class="field-validation"></span>
+    </label>
+
+    <label class="form-field form-field--full">
+        <span class="form-label">Reason</span>
+        <textarea asp-for="Reason" class="form-input form-input--textarea"></textarea>
+        <span asp-validation-for="Reason" class="field-validation"></span>
+    </label>
+
+    <label class="form-checkbox">
+        <input asp-for="IsAnswered" />
+        <span>Question already answered</span>
+    </label>
+
+    <label class="form-field form-field--full">
+        <span class="form-label">Answer</span>
+        <textarea asp-for="Answer" class="form-input form-input--textarea"></textarea>
+        <span asp-validation-for="Answer" class="field-validation"></span>
+    </label>
+</div>

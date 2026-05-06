@@ -193,6 +193,10 @@
                         <span>@entity.Count</span>
                     </a>
                 }
+                <a asp-controller="OutreachQueue" asp-action="Index" class="vault-sheet__link">
+                    <span>Queue</span>
+                    <span>@Model.TopLeads.Count</span>
+                </a>
             </div>
         </section>
     </aside>

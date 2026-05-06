@@ -1,41 +1,43 @@
-// Namespace `Leadgen.Model.Entities` definiram kako bih tipove grupirao prema projektu i odgovornosti.
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace Leadgen.Model.Entities;
 
-// Klasu `LeadDossier` definiram kao nositelja podataka ili ponašanja za ovu domensku cjelinu.
 public class LeadDossier
-// Ovom sintaksom otvaram blok ili izraz kako bih grupirao povezanu logiku.
 {
-// Svojstvo `Id` uvodim kako bih spremio jedinstveni identifikator kako bi se svaki zapis mogao pouzdano povezati s drugim zapisima.
+    [Key]
     public Guid Id { get; set; }
 
-// Svojstvo `MissionRunId` uvodim kako bih spremio vezu na konkretno izvođenje misije.
+    [ForeignKey(nameof(MissionRun))]
     public Guid MissionRunId { get; set; }
 
-// Svojstvo `TargetCompanyId` uvodim kako bih spremio vezu na target kompaniju.
+    [ForeignKey(nameof(TargetCompany))]
     public Guid TargetCompanyId { get; set; }
 
-// Svojstvo `TargetContactId` uvodim kako bih spremio vezu na target kontakt.
+    [ForeignKey(nameof(TargetContact))]
     public Guid TargetContactId { get; set; }
 
-// Svojstvo `LeadgenScore` uvodim kako bih spremio prioritetni score kako bismo mogli rangirati leadove.
     public int LeadgenScore { get; set; }
 
-// Svojstvo `SuggestedApproach` uvodim kako bih spremio predloženi outreach pristup temeljen na dokazima.
+    [Required]
+    [MaxLength(600)]
     public string SuggestedApproach { get; set; } = string.Empty;
 
-// Svojstvo `AdvantagePoint` uvodim kako bih spremio ključnu prednost ili ulaznu točku za outreach.
+    [Required]
+    [MaxLength(600)]
     public string AdvantagePoint { get; set; } = string.Empty;
 
-// Svojstvo `IsReadyForOutreach` uvodim kako bih spremio oznaku je li dossier dovoljno jak za kontaktiranje.
     public bool IsReadyForOutreach { get; set; }
 
-// Svojstvo `CreatedAtUtc` uvodim kako bih spremio vrijeme kreiranja u UTC-u radi konzistentnog vremenskog praćenja.
     public DateTime CreatedAtUtc { get; set; }
 
-// Svojstvo `LastUpdatedAtUtc` uvodim kako bih spremio vrijeme zadnje izmjene radi praćenja svježine.
     public DateTime LastUpdatedAtUtc { get; set; }
 
-// Svojstvo `SupportingEvidenceCount` uvodim kako bih spremio broj dokaza koji podupiru dossier.
     public int SupportingEvidenceCount { get; set; }
-// Ovom sintaksom zatvaram prethodni blok ili inicijalizator kada je cjelina završena.
+
+    public virtual MissionRun? MissionRun { get; set; }
+
+    public virtual TargetCompany? TargetCompany { get; set; }
+
+    public virtual TargetContact? TargetContact { get; set; }
 }
