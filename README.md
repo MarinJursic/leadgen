@@ -116,9 +116,24 @@ What remains in the repo from Lab 3:
 - `.agents/skills/leadgen-list-page/`
 - `.agents/skills/leadgen-edit-form/`
 
+### Lab 4
+
+Lab 4 turns the EF-backed MVC app into a full CRUD application with AJAX-assisted list and form interactions.
+
+What was done:
+
+- added create/edit/delete support for the main EF entities
+- added AJAX search to every entity list page and the outreach queue
+- added `Controllers/EntitySearchController.cs` for reusable search results
+- added `Controllers/LookupsController.cs` for AJAX autocomplete dropdowns
+- added shared partials for search, autocomplete, delete confirmation, and custom date-time input
+- added blur-triggered client validation plus server-side business validation in POST actions
+- added a custom JavaScript date-time picker that displays Croatian or English date formats based on browser language
+- documented the Lab 4 work in `lab-4/implementation-plan.md`, `lab-4/crud-matrix.md`, and `lab-4/completion-report.md`
+
 ## Current Repository State
 
-The current repository is a single runnable MVC web application backed by EF Core and SQLite.
+The current repository is a single runnable MVC web application backed by EF Core and SQLite, with CRUD and AJAX workflows across the Leadgen domain.
 
 What is active today:
 
@@ -132,7 +147,8 @@ What is active today:
 - EF-backed read access through `Services/LeadgenEfRepository.cs`
 - dashboard and query services in `Services/`
 - dossier-style UI in `Views/` and `wwwroot/css/site.css`
-- one real create/edit/delete workflow for clarification questions
+- create/edit/delete workflows for the main EF entities
+- AJAX search and autocomplete lookup endpoints
 - one extra projection/list workflow for the outreach queue
 
 Current architectural summary:
@@ -140,6 +156,7 @@ Current architectural summary:
 - Lab 1 ideas define the domain
 - Lab 2 defines the MVC shell and UX direction
 - Lab 3 defines the persistence model, routing model, and first real write flow
+- Lab 4 defines full CRUD, AJAX search, autocomplete, validation, and custom date-time input
 
 ## Repository Structure
 
@@ -156,6 +173,7 @@ leadgen/
 ├── lab-1/               Lab 1 planning and AI usage notes
 ├── lab-2/               Lab 2 planning, UX notes, and hook captures
 ├── lab-3/               Lab 3 plan and semantic/routing documentation
+├── lab-4/               Lab 4 assignment, implementation plan, and completion notes
 ├── Program.cs           ASP.NET Core startup
 ├── leadgen.csproj       runnable web project
 └── leadgen.sln          solution containing `leadgen`
@@ -203,10 +221,13 @@ The app currently includes browsing support for:
 - evidence points
 - lead dossiers
 
-Additional Lab 3 functionality includes:
+Additional Lab 3 and Lab 4 functionality includes:
 
 - the `Outreach Queue` page at `/outreach/queue`
-- create, edit, and delete flows for clarification questions under `/questions`
+- create, edit, and delete flows for the main EF entities
+- AJAX search endpoints under `/search/{entity}`
+- autocomplete lookup endpoints under `/lookups/...`
+- custom date-time inputs rendered through `Views/Shared/_DateTimeControl.cshtml`
 
 ## Supporting Documentation
 
@@ -220,10 +241,12 @@ Useful repo-local references:
 - `lab-3/implementation-plan.md`
 - `lab-3/semantic-model.md`
 - `lab-3/sitemap.md`
+- `lab-4/implementation-plan.md`
+- `lab-4/crud-matrix.md`
+- `lab-4/completion-report.md`
 
 ## Next Likely Steps
 
 - tighten the `lab-3/sitemap.md` page map so shared partial usage is documented more explicitly
-- add more write workflows beyond clarification questions
 - replace startup demo seeding with production persistence workflows when the app moves beyond lab scope
 - connect real mission orchestration and live swarm progress when those integrations are ready

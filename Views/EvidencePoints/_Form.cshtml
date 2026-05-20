@@ -1,0 +1,66 @@
+@model EvidencePointFormViewModel
+
+@if (Model.Id.HasValue)
+{
+    <input asp-for="Id" type="hidden" />
+}
+
+<div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+<div class="form-grid">
+    <partial name="_AutocompleteSelect" model="@(new AutocompleteFieldViewModel
+    {
+        Name = nameof(Model.TargetContactId),
+        Label = "Contact",
+        Endpoint = Url.Action("Contacts", "Lookups") ?? "/lookups/contacts",
+        Value = Model.TargetContactId == Guid.Empty ? null : Model.TargetContactId,
+        DisplayValue = Model.TargetContactName,
+        Placeholder = "Search contacts"
+    })" />
+    <label class="form-field">
+        <span class="form-label">Kind</span>
+        <select asp-for="Kind" asp-items="Html.GetEnumSelectList<EvidenceKind>()" class="form-input"></select>
+        <span asp-validation-for="Kind" class="field-validation"></span>
+    </label>
+    <label class="form-field">
+        <span class="form-label">Label</span>
+        <input asp-for="Label" class="form-input" />
+        <span asp-validation-for="Label" class="field-validation"></span>
+    </label>
+    <label class="form-field">
+        <span class="form-label">Platform</span>
+        <input asp-for="SourcePlatform" class="form-input" />
+        <span asp-validation-for="SourcePlatform" class="field-validation"></span>
+    </label>
+    <label class="form-field form-field--full">
+        <span class="form-label">Source URL</span>
+        <input asp-for="SourceUrl" class="form-input" />
+        <span asp-validation-for="SourceUrl" class="field-validation"></span>
+    </label>
+    <label class="form-field form-field--full">
+        <span class="form-label">Summary</span>
+        <textarea asp-for="Summary" class="form-input form-input--textarea"></textarea>
+        <span asp-validation-for="Summary" class="field-validation"></span>
+    </label>
+    <label class="form-field form-field--full">
+        <span class="form-label">Raw snippet</span>
+        <textarea asp-for="RawSnippet" class="form-input form-input--textarea"></textarea>
+        <span asp-validation-for="RawSnippet" class="field-validation"></span>
+    </label>
+    <partial name="_DateTimeControl" model="@(new DateTimeFieldViewModel
+    {
+        Name = nameof(Model.CapturedAtUtc),
+        Label = "Captured at",
+        Value = Model.CapturedAtUtc,
+        IsRequired = true
+    })" />
+    <label class="form-field">
+        <span class="form-label">Confidence</span>
+        <input asp-for="ConfidenceScore" class="form-input" />
+        <span asp-validation-for="ConfidenceScore" class="field-validation"></span>
+    </label>
+    <label class="form-checkbox">
+        <input asp-for="IsQualificationSignal" />
+        <span>Qualification signal</span>
+    </label>
+</div>

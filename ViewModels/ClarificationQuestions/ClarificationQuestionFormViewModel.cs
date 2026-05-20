@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace leadgen.ViewModels.ClarificationQuestions;
 
@@ -10,6 +9,8 @@ public sealed class ClarificationQuestionFormViewModel
     [Display(Name = "Mission")]
     [Required]
     public Guid BusinessDnaMissionId { get; set; }
+
+    public string? BusinessDnaMissionName { get; set; }
 
     [Display(Name = "Slot")]
     [Required]
@@ -30,5 +31,8 @@ public sealed class ClarificationQuestionFormViewModel
     [StringLength(500)]
     public string? Answer { get; set; }
 
-    public IReadOnlyList<SelectListItem> MissionOptions { get; set; } = Array.Empty<SelectListItem>();
+    [Required]
+    public DateTime CreatedAtUtc { get; set; }
+
+    public DateTime? AnsweredAtUtc { get; set; }
 }

@@ -10,6 +10,10 @@
         <strong>@Model.Run.RunCode</strong>
     </div>
     <h1 class="page-heading">@Model.Run.RunCode</h1>
+    <div class="page-actions">
+        <a asp-action="Edit" asp-route-id="@Model.Run.Id" class="button-link button-link--solid">Edit</a>
+        <a asp-action="Delete" asp-route-id="@Model.Run.Id" class="button-link button-link--danger">Delete</a>
+    </div>
 </div>
 
 <section class="detail-grid">

@@ -1,0 +1,52 @@
+@model SwarmAgentFormViewModel
+
+@if (Model.Id.HasValue)
+{
+    <input asp-for="Id" type="hidden" />
+}
+
+<div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+<div class="form-grid">
+    <label class="form-field">
+        <span class="form-label">Code name</span>
+        <input asp-for="CodeName" class="form-input" />
+        <span asp-validation-for="CodeName" class="field-validation"></span>
+    </label>
+    <label class="form-field">
+        <span class="form-label">Role</span>
+        <select asp-for="Role" asp-items="Html.GetEnumSelectList<AgentRole>()" class="form-input"></select>
+        <span asp-validation-for="Role" class="field-validation"></span>
+    </label>
+    <label class="form-field">
+        <span class="form-label">Provider</span>
+        <input asp-for="Provider" class="form-input" />
+        <span asp-validation-for="Provider" class="field-validation"></span>
+    </label>
+    <label class="form-field">
+        <span class="form-label">Temperature</span>
+        <input asp-for="Temperature" class="form-input" />
+        <span asp-validation-for="Temperature" class="field-validation"></span>
+    </label>
+    <label class="form-field">
+        <span class="form-label">Max tasks</span>
+        <input asp-for="MaxConcurrentTasks" class="form-input" />
+        <span asp-validation-for="MaxConcurrentTasks" class="field-validation"></span>
+    </label>
+    <label class="form-checkbox">
+        <input asp-for="IsActive" />
+        <span>Agent is active</span>
+    </label>
+    <partial name="_DateTimeControl" model="@(new DateTimeFieldViewModel
+    {
+        Name = nameof(Model.LastHeartbeatUtc),
+        Label = "Last heartbeat",
+        Value = Model.LastHeartbeatUtc,
+        IsRequired = true
+    })" />
+    <label class="form-field form-field--full">
+        <span class="form-label">Current focus</span>
+        <textarea asp-for="CurrentFocus" class="form-input form-input--textarea"></textarea>
+        <span asp-validation-for="CurrentFocus" class="field-validation"></span>
+    </label>
+</div>

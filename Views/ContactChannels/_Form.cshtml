@@ -1,0 +1,50 @@
+@model ContactChannelFormViewModel
+
+@if (Model.Id.HasValue)
+{
+    <input asp-for="Id" type="hidden" />
+}
+
+<div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+<div class="form-grid">
+    <partial name="_AutocompleteSelect" model="@(new AutocompleteFieldViewModel
+    {
+        Name = nameof(Model.TargetContactId),
+        Label = "Contact",
+        Endpoint = Url.Action("Contacts", "Lookups") ?? "/lookups/contacts",
+        Value = Model.TargetContactId == Guid.Empty ? null : Model.TargetContactId,
+        DisplayValue = Model.TargetContactName,
+        Placeholder = "Search contacts"
+    })" />
+    <label class="form-field">
+        <span class="form-label">Type</span>
+        <select asp-for="Type" asp-items="Html.GetEnumSelectList<ContactChannelType>()" class="form-input"></select>
+        <span asp-validation-for="Type" class="field-validation"></span>
+    </label>
+    <label class="form-field form-field--full">
+        <span class="form-label">Value</span>
+        <input asp-for="Value" class="form-input" />
+        <span asp-validation-for="Value" class="field-validation"></span>
+    </label>
+    <label class="form-checkbox">
+        <input asp-for="IsVerified" />
+        <span>Verified</span>
+    </label>
+    <partial name="_DateTimeControl" model="@(new DateTimeFieldViewModel
+    {
+        Name = nameof(Model.VerifiedAtUtc),
+        Label = "Verified at",
+        Value = Model.VerifiedAtUtc
+    })" />
+    <label class="form-field">
+        <span class="form-label">Source</span>
+        <input asp-for="Source" class="form-input" />
+        <span asp-validation-for="Source" class="field-validation"></span>
+    </label>
+    <label class="form-field">
+        <span class="form-label">Confidence</span>
+        <input asp-for="ConfidenceScore" class="form-input" />
+        <span asp-validation-for="ConfidenceScore" class="field-validation"></span>
+    </label>
+</div>

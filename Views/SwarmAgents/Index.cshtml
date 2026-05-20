@@ -6,14 +6,18 @@
 <div class="page-header">
     <div class="breadcrumb"><a asp-controller="Home" asp-action="Index">Home</a><span>/</span><strong>Agents</strong></div>
     <h1 class="page-heading">Swarm agents</h1>
+    <div class="page-actions">
+        <a asp-action="Create" class="button-link button-link--solid">New agent</a>
+    </div>
 </div>
 
 <section class="surface-panel">
-    <table class="list-table">
+    <partial name="_AjaxSearch" model="@(new AjaxSearchViewModel("agents", "Search agents, roles, focus..."))" />
+    <table class="list-table" data-search-table>
         <thead>
             <tr><th>Code name</th><th>Role</th><th>Provider</th><th>Capacity</th><th></th></tr>
         </thead>
-        <tbody>
+        <tbody data-search-results>
             @foreach (var agent in Model)
             {
                 <tr>
@@ -21,7 +25,11 @@
                     <td>@agent.Role</td>
                     <td>@agent.Provider</td>
                     <td>@agent.MaxConcurrentTasks</td>
-                    <td><a asp-action="Details" asp-route-id="@agent.Id" class="button-link">Details</a></td>
+                    <td class="table-actions">
+                        <a asp-action="Details" asp-route-id="@agent.Id" class="button-link">Details</a>
+                        <a asp-action="Edit" asp-route-id="@agent.Id" class="button-link">Edit</a>
+                        <a asp-action="Delete" asp-route-id="@agent.Id" class="button-link button-link--danger">Delete</a>
+                    </td>
                 </tr>
             }
         </tbody>

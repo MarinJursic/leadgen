@@ -6,14 +6,18 @@
 <div class="page-header">
     <div class="breadcrumb"><a asp-controller="Home" asp-action="Index">Home</a><span>/</span><strong>Contact Channels</strong></div>
     <h1 class="page-heading">Contact channels</h1>
+    <div class="page-actions">
+        <a asp-action="Create" class="button-link button-link--solid">New channel</a>
+    </div>
 </div>
 
 <section class="surface-panel">
-    <table class="list-table">
+    <partial name="_AjaxSearch" model="@(new AjaxSearchViewModel("channels", "Search channel values and sources..."))" />
+    <table class="list-table" data-search-table>
         <thead>
             <tr><th>Type</th><th>Value</th><th>Verified</th><th>Source</th><th></th></tr>
         </thead>
-        <tbody>
+        <tbody data-search-results>
             @foreach (var channel in Model)
             {
                 <tr>
@@ -21,7 +25,11 @@
                     <td>@channel.Value</td>
                     <td>@(channel.IsVerified ? "Yes" : "No")</td>
                     <td>@channel.Source</td>
-                    <td><a asp-action="Details" asp-route-id="@channel.Id" class="button-link">Details</a></td>
+                    <td class="table-actions">
+                        <a asp-action="Details" asp-route-id="@channel.Id" class="button-link">Details</a>
+                        <a asp-action="Edit" asp-route-id="@channel.Id" class="button-link">Edit</a>
+                        <a asp-action="Delete" asp-route-id="@channel.Id" class="button-link button-link--danger">Delete</a>
+                    </td>
                 </tr>
             }
         </tbody>

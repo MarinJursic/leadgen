@@ -1,0 +1,51 @@
+@model MissionAgentAssignmentFormViewModel
+
+@if (Model.Id.HasValue)
+{
+    <input asp-for="Id" type="hidden" />
+}
+
+<div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+<div class="form-grid">
+    <partial name="_AutocompleteSelect" model="@(new AutocompleteFieldViewModel
+    {
+        Name = nameof(Model.MissionRunId),
+        Label = "Run",
+        Endpoint = Url.Action("Runs", "Lookups") ?? "/lookups/runs",
+        Value = Model.MissionRunId == Guid.Empty ? null : Model.MissionRunId,
+        DisplayValue = Model.MissionRunName,
+        Placeholder = "Search runs"
+    })" />
+    <partial name="_AutocompleteSelect" model="@(new AutocompleteFieldViewModel
+    {
+        Name = nameof(Model.SwarmAgentId),
+        Label = "Agent",
+        Endpoint = Url.Action("Agents", "Lookups") ?? "/lookups/agents",
+        Value = Model.SwarmAgentId == Guid.Empty ? null : Model.SwarmAgentId,
+        DisplayValue = Model.SwarmAgentName,
+        Placeholder = "Search agents"
+    })" />
+    <partial name="_DateTimeControl" model="@(new DateTimeFieldViewModel
+    {
+        Name = nameof(Model.AssignedAtUtc),
+        Label = "Assigned at",
+        Value = Model.AssignedAtUtc,
+        IsRequired = true
+    })" />
+    <label class="form-field">
+        <span class="form-label">Status</span>
+        <select asp-for="Status" asp-items="Html.GetEnumSelectList<MissionStatus>()" class="form-input"></select>
+        <span asp-validation-for="Status" class="field-validation"></span>
+    </label>
+    <label class="form-field form-field--full">
+        <span class="form-label">Responsibility</span>
+        <textarea asp-for="Responsibility" class="form-input form-input--textarea"></textarea>
+        <span asp-validation-for="Responsibility" class="field-validation"></span>
+    </label>
+    <label class="form-field">
+        <span class="form-label">Token budget</span>
+        <input asp-for="TokenBudget" class="form-input" />
+        <span asp-validation-for="TokenBudget" class="field-validation"></span>
+    </label>
+</div>

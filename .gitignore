@@ -35,4 +35,14 @@ leadgen-lab3.db-wal
 !/.agents/**/*.md
 !/lab-1/*.md
 !/lab-2/*.md
-!/lab-3/*.md
+!/Lab3.md
+!/lab-3/implementation-plan.md
+!/lab-3/semantic-model.md
+!/lab-3/sitemap.md
+!/lab-4/
+!/lab-4/Lab4 copy.md
+!/lab-4/implementation-plan.md
+!/lab-4/completion-report.md
+!/lab-4/crud-matrix.md
+lab-3/lab3-*.md
+lab-4/lab4-*.md

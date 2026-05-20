@@ -10,6 +10,10 @@
         <strong>@Model.Contact.FullName</strong>
     </div>
     <h1 class="page-heading">@Model.Contact.FullName</h1>
+    <div class="page-actions">
+        <a asp-action="Edit" asp-route-id="@Model.Contact.Id" class="button-link button-link--solid">Edit</a>
+        <a asp-action="Delete" asp-route-id="@Model.Contact.Id" class="button-link button-link--danger">Delete</a>
+    </div>
 </div>
 
 <section class="detail-grid">

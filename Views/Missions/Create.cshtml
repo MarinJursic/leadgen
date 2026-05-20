@@ -1,0 +1,22 @@
+@model MissionFormViewModel
+@{
+    ViewData["Title"] = "New Mission";
+}
+
+<div class="page-header">
+    <div class="breadcrumb">
+        <a asp-controller="Home" asp-action="Index">Home</a><span>/</span>
+        <a asp-action="Index">Missions</a><span>/</span><strong>New</strong>
+    </div>
+    <h1 class="page-heading">New mission</h1>
+</div>
+
+<section class="surface-panel form-shell">
+    <form asp-action="Create" method="post" class="stack-form">
+        <partial name="_Form" model="Model" />
+        <div class="form-actions">
+            <button type="submit" class="button-link button-link--solid">Create mission</button>
+            <a asp-action="Index" class="button-link">Cancel</a>
+        </div>
+    </form>
+</section>

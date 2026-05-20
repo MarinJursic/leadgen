@@ -14,11 +14,12 @@
 </div>
 
 <section class="surface-panel">
-    <table class="list-table">
+    <partial name="_AjaxSearch" model="@(new AjaxSearchViewModel("questions", "Search slots, prompts, answers..."))" />
+    <table class="list-table" data-search-table>
         <thead>
             <tr><th>Slot</th><th>Prompt</th><th>Answered</th><th>Created</th><th></th></tr>
         </thead>
-        <tbody>
+        <tbody data-search-results>
             @foreach (var question in Model)
             {
                 <tr>

@@ -1,0 +1,70 @@
+@model TargetCompanyFormViewModel
+
+@if (Model.Id.HasValue)
+{
+    <input asp-for="Id" type="hidden" />
+}
+
+<div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+<div class="form-grid">
+    <partial name="_AutocompleteSelect" model="@(new AutocompleteFieldViewModel
+    {
+        Name = nameof(Model.MissionRunId),
+        Label = "Run",
+        Endpoint = Url.Action("Runs", "Lookups") ?? "/lookups/runs",
+        Value = Model.MissionRunId == Guid.Empty ? null : Model.MissionRunId,
+        DisplayValue = Model.MissionRunName,
+        Placeholder = "Search runs"
+    })" />
+    <label class="form-field">
+        <span class="form-label">Name</span>
+        <input asp-for="Name" class="form-input" />
+        <span asp-validation-for="Name" class="field-validation"></span>
+    </label>
+    <label class="form-field">
+        <span class="form-label">Domain</span>
+        <input asp-for="Domain" class="form-input" />
+        <span asp-validation-for="Domain" class="field-validation"></span>
+    </label>
+    <label class="form-field">
+        <span class="form-label">Industry</span>
+        <input asp-for="Industry" class="form-input" />
+        <span asp-validation-for="Industry" class="field-validation"></span>
+    </label>
+    <label class="form-field">
+        <span class="form-label">City</span>
+        <input asp-for="HeadquartersCity" class="form-input" />
+        <span asp-validation-for="HeadquartersCity" class="field-validation"></span>
+    </label>
+    <label class="form-field">
+        <span class="form-label">Country</span>
+        <input asp-for="HeadquartersCountry" class="form-input" />
+        <span asp-validation-for="HeadquartersCountry" class="field-validation"></span>
+    </label>
+    <label class="form-field">
+        <span class="form-label">Stage</span>
+        <input asp-for="OrganizationStageLabel" class="form-input" />
+        <span asp-validation-for="OrganizationStageLabel" class="field-validation"></span>
+    </label>
+    <partial name="_DateTimeControl" model="@(new DateTimeFieldViewModel
+    {
+        Name = nameof(Model.LastSignalAtUtc),
+        Label = "Last signal",
+        Value = Model.LastSignalAtUtc
+    })" />
+    <label class="form-field">
+        <span class="form-label">Employees</span>
+        <input asp-for="EmployeeCount" class="form-input" />
+        <span asp-validation-for="EmployeeCount" class="field-validation"></span>
+    </label>
+    <label class="form-field">
+        <span class="form-label">Match score</span>
+        <input asp-for="MatchScore" class="form-input" />
+        <span asp-validation-for="MatchScore" class="field-validation"></span>
+    </label>
+    <label class="form-checkbox">
+        <input asp-for="IsHeadquartersVerified" />
+        <span>Headquarters verified</span>
+    </label>
+</div>

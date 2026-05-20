@@ -6,14 +6,18 @@
 <div class="page-header">
     <div class="breadcrumb"><a asp-controller="Home" asp-action="Index">Home</a><span>/</span><strong>Evidence</strong></div>
     <h1 class="page-heading">Evidence points</h1>
+    <div class="page-actions">
+        <a asp-action="Create" class="button-link button-link--solid">New evidence</a>
+    </div>
 </div>
 
 <section class="surface-panel">
-    <table class="list-table">
+    <partial name="_AjaxSearch" model="@(new AjaxSearchViewModel("evidence", "Search labels, sources, snippets..."))" />
+    <table class="list-table" data-search-table>
         <thead>
             <tr><th>Label</th><th>Kind</th><th>Source</th><th>Captured</th><th></th></tr>
         </thead>
-        <tbody>
+        <tbody data-search-results>
             @foreach (var evidence in Model)
             {
                 <tr>
@@ -21,7 +25,11 @@
                     <td>@evidence.Kind</td>
                     <td>@evidence.SourcePlatform</td>
                     <td>@evidence.CapturedAtUtc.ToString("yyyy-MM-dd")</td>
-                    <td><a asp-action="Details" asp-route-id="@evidence.Id" class="button-link">Details</a></td>
+                    <td class="table-actions">
+                        <a asp-action="Details" asp-route-id="@evidence.Id" class="button-link">Details</a>
+                        <a asp-action="Edit" asp-route-id="@evidence.Id" class="button-link">Edit</a>
+                        <a asp-action="Delete" asp-route-id="@evidence.Id" class="button-link button-link--danger">Delete</a>
+                    </td>
                 </tr>
             }
         </tbody>

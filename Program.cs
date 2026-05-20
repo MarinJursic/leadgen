@@ -1,6 +1,8 @@
 using leadgen.Data;
 using leadgen.Services;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 // Create the ASP.NET Core application builder from command-line arguments.
 var builder = WebApplication.CreateBuilder(args);
@@ -17,6 +19,19 @@ builder.Services.AddScoped<ILeadgenDashboardService, LeadgenDashboardService>();
 
 // Build the configured web application.
 var app = builder.Build();
+var supportedCultures = new[]
+{
+    new CultureInfo("hr"),
+    new CultureInfo("hr-HR"),
+    new CultureInfo("en"),
+    new CultureInfo("en-US")
+};
+var localizationOptions = new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new RequestCulture("hr-HR"),
+    SupportedCultures = supportedCultures,
+    SupportedUICultures = supportedCultures
+};
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -27,6 +42,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseRequestLocalization(localizationOptions);
 // Enable endpoint routing for controller actions.
 app.UseRouting();
 

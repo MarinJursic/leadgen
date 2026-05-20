@@ -11,6 +11,12 @@
 </div>
 
 <section class="queue-grid">
+    <div class="queue-search">
+        <partial name="_AjaxSearch" model="@(new AjaxSearchViewModel("queue", "Search ready outreach by mission, company, contact..."))" />
+    </div>
+</section>
+
+<section class="queue-grid" data-card-results>
     @foreach (var item in Model)
     {
         <article class="detail-panel queue-card">

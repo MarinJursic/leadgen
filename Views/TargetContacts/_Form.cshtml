@@ -1,0 +1,71 @@
+@model TargetContactFormViewModel
+
+@if (Model.Id.HasValue)
+{
+    <input asp-for="Id" type="hidden" />
+}
+
+<div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+<div class="form-grid">
+    <partial name="_AutocompleteSelect" model="@(new AutocompleteFieldViewModel
+    {
+        Name = nameof(Model.TargetCompanyId),
+        Label = "Company",
+        Endpoint = Url.Action("Companies", "Lookups") ?? "/lookups/companies",
+        Value = Model.TargetCompanyId == Guid.Empty ? null : Model.TargetCompanyId,
+        DisplayValue = Model.TargetCompanyName,
+        Placeholder = "Search companies"
+    })" />
+    <label class="form-field">
+        <span class="form-label">Full name</span>
+        <input asp-for="FullName" class="form-input" />
+        <span asp-validation-for="FullName" class="field-validation"></span>
+    </label>
+    <label class="form-field">
+        <span class="form-label">Job title</span>
+        <input asp-for="JobTitle" class="form-input" />
+        <span asp-validation-for="JobTitle" class="field-validation"></span>
+    </label>
+    <label class="form-field">
+        <span class="form-label">Department</span>
+        <input asp-for="Department" class="form-input" />
+        <span asp-validation-for="Department" class="field-validation"></span>
+    </label>
+    <label class="form-field">
+        <span class="form-label">Seniority</span>
+        <input asp-for="Seniority" class="form-input" />
+        <span asp-validation-for="Seniority" class="field-validation"></span>
+    </label>
+    <label class="form-checkbox">
+        <input asp-for="IsDecisionMaker" />
+        <span>Decision maker</span>
+    </label>
+    <label class="form-field">
+        <span class="form-label">LinkedIn</span>
+        <input asp-for="LinkedInUrl" class="form-input" />
+        <span asp-validation-for="LinkedInUrl" class="field-validation"></span>
+    </label>
+    <label class="form-field">
+        <span class="form-label">X handle</span>
+        <input asp-for="XHandle" class="form-input" />
+        <span asp-validation-for="XHandle" class="field-validation"></span>
+    </label>
+    <label class="form-field">
+        <span class="form-label">GitHub</span>
+        <input asp-for="GitHubUsername" class="form-input" />
+        <span asp-validation-for="GitHubUsername" class="field-validation"></span>
+    </label>
+    <partial name="_DateTimeControl" model="@(new DateTimeFieldViewModel
+    {
+        Name = nameof(Model.LastObservedAtUtc),
+        Label = "Last observed",
+        Value = Model.LastObservedAtUtc,
+        IsRequired = true
+    })" />
+    <label class="form-field form-field--full">
+        <span class="form-label">Opportunity summary</span>
+        <textarea asp-for="OpportunitySummary" class="form-input form-input--textarea"></textarea>
+        <span asp-validation-for="OpportunitySummary" class="field-validation"></span>
+    </label>
+</div>

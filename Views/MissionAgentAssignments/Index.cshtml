@@ -6,14 +6,18 @@
 <div class="page-header">
     <div class="breadcrumb"><a asp-controller="Home" asp-action="Index">Home</a><span>/</span><strong>Assignments</strong></div>
     <h1 class="page-heading">Mission agent assignments</h1>
+    <div class="page-actions">
+        <a asp-action="Create" class="button-link button-link--solid">New assignment</a>
+    </div>
 </div>
 
 <section class="surface-panel">
-    <table class="list-table">
+    <partial name="_AjaxSearch" model="@(new AjaxSearchViewModel("assignments", "Search responsibilities and statuses..."))" />
+    <table class="list-table" data-search-table>
         <thead>
             <tr><th>Responsibility</th><th>Status</th><th>Assigned</th><th>Budget</th><th></th></tr>
         </thead>
-        <tbody>
+        <tbody data-search-results>
             @foreach (var assignment in Model)
             {
                 <tr>
@@ -21,7 +25,11 @@
                     <td>@assignment.Status</td>
                     <td>@assignment.AssignedAtUtc.ToString("yyyy-MM-dd HH:mm")</td>
                     <td>@assignment.TokenBudget</td>
-                    <td><a asp-action="Details" asp-route-id="@assignment.Id" class="button-link">Details</a></td>
+                    <td class="table-actions">
+                        <a asp-action="Details" asp-route-id="@assignment.Id" class="button-link">Details</a>
+                        <a asp-action="Edit" asp-route-id="@assignment.Id" class="button-link">Edit</a>
+                        <a asp-action="Delete" asp-route-id="@assignment.Id" class="button-link button-link--danger">Delete</a>
+                    </td>
                 </tr>
             }
         </tbody>

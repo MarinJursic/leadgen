@@ -1,0 +1,9 @@
+@model AjaxSearchViewModel
+
+<form class="ajax-search" data-ajax-search data-search-entity="@Model.Entity" autocomplete="off">
+    <label class="ajax-search__field">
+        <span class="form-label">Search</span>
+        <input class="form-input" type="search" name="q" placeholder="@Model.Placeholder" data-search-input />
+    </label>
+    <div class="ajax-search__meta" data-search-status>Showing current records</div>
+</form>

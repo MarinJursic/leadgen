@@ -1686,6 +1686,11 @@ a:hover {
   outline-offset: 1px;
 }
 
+.form-input.input-validation-error {
+  border-color: rgba(143, 29, 29, 0.62);
+  background: rgba(143, 29, 29, 0.04);
+}
+
 .form-checkbox {
   display: inline-flex;
   align-items: center;
@@ -1709,6 +1714,203 @@ a:hover {
   align-items: center;
   gap: 0.75rem;
   flex-wrap: wrap;
+}
+
+.ajax-search {
+  display: grid;
+  grid-template-columns: minmax(12rem, 1fr) auto;
+  align-items: end;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.ajax-search__field {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.ajax-search__meta {
+  color: var(--ink-soft);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+[data-search-results],
+[data-card-results] {
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+[data-search-results].is-refreshing,
+[data-card-results].is-refreshing {
+  opacity: 0.42;
+  transform: translateY(2px);
+}
+
+.search-row-enter {
+  animation: search-row-enter 180ms ease both;
+}
+
+@keyframes search-row-enter {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.autocomplete-field,
+.date-control {
+  position: relative;
+}
+
+.autocomplete-menu,
+.date-picker {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  left: 0;
+  right: 0;
+  z-index: 25;
+  display: none;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 22px 54px rgba(17, 17, 17, 0.12);
+}
+
+.autocomplete-menu.is-open,
+.date-picker.is-open {
+  display: grid;
+}
+
+.autocomplete-menu {
+  overflow: hidden;
+}
+
+.autocomplete-menu__item {
+  display: grid;
+  gap: 0.25rem;
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  background: transparent;
+  text-align: left;
+  color: var(--ink);
+}
+
+.autocomplete-menu__item:hover,
+.autocomplete-menu__item:focus {
+  background: rgba(17, 17, 17, 0.04);
+}
+
+.autocomplete-menu__item span,
+.autocomplete-menu__empty {
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+}
+
+.autocomplete-menu__empty {
+  padding: 0.9rem 1rem;
+}
+
+.date-picker {
+  gap: 0.75rem;
+  padding: 0.9rem;
+}
+
+.date-picker__head,
+.date-picker__week,
+.date-picker__grid,
+.date-picker__actions,
+.date-picker__time {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.date-picker__head {
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  text-align: center;
+}
+
+.date-picker__nav,
+.date-picker__day {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: white;
+  color: var(--ink);
+}
+
+.date-picker__nav {
+  width: 2rem;
+  height: 2rem;
+}
+
+.date-picker__week,
+.date-picker__grid {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.date-picker__week span {
+  color: var(--ink-soft);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.66rem;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.date-picker__day {
+  min-height: 2rem;
+}
+
+.date-picker__day.is-selected {
+  background: var(--ink);
+  color: white;
+  border-color: var(--ink);
+}
+
+.date-picker__time {
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+}
+
+.date-picker__time .form-input {
+  padding: 0.55rem 0.65rem;
+  text-align: center;
+}
+
+.date-picker__actions {
+  grid-template-columns: 1fr 1fr;
+}
+
+.date-control.has-date-error .form-input {
+  border-color: rgba(143, 29, 29, 0.55);
+}
+
+.delete-shell {
+  display: grid;
+  gap: 1rem;
+}
+
+.delete-warnings {
+  padding: 1rem;
+  border: 1px solid rgba(123, 31, 35, 0.16);
+  border-radius: var(--radius-md);
+  background: rgba(123, 31, 35, 0.05);
+}
+
+.queue-search {
+  grid-column: 1 / -1;
+  width: 100%;
 }
 
 .queue-grid {
@@ -1794,6 +1996,10 @@ a:hover {
   }
 
   .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ajax-search {
     grid-template-columns: 1fr;
   }
 }

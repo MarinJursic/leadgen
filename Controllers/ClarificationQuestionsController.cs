@@ -3,7 +3,6 @@ using leadgen.Data;
 using leadgen.Services;
 using leadgen.ViewModels.ClarificationQuestions;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace leadgen.Controllers;
@@ -63,7 +62,7 @@ public sealed class ClarificationQuestionsController : Controller
     {
         return View(new ClarificationQuestionFormViewModel
         {
-            MissionOptions = BuildMissionOptions()
+            CreatedAtUtc = DateTime.UtcNow
         });
     }
 
@@ -73,14 +72,15 @@ public sealed class ClarificationQuestionsController : Controller
     {
         ValidateAnsweredState(model);
 
-        if (!_dbContext.BusinessDnaMissions.Any(mission => mission.Id == model.BusinessDnaMissionId))
+        ValidateQuestionDates(model);
+
+        if (!await _dbContext.BusinessDnaMissions.AnyAsync(mission => mission.Id == model.BusinessDnaMissionId))
         {
             ModelState.AddModelError(nameof(model.BusinessDnaMissionId), "Selected mission was not found.");
         }
 
         if (!ModelState.IsValid)
         {
-            model.MissionOptions = BuildMissionOptions();
             return View(model);
         }
 
@@ -93,8 +93,8 @@ public sealed class ClarificationQuestionsController : Controller
             Reason = model.Reason.Trim(),
             IsAnswered = model.IsAnswered,
             Answer = model.IsAnswered ? model.Answer?.Trim() : null,
-            CreatedAtUtc = DateTime.UtcNow,
-            AnsweredAtUtc = model.IsAnswered ? DateTime.UtcNow : null
+            CreatedAtUtc = NormalizeUtc(model.CreatedAtUtc),
+            AnsweredAtUtc = model.IsAnswered ? NormalizeUtc(model.AnsweredAtUtc ?? DateTime.UtcNow) : null
         };
 
         _dbContext.ClarificationQuestions.Add(entity);
@@ -106,7 +106,9 @@ public sealed class ClarificationQuestionsController : Controller
     [HttpGet("{id:guid}/edit")]
     public async Task<IActionResult> Edit(Guid id)
     {
-        var entity = await _dbContext.ClarificationQuestions.AsNoTracking().FirstOrDefaultAsync(question => question.Id == id);
+        var entity = await _dbContext.ClarificationQuestions.AsNoTracking()
+            .Include(question => question.Mission)
+            .FirstOrDefaultAsync(question => question.Id == id);
         if (entity is null)
         {
             return NotFound();
@@ -116,12 +118,14 @@ public sealed class ClarificationQuestionsController : Controller
         {
             Id = entity.Id,
             BusinessDnaMissionId = entity.BusinessDnaMissionId,
+            BusinessDnaMissionName = entity.Mission?.MissionName,
             SlotName = entity.SlotName,
             Prompt = entity.Prompt,
             Reason = entity.Reason,
             IsAnswered = entity.IsAnswered,
             Answer = entity.Answer,
-            MissionOptions = BuildMissionOptions()
+            CreatedAtUtc = entity.CreatedAtUtc,
+            AnsweredAtUtc = entity.AnsweredAtUtc
         });
     }
 
@@ -135,6 +139,7 @@ public sealed class ClarificationQuestionsController : Controller
         }
 
         ValidateAnsweredState(model);
+        ValidateQuestionDates(model);
 
         var entity = await _dbContext.ClarificationQuestions.FirstOrDefaultAsync(question => question.Id == id);
         if (entity is null)
@@ -142,14 +147,13 @@ public sealed class ClarificationQuestionsController : Controller
             return NotFound();
         }
 
-        if (!_dbContext.BusinessDnaMissions.Any(mission => mission.Id == model.BusinessDnaMissionId))
+        if (!await _dbContext.BusinessDnaMissions.AnyAsync(mission => mission.Id == model.BusinessDnaMissionId))
         {
             ModelState.AddModelError(nameof(model.BusinessDnaMissionId), "Selected mission was not found.");
         }
 
         if (!ModelState.IsValid)
         {
-            model.MissionOptions = BuildMissionOptions();
             return View(model);
         }
 
@@ -159,7 +163,8 @@ public sealed class ClarificationQuestionsController : Controller
         entity.Reason = model.Reason.Trim();
         entity.IsAnswered = model.IsAnswered;
         entity.Answer = model.IsAnswered ? model.Answer?.Trim() : null;
-        entity.AnsweredAtUtc = model.IsAnswered ? entity.AnsweredAtUtc ?? DateTime.UtcNow : null;
+        entity.CreatedAtUtc = NormalizeUtc(model.CreatedAtUtc);
+        entity.AnsweredAtUtc = model.IsAnswered ? NormalizeUtc(model.AnsweredAtUtc ?? entity.AnsweredAtUtc ?? DateTime.UtcNow) : null;
 
         await _dbContext.SaveChangesAsync();
 
@@ -207,6 +212,19 @@ public sealed class ClarificationQuestionsController : Controller
         }
     }
 
+    private void ValidateQuestionDates(ClarificationQuestionFormViewModel model)
+    {
+        if (model.BusinessDnaMissionId == Guid.Empty)
+        {
+            ModelState.AddModelError(nameof(model.BusinessDnaMissionId), "Select a mission.");
+        }
+
+        if (model.IsAnswered && model.AnsweredAtUtc.HasValue && model.AnsweredAtUtc.Value < model.CreatedAtUtc)
+        {
+            ModelState.AddModelError(nameof(model.AnsweredAtUtc), "Answered time cannot be before the question was created.");
+        }
+    }
+
     private async Task<ClarificationQuestionDeleteViewModel?> BuildDeleteViewModelAsync(Guid id)
     {
         return await _dbContext.ClarificationQuestions
@@ -228,12 +246,8 @@ public sealed class ClarificationQuestionsController : Controller
             .FirstOrDefaultAsync();
     }
 
-    private IReadOnlyList<SelectListItem> BuildMissionOptions()
+    private static DateTime NormalizeUtc(DateTime value)
     {
-        return _dbContext.BusinessDnaMissions
-            .AsNoTracking()
-            .OrderBy(mission => mission.MissionName)
-            .Select(mission => new SelectListItem(mission.MissionName, mission.Id.ToString()))
-            .ToList();
+        return value.Kind == DateTimeKind.Utc ? value : DateTime.SpecifyKind(value, DateTimeKind.Utc);
     }
 }

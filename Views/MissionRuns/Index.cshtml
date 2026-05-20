@@ -6,14 +6,18 @@
 <div class="page-header">
     <div class="breadcrumb"><a asp-controller="Home" asp-action="Index">Home</a><span>/</span><strong>Runs</strong></div>
     <h1 class="page-heading">Mission runs</h1>
+    <div class="page-actions">
+        <a asp-action="Create" class="button-link button-link--solid">New run</a>
+    </div>
 </div>
 
 <section class="surface-panel">
-    <table class="list-table">
+    <partial name="_AjaxSearch" model="@(new AjaxSearchViewModel("runs", "Search runs, status, regions..."))" />
+    <table class="list-table" data-search-table>
         <thead>
             <tr><th>Run</th><th>Status</th><th>Region</th><th>Budget</th><th>Cost</th><th></th></tr>
         </thead>
-        <tbody>
+        <tbody data-search-results>
             @foreach (var run in Model)
             {
                 <tr>
@@ -22,7 +26,11 @@
                     <td>@run.SearchRegion</td>
                     <td>@run.TokenBudget</td>
                     <td>$@run.EstimatedCostUsd.ToString("0.00")</td>
-                    <td><a asp-action="Details" asp-route-id="@run.Id" class="button-link">Details</a></td>
+                    <td class="table-actions">
+                        <a asp-action="Details" asp-route-id="@run.Id" class="button-link">Details</a>
+                        <a asp-action="Edit" asp-route-id="@run.Id" class="button-link">Edit</a>
+                        <a asp-action="Delete" asp-route-id="@run.Id" class="button-link button-link--danger">Delete</a>
+                    </td>
                 </tr>
             }
         </tbody>

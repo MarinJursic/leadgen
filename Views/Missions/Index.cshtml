@@ -14,11 +14,15 @@
             <div class="section-header__eyebrow">Entity index</div>
             <h1 class="page-heading">Business DNA missions</h1>
         </div>
+        <div class="page-actions">
+            <a asp-action="Create" class="button-link button-link--solid">New mission</a>
+        </div>
     </div>
 </div>
 
 <section class="surface-panel">
-    <table class="list-table">
+    <partial name="_AjaxSearch" model="@(new AjaxSearchViewModel("missions", "Search missions, products, personas..."))" />
+    <table class="list-table" data-search-table>
         <thead>
             <tr>
                 <th>Mission</th>
@@ -29,7 +33,7 @@
                 <th></th>
             </tr>
         </thead>
-        <tbody>
+        <tbody data-search-results>
             @foreach (var mission in Model)
             {
                 <tr>
@@ -43,6 +47,8 @@
                     <td>@mission.Runs.Count</td>
                     <td>
                         <a asp-controller="Missions" asp-action="Details" asp-route-id="@mission.Id" class="button-link">Details</a>
+                        <a asp-controller="Missions" asp-action="Edit" asp-route-id="@mission.Id" class="button-link">Edit</a>
+                        <a asp-controller="Missions" asp-action="Delete" asp-route-id="@mission.Id" class="button-link button-link--danger">Delete</a>
                     </td>
                 </tr>
             }
