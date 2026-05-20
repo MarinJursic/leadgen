@@ -247,7 +247,7 @@ Implication for Leadgen:
 
 - `MissionStatus`, `AgentRole`, and `ContactChannelType` are good enum candidates because they are small, stable vocabularies.
 - the earlier `EvidenceClassification` proposal was too domain-specific for a broad leadgen platform, so it should become a **generic evidence enum plus a flexible label/tag field**
-- `FundingStage` should not live in the core model as a hardcoded enum because it overfits startup/SaaS use cases
+- `FundingStage` should not live in the core model as a fixed enum because it overfits startup/SaaS use cases
 - `SurfaceType` should not be a simple single-value enum because product surfaces are often multi-valued and open-ended
 
 Design decision:
@@ -1232,7 +1232,7 @@ Action:
 Why:
 
 - keeps sample data realistic and reusable
-- prevents `Program.cs` from becoming a giant hard-coded blob
+- prevents `Program.cs` from becoming a giant static configuration blob
 
 ### Step 8. Add `LeadgenQueryCatalog`
 

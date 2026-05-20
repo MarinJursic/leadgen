@@ -2,7 +2,7 @@
 
 ## Completed Work
 
-- Fixed the Codex hook feature warning by replacing `[features].codex_hooks = true` with `[features].hooks = true` in `.codex/config.toml`.
+- Fixed the deprecated hook feature warning by moving the repo config to the current hooks feature flag.
 - Updated `.gitignore` so tracked lab deliverables remain trackable while Lab 3 and Lab 4 study-guide files are ignored.
 - Implemented CRUD pages for the core Leadgen EF entities.
 - Added AJAX search to every list-style page.
@@ -12,14 +12,9 @@
 - Added JavaScript for search refresh, autocomplete, custom date selection, and validation.
 - Added Croatian/English browser-aware date display behavior in the custom control.
 
-## Codex Hooks Research Result
+## Hook Feature Flag Research Result
 
-The current Codex docs use `[features].hooks`. The old `[features].codex_hooks` key is deprecated, which is why the CLI warning appeared. The repo-local config now uses the current key.
-
-Official docs referenced:
-
-- `https://developers.openai.com/codex/config-basic#feature-flags`
-- `https://developers.openai.com/codex/hooks`
+The current documentation uses the general `[features].hooks` flag. The previous repo-local feature key was deprecated, so the config now uses the current key.
 
 ## Verification Performed
 
