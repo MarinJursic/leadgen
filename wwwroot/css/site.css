@@ -166,6 +166,32 @@ a:hover {
   border-color: #262626;
 }
 
+.site-nav__link--button {
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+
+.login-strip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.login-strip form {
+  margin: 0;
+}
+
+.login-strip__user {
+  max-width: 12rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ink-soft);
+  font-size: 0.88rem;
+}
+
 .site-main {
   flex: 1;
   padding: 1.6rem 0 4rem;
@@ -1698,6 +1724,23 @@ a:hover {
   padding-top: 0.4rem;
 }
 
+.form-checkline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  color: var(--ink-soft);
+}
+
+.auth-provider-strip {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+}
+
 .validation-summary,
 .field-validation {
   color: #8f1d1d;
@@ -1714,6 +1757,38 @@ a:hover {
   align-items: center;
   gap: 0.75rem;
   flex-wrap: wrap;
+}
+
+.mission-edit-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(19rem, 0.8fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.attachment-panel {
+  display: grid;
+  gap: 1rem;
+}
+
+.attachment-upload {
+  display: grid;
+  gap: 0.75rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.attachment-list {
+  overflow-x: auto;
+}
+
+.attachment-empty {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+.attachment-table {
+  min-width: 34rem;
 }
 
 .ajax-search {
@@ -1996,6 +2071,10 @@ a:hover {
   }
 
   .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .mission-edit-grid {
     grid-template-columns: 1fr;
   }
 

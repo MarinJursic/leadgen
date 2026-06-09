@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 namespace leadgen.Controllers;
 
 // Expose mission run list and details pages.
+[Authorize]
 [Route("runs")]
 public sealed class MissionRunsController : Controller
 {
@@ -25,6 +26,7 @@ public sealed class MissionRunsController : Controller
     }
 
     // Show all mission runs ordered by most recent start time.
+    [AllowAnonymous]
     [HttpGet("")]
     public IActionResult Index()
     {
@@ -59,6 +61,7 @@ public sealed class MissionRunsController : Controller
         });
     }
 
+    [Authorize(Roles = "Admin,Manager")]
     [HttpGet("new")]
     public IActionResult Create()
     {
@@ -70,6 +73,7 @@ public sealed class MissionRunsController : Controller
         });
     }
 
+    [Authorize(Roles = "Admin,Manager")]
     [HttpPost("new")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(MissionRunFormViewModel model)
@@ -99,6 +103,7 @@ public sealed class MissionRunsController : Controller
         return RedirectToAction(nameof(Details), new { id = entity.Id });
     }
 
+    [Authorize(Roles = "Admin,Manager")]
     [HttpGet("{id:guid}/edit")]
     public async Task<IActionResult> Edit(Guid id)
     {
@@ -113,6 +118,7 @@ public sealed class MissionRunsController : Controller
         return View(ToForm(run));
     }
 
+    [Authorize(Roles = "Admin,Manager")]
     [HttpPost("{id:guid}/edit")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(Guid id, MissionRunFormViewModel model)
@@ -148,6 +154,7 @@ public sealed class MissionRunsController : Controller
         return RedirectToAction(nameof(Details), new { id = run.Id });
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpGet("{id:guid}/delete")]
     public async Task<IActionResult> Delete(Guid id)
     {
@@ -177,6 +184,7 @@ public sealed class MissionRunsController : Controller
         });
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost("{id:guid}/delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(Guid id, DeleteEntityViewModel model)

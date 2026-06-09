@@ -6,25 +6,30 @@ using leadgen.ViewModels.Missions;
 using leadgen.ViewModels.Shared;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace leadgen.Controllers;
 
 // Expose mission list and mission details pages.
+[Authorize]
 [Route("missions")]
 public sealed class MissionsController : Controller
 {
     // Read-only access to the seeded Leadgen dataset.
     private readonly ILeadgenReadRepository _repository;
     private readonly LeadgenDbContext _dbContext;
+    private readonly IWebHostEnvironment _environment;
 
     // Receive the repository from dependency injection.
-    public MissionsController(ILeadgenReadRepository repository, LeadgenDbContext dbContext)
+    public MissionsController(ILeadgenReadRepository repository, LeadgenDbContext dbContext, IWebHostEnvironment environment)
     {
         _repository = repository;
         _dbContext = dbContext;
+        _environment = environment;
     }
 
     // Show all missions ordered by highest confidence first.
+    [AllowAnonymous]
     [HttpGet("")]
     public IActionResult Index()
     {
@@ -65,6 +70,7 @@ public sealed class MissionsController : Controller
         return View(model);
     }
 
+    [Authorize(Roles = "Admin,Manager")]
     [HttpGet("new")]
     public IActionResult Create()
     {
@@ -75,6 +81,7 @@ public sealed class MissionsController : Controller
         });
     }
 
+    [Authorize(Roles = "Admin,Manager")]
     [HttpPost("new")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(MissionFormViewModel model)
@@ -106,6 +113,7 @@ public sealed class MissionsController : Controller
         return RedirectToAction(nameof(Details), new { id = entity.Id });
     }
 
+    [Authorize(Roles = "Admin,Manager")]
     [HttpGet("{id:guid}/edit")]
     public async Task<IActionResult> Edit(Guid id)
     {
@@ -118,6 +126,7 @@ public sealed class MissionsController : Controller
         return View(ToForm(mission));
     }
 
+    [Authorize(Roles = "Admin,Manager")]
     [HttpPost("{id:guid}/edit")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(Guid id, MissionFormViewModel model)
@@ -155,6 +164,7 @@ public sealed class MissionsController : Controller
         return RedirectToAction(nameof(Details), new { id = mission.Id });
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpGet("{id:guid}/delete")]
     public async Task<IActionResult> Delete(Guid id)
     {
@@ -182,6 +192,7 @@ public sealed class MissionsController : Controller
         });
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost("{id:guid}/delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(Guid id, DeleteEntityViewModel model)
@@ -206,6 +217,117 @@ public sealed class MissionsController : Controller
         await _dbContext.SaveChangesAsync();
 
         return RedirectToAction(nameof(Index));
+    }
+
+    [Authorize(Roles = "Admin,Manager")]
+    [HttpGet("{missionId:guid}/attachments")]
+    public async Task<IActionResult> GetAttachments(Guid missionId)
+    {
+        if (!await _dbContext.BusinessDnaMissions.AnyAsync(mission => mission.Id == missionId))
+        {
+            return NotFound();
+        }
+
+        var attachments = await _dbContext.MissionAttachments.AsNoTracking()
+            .Where(attachment => attachment.BusinessDnaMissionId == missionId)
+            .OrderByDescending(attachment => attachment.CreatedAtUtc)
+            .ToListAsync();
+
+        return PartialView("_AttachmentList", attachments);
+    }
+
+    [Authorize(Roles = "Admin,Manager")]
+    [HttpPost("{missionId:guid}/attachments")]
+    [ValidateAntiForgeryToken]
+    [RequestSizeLimit(10_000_000)]
+    public async Task<IActionResult> UploadAttachment(Guid missionId, IFormFile? file)
+    {
+        var missionExists = await _dbContext.BusinessDnaMissions.AnyAsync(mission => mission.Id == missionId);
+        if (!missionExists)
+        {
+            return NotFound();
+        }
+
+        if (file is null || file.Length == 0)
+        {
+            return BadRequest(new { message = "A non-empty file is required." });
+        }
+
+        if (file.Length > 10_000_000)
+        {
+            return BadRequest(new { message = "The file is too large." });
+        }
+
+        var originalFileName = Path.GetFileName(file.FileName);
+        var extension = Path.GetExtension(originalFileName).ToLowerInvariant();
+        var allowedExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ".csv",
+            ".doc",
+            ".docx",
+            ".jpeg",
+            ".jpg",
+            ".json",
+            ".md",
+            ".pdf",
+            ".png",
+            ".txt"
+        };
+        if (!allowedExtensions.Contains(extension))
+        {
+            return BadRequest(new { message = "This file type is not allowed." });
+        }
+
+        var uploadsPath = Path.Combine(WebRootPath, "uploads", "missions", missionId.ToString());
+        Directory.CreateDirectory(uploadsPath);
+
+        var storageFileName = $"{Guid.NewGuid():N}{extension}";
+        var physicalPath = Path.Combine(uploadsPath, storageFileName);
+        await using (var stream = System.IO.File.Create(physicalPath))
+        {
+            await file.CopyToAsync(stream);
+        }
+
+        var attachment = new MissionAttachment
+        {
+            Id = Guid.NewGuid(),
+            BusinessDnaMissionId = missionId,
+            FileName = originalFileName,
+            StorageFileName = storageFileName,
+            FilePath = $"/uploads/missions/{missionId}/{storageFileName}",
+            ContentType = string.IsNullOrWhiteSpace(file.ContentType) ? "application/octet-stream" : file.ContentType,
+            FileSize = file.Length,
+            CreatedAtUtc = DateTime.UtcNow,
+            UploadedByUserId = User.FindFirstValue(ClaimTypes.NameIdentifier)
+        };
+
+        _dbContext.MissionAttachments.Add(attachment);
+        await _dbContext.SaveChangesAsync();
+
+        return Json(new { success = true, attachment.Id });
+    }
+
+    [Authorize(Roles = "Admin,Manager")]
+    [HttpPost("attachments/{id:guid}/delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteAttachment(Guid id)
+    {
+        var attachment = await _dbContext.MissionAttachments.FirstOrDefaultAsync(item => item.Id == id);
+        if (attachment is null)
+        {
+            return NotFound();
+        }
+
+        var physicalPath = ToPhysicalAttachmentPath(attachment.FilePath);
+        if (System.IO.File.Exists(physicalPath))
+        {
+            System.IO.File.Delete(physicalPath);
+        }
+
+        _dbContext.MissionAttachments.Remove(attachment);
+        await _dbContext.SaveChangesAsync();
+
+        return Json(new { success = true });
     }
 
     private static MissionFormViewModel ToForm(BusinessDnaMission mission)
@@ -238,5 +360,13 @@ public sealed class MissionsController : Controller
     private static DateTime NormalizeUtc(DateTime value)
     {
         return value.Kind == DateTimeKind.Utc ? value : DateTime.SpecifyKind(value, DateTimeKind.Utc);
+    }
+
+    private string WebRootPath => _environment.WebRootPath ?? Path.Combine(_environment.ContentRootPath, "wwwroot");
+
+    private string ToPhysicalAttachmentPath(string relativePath)
+    {
+        var safeRelativePath = relativePath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
+        return Path.Combine(WebRootPath, safeRelativePath);
     }
 }

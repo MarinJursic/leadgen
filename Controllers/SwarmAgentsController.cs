@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 namespace leadgen.Controllers;
 
 // Expose swarm agent list and details pages.
+[Authorize]
 [Route("agents")]
 public sealed class SwarmAgentsController : Controller
 {
@@ -25,6 +26,7 @@ public sealed class SwarmAgentsController : Controller
     }
 
     // Show all agents ordered by role and code name.
+    [AllowAnonymous]
     [HttpGet("")]
     public IActionResult Index()
     {
@@ -60,6 +62,7 @@ public sealed class SwarmAgentsController : Controller
         });
     }
 
+    [Authorize(Roles = "Admin,Manager")]
     [HttpGet("new")]
     public IActionResult Create()
     {
@@ -72,6 +75,7 @@ public sealed class SwarmAgentsController : Controller
         });
     }
 
+    [Authorize(Roles = "Admin,Manager")]
     [HttpPost("new")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(SwarmAgentFormViewModel model)
@@ -101,6 +105,7 @@ public sealed class SwarmAgentsController : Controller
         return RedirectToAction(nameof(Details), new { id = entity.Id });
     }
 
+    [Authorize(Roles = "Admin,Manager")]
     [HttpGet("{id:guid}/edit")]
     public async Task<IActionResult> Edit(Guid id)
     {
@@ -113,6 +118,7 @@ public sealed class SwarmAgentsController : Controller
         return View(ToForm(agent));
     }
 
+    [Authorize(Roles = "Admin,Manager")]
     [HttpPost("{id:guid}/edit")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(Guid id, SwarmAgentFormViewModel model)
@@ -148,6 +154,7 @@ public sealed class SwarmAgentsController : Controller
         return RedirectToAction(nameof(Details), new { id = agent.Id });
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpGet("{id:guid}/delete")]
     public async Task<IActionResult> Delete(Guid id)
     {
@@ -170,6 +177,7 @@ public sealed class SwarmAgentsController : Controller
         });
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost("{id:guid}/delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(Guid id, DeleteEntityViewModel model)

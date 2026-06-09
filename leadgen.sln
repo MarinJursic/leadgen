@@ -1,73 +1,51 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Ovim headerom označavam format solution datoteke kako bi je Visual Studio i .NET alati ispravno parsirali.
-# Visual Studio Version 17
-# Ovaj standardni komentar zadržavam jer označava generaciju Visual Studio formata.
 VisualStudioVersion = 17.5.2.0
-# Bilježim konkretnu verziju alata koja je zapisala solution.
 MinimumVisualStudioVersion = 10.0.40219.1
-# Navodim minimalnu verziju alata koja može otvoriti solution.
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "leadgen", "leadgen.csproj", "{72FBC078-E6E2-B9FA-0558-421BC0CE347E}"
-# Glavni web projekt registriram u solutionu kako bi se mogao buildati zajedno s ostatkom rješenja.
 EndProject
-# Deklaraciju pojedinog projekta zatvaram kada su njegovi metapodaci uneseni.
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "leadgen.Tests", "leadgen.Tests\leadgen.Tests.csproj", "{C996E312-375A-4F1D-ABF0-0F202967AF91}"
+EndProject
 Global
-# Global sekciju otvaram za zajedničke postavke cijelog solutiona.
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-# Ovu sekciju koristim da definiram koje build konfiguracije solution podržava.
 		Debug|Any CPU = Debug|Any CPU
-# Debug Any CPU konfiguraciju ostavljam kao standardnu razvojnu opciju.
 		Debug|x64 = Debug|x64
-# Debug x64 konfiguraciju ostavljam radi kompatibilnosti s IDE toolingom.
 		Debug|x86 = Debug|x86
-# Debug x86 konfiguraciju zadržavam kao dio standardnog solution skeletona.
 		Release|Any CPU = Release|Any CPU
-# Release Any CPU konfiguraciju koristim za generički release build.
 		Release|x64 = Release|x64
-# Release x64 konfiguraciju zadržavam radi standardnog solution formata.
 		Release|x86 = Release|x86
-# Release x86 konfiguraciju zadržavam kao dio standardnog solution skeletona.
 	EndGlobalSection
-# Trenutnu globalnu sekciju zatvaram kada su sve njene stavke navedene.
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-# Ovu sekciju koristim da mapiram konfiguracije na konkretne projekte.
 		{72FBC078-E6E2-B9FA-0558-421BC0CE347E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-# Ovaj red zadržavam jer je dio standardne solution strukture koju .NET alati očekuju.
 		{72FBC078-E6E2-B9FA-0558-421BC0CE347E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-# Ovaj red zadržavam jer je dio standardne solution strukture koju .NET alati očekuju.
 		{72FBC078-E6E2-B9FA-0558-421BC0CE347E}.Debug|x64.ActiveCfg = Debug|Any CPU
-# Ovaj red zadržavam jer je dio standardne solution strukture koju .NET alati očekuju.
 		{72FBC078-E6E2-B9FA-0558-421BC0CE347E}.Debug|x64.Build.0 = Debug|Any CPU
-# Ovaj red zadržavam jer je dio standardne solution strukture koju .NET alati očekuju.
 		{72FBC078-E6E2-B9FA-0558-421BC0CE347E}.Debug|x86.ActiveCfg = Debug|Any CPU
-# Ovaj red zadržavam jer je dio standardne solution strukture koju .NET alati očekuju.
 		{72FBC078-E6E2-B9FA-0558-421BC0CE347E}.Debug|x86.Build.0 = Debug|Any CPU
-# Ovaj red zadržavam jer je dio standardne solution strukture koju .NET alati očekuju.
 		{72FBC078-E6E2-B9FA-0558-421BC0CE347E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-# Ovaj red zadržavam jer je dio standardne solution strukture koju .NET alati očekuju.
 		{72FBC078-E6E2-B9FA-0558-421BC0CE347E}.Release|Any CPU.Build.0 = Release|Any CPU
-# Ovaj red zadržavam jer je dio standardne solution strukture koju .NET alati očekuju.
 		{72FBC078-E6E2-B9FA-0558-421BC0CE347E}.Release|x64.ActiveCfg = Release|Any CPU
-# Ovaj red zadržavam jer je dio standardne solution strukture koju .NET alati očekuju.
 		{72FBC078-E6E2-B9FA-0558-421BC0CE347E}.Release|x64.Build.0 = Release|Any CPU
-# Ovaj red zadržavam jer je dio standardne solution strukture koju .NET alati očekuju.
 		{72FBC078-E6E2-B9FA-0558-421BC0CE347E}.Release|x86.ActiveCfg = Release|Any CPU
-# Ovaj red zadržavam jer je dio standardne solution strukture koju .NET alati očekuju.
 		{72FBC078-E6E2-B9FA-0558-421BC0CE347E}.Release|x86.Build.0 = Release|Any CPU
-# Ovaj red zadržavam jer je dio standardne solution strukture koju .NET alati očekuju.
+		{C996E312-375A-4F1D-ABF0-0F202967AF91}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C996E312-375A-4F1D-ABF0-0F202967AF91}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C996E312-375A-4F1D-ABF0-0F202967AF91}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C996E312-375A-4F1D-ABF0-0F202967AF91}.Debug|x64.Build.0 = Debug|Any CPU
+		{C996E312-375A-4F1D-ABF0-0F202967AF91}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C996E312-375A-4F1D-ABF0-0F202967AF91}.Debug|x86.Build.0 = Debug|Any CPU
+		{C996E312-375A-4F1D-ABF0-0F202967AF91}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C996E312-375A-4F1D-ABF0-0F202967AF91}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C996E312-375A-4F1D-ABF0-0F202967AF91}.Release|x64.ActiveCfg = Release|Any CPU
+		{C996E312-375A-4F1D-ABF0-0F202967AF91}.Release|x64.Build.0 = Release|Any CPU
+		{C996E312-375A-4F1D-ABF0-0F202967AF91}.Release|x86.ActiveCfg = Release|Any CPU
+		{C996E312-375A-4F1D-ABF0-0F202967AF91}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
-# Trenutnu globalnu sekciju zatvaram kada su sve njene stavke navedene.
 	GlobalSection(SolutionProperties) = preSolution
-# Ovdje držim opća svojstva solutiona.
 		HideSolutionNode = FALSE
-# Ovo svojstvo ostavljam kako bi solution čvor bio vidljiv u IDE-u.
 	EndGlobalSection
-# Trenutnu globalnu sekciju zatvaram kada su sve njene stavke navedene.
 	GlobalSection(ExtensibilityGlobals) = postSolution
-# Ovu sekciju koristim za dodatne metapodatke solutiona poput GUID-a.
 		SolutionGuid = {9F382903-3C18-4737-9C23-64CCD5445A9B}
-# Solution GUID zadržavam jer solutionu daje stabilan identitet u tooling-u.
 	EndGlobalSection
-# Trenutnu globalnu sekciju zatvaram kada su sve njene stavke navedene.
 EndGlobal
-# Global postavke zatvaram kada su sve solution sekcije dovršene.

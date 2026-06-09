@@ -40,6 +40,7 @@
                         <a asp-area="" asp-controller="EvidencePoints" asp-action="Index" class="site-nav__link @(currentController == "EvidencePoints" ? "site-nav__link--active" : null)">Evidence</a>
                         <a asp-area="" asp-controller="LeadDossiers" asp-action="Index" class="site-nav__link @(currentController == "LeadDossiers" ? "site-nav__link--active" : null)">Dossiers</a>
                         <a asp-area="" asp-controller="OutreachQueue" asp-action="Index" class="site-nav__link @(currentController == "OutreachQueue" ? "site-nav__link--active" : null)">Queue</a>
+                        <partial name="_LoginPartial" />
                     </nav>
                 </div>
             </header>

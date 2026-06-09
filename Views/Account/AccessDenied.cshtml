@@ -1,0 +1,17 @@
+@{
+    ViewData["Title"] = "Access Denied";
+}
+
+<div class="page-header">
+    <div class="breadcrumb">
+        <a asp-controller="Home" asp-action="Index">Home</a><span>/</span><strong>Access denied</strong>
+    </div>
+    <h1 class="page-heading">Access denied</h1>
+</div>
+
+<section class="surface-panel">
+    <p class="lede">This account does not have permission to perform the requested action.</p>
+    <div class="form-actions">
+        <a asp-controller="Missions" asp-action="Index" class="button-link button-link--solid">Back to missions</a>
+    </div>
+</section>

@@ -1,0 +1,18 @@
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<AppUser> SignInManager
+@inject UserManager<AppUser> UserManager
+
+<div class="login-strip">
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <span class="login-strip__user">@User.Identity?.Name</span>
+        <form asp-controller="Account" asp-action="Logout" method="post">
+            <button type="submit" class="site-nav__link site-nav__link--button">Sign out</button>
+        </form>
+    }
+    else
+    {
+        <a asp-controller="Account" asp-action="Login" class="site-nav__link">Sign in</a>
+        <a asp-controller="Account" asp-action="Register" class="site-nav__link">Register</a>
+    }
+</div>

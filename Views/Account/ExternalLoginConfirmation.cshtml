@@ -1,0 +1,47 @@
+@model ExternalLoginConfirmationViewModel
+@{
+    ViewData["Title"] = "Complete External Login";
+}
+
+<div class="page-header">
+    <div class="breadcrumb">
+        <a asp-controller="Home" asp-action="Index">Home</a><span>/</span><strong>External login</strong>
+    </div>
+    <h1 class="page-heading">Complete @Model.Provider login</h1>
+</div>
+
+<section class="surface-panel form-shell">
+    <form asp-action="ExternalLoginConfirmation" method="post" class="stack-form">
+        <input asp-for="Provider" type="hidden" />
+        <input asp-for="ReturnUrl" type="hidden" />
+        <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+        <div class="form-grid">
+            <label class="form-field">
+                <span class="form-label">Email</span>
+                <input asp-for="Email" class="form-input" autocomplete="username" />
+                <span asp-validation-for="Email" class="field-validation"></span>
+            </label>
+            <label class="form-field">
+                <span class="form-label">Display name</span>
+                <input asp-for="DisplayName" class="form-input" autocomplete="name" />
+                <span asp-validation-for="DisplayName" class="field-validation"></span>
+            </label>
+            <label class="form-field">
+                <span class="form-label">OIB</span>
+                <input asp-for="OIB" class="form-input" inputmode="numeric" autocomplete="off" />
+                <span asp-validation-for="OIB" class="field-validation"></span>
+            </label>
+            <label class="form-field">
+                <span class="form-label">JMBG</span>
+                <input asp-for="JMBG" class="form-input" inputmode="numeric" autocomplete="off" />
+                <span asp-validation-for="JMBG" class="field-validation"></span>
+            </label>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="button-link button-link--solid">Finish sign in</button>
+            <a asp-action="Login" asp-route-returnUrl="@Model.ReturnUrl" class="button-link">Cancel</a>
+        </div>
+    </form>
+</section>

@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 namespace leadgen.Controllers;
 
 // Expose final lead dossier list and details pages.
+[Authorize]
 [Route("dossiers")]
 public sealed class LeadDossiersController : Controller
 {
@@ -25,6 +26,7 @@ public sealed class LeadDossiersController : Controller
     }
 
     // Show all dossiers ordered by highest score, then most recently updated.
+    [AllowAnonymous]
     [HttpGet("")]
     public IActionResult Index()
     {
@@ -63,6 +65,7 @@ public sealed class LeadDossiersController : Controller
         });
     }
 
+    [Authorize(Roles = "Admin,Manager")]
     [HttpGet("new")]
     public IActionResult Create()
     {
@@ -74,6 +77,7 @@ public sealed class LeadDossiersController : Controller
         });
     }
 
+    [Authorize(Roles = "Admin,Manager")]
     [HttpPost("new")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(LeadDossierFormViewModel model)
@@ -105,6 +109,7 @@ public sealed class LeadDossiersController : Controller
         return RedirectToAction(nameof(Details), new { id = entity.Id });
     }
 
+    [Authorize(Roles = "Admin,Manager")]
     [HttpGet("{id:guid}/edit")]
     public async Task<IActionResult> Edit(Guid id)
     {
@@ -121,6 +126,7 @@ public sealed class LeadDossiersController : Controller
         return View(ToForm(dossier));
     }
 
+    [Authorize(Roles = "Admin,Manager")]
     [HttpPost("{id:guid}/edit")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(Guid id, LeadDossierFormViewModel model)
@@ -158,6 +164,7 @@ public sealed class LeadDossiersController : Controller
         return RedirectToAction(nameof(Details), new { id = dossier.Id });
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpGet("{id:guid}/delete")]
     public async Task<IActionResult> Delete(Guid id)
     {
@@ -177,6 +184,7 @@ public sealed class LeadDossiersController : Controller
         });
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost("{id:guid}/delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(Guid id, DeleteEntityViewModel model)

@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 namespace leadgen.Controllers;
 
 // Expose target company list and details pages.
+[Authorize]
 [Route("companies")]
 public sealed class TargetCompaniesController : Controller
 {
@@ -25,6 +26,7 @@ public sealed class TargetCompaniesController : Controller
     }
 
     // Show all target companies ordered by best match score first.
+    [AllowAnonymous]
     [HttpGet("")]
     public IActionResult Index()
     {
@@ -60,6 +62,7 @@ public sealed class TargetCompaniesController : Controller
         });
     }
 
+    [Authorize(Roles = "Admin,Manager")]
     [HttpGet("new")]
     public IActionResult Create()
     {
@@ -70,6 +73,7 @@ public sealed class TargetCompaniesController : Controller
         });
     }
 
+    [Authorize(Roles = "Admin,Manager")]
     [HttpPost("new")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(TargetCompanyFormViewModel model)
@@ -102,6 +106,7 @@ public sealed class TargetCompaniesController : Controller
         return RedirectToAction(nameof(Details), new { id = entity.Id });
     }
 
+    [Authorize(Roles = "Admin,Manager")]
     [HttpGet("{id:guid}/edit")]
     public async Task<IActionResult> Edit(Guid id)
     {
@@ -116,6 +121,7 @@ public sealed class TargetCompaniesController : Controller
         return View(ToForm(company));
     }
 
+    [Authorize(Roles = "Admin,Manager")]
     [HttpPost("{id:guid}/edit")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(Guid id, TargetCompanyFormViewModel model)
@@ -154,6 +160,7 @@ public sealed class TargetCompaniesController : Controller
         return RedirectToAction(nameof(Details), new { id = company.Id });
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpGet("{id:guid}/delete")]
     public async Task<IActionResult> Delete(Guid id)
     {
@@ -181,6 +188,7 @@ public sealed class TargetCompaniesController : Controller
         });
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost("{id:guid}/delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(Guid id, DeleteEntityViewModel model)

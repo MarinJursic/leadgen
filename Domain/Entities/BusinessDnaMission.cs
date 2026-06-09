@@ -47,4 +47,6 @@ public class BusinessDnaMission
     public virtual ICollection<ClarificationQuestion> ClarificationQuestions { get; set; } = new List<ClarificationQuestion>();
 
     public virtual ICollection<MissionRun> Runs { get; set; } = new List<MissionRun>();
+
+    public virtual ICollection<MissionAttachment> Attachments { get; set; } = new List<MissionAttachment>();
 }

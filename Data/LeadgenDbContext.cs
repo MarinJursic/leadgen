@@ -1,11 +1,12 @@
 using System.Text.Json;
 using Leadgen.Model.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace leadgen.Data;
 
-public sealed class LeadgenDbContext : DbContext
+public sealed class LeadgenDbContext : IdentityDbContext<AppUser>
 {
     public LeadgenDbContext(DbContextOptions<LeadgenDbContext> options)
         : base(options)
@@ -32,8 +33,12 @@ public sealed class LeadgenDbContext : DbContext
 
     public DbSet<LeadDossier> LeadDossiers => Set<LeadDossier>();
 
+    public DbSet<MissionAttachment> MissionAttachments => Set<MissionAttachment>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+
         var surfaceTagsComparer = new ValueComparer<List<string>>(
             (left, right) => left!.SequenceEqual(right!),
             value => value.Aggregate(0, (current, item) => HashCode.Combine(current, item.GetHashCode())),
@@ -66,6 +71,14 @@ public sealed class LeadgenDbContext : DbContext
             builder.HasOne(question => question.Mission)
                 .WithMany(mission => mission.ClarificationQuestions)
                 .HasForeignKey(question => question.BusinessDnaMissionId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<MissionAttachment>(builder =>
+        {
+            builder.HasOne(attachment => attachment.Mission)
+                .WithMany(mission => mission.Attachments)
+                .HasForeignKey(attachment => attachment.BusinessDnaMissionId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
 

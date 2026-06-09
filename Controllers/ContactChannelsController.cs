@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 namespace leadgen.Controllers;
 
 // Expose contact channel list and details pages.
+[Authorize]
 [Route("channels")]
 public sealed class ContactChannelsController : Controller
 {
@@ -25,6 +26,7 @@ public sealed class ContactChannelsController : Controller
     }
 
     // Show all contact channels with verified channels first.
+    [AllowAnonymous]
     [HttpGet("")]
     public IActionResult Index()
     {
@@ -59,6 +61,7 @@ public sealed class ContactChannelsController : Controller
         });
     }
 
+    [Authorize(Roles = "Admin,Manager")]
     [HttpGet("new")]
     public IActionResult Create()
     {
@@ -68,6 +71,7 @@ public sealed class ContactChannelsController : Controller
         });
     }
 
+    [Authorize(Roles = "Admin,Manager")]
     [HttpPost("new")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(ContactChannelFormViewModel model)
@@ -96,6 +100,7 @@ public sealed class ContactChannelsController : Controller
         return RedirectToAction(nameof(Details), new { id = entity.Id });
     }
 
+    [Authorize(Roles = "Admin,Manager")]
     [HttpGet("{id:guid}/edit")]
     public async Task<IActionResult> Edit(Guid id)
     {
@@ -110,6 +115,7 @@ public sealed class ContactChannelsController : Controller
         return View(ToForm(channel));
     }
 
+    [Authorize(Roles = "Admin,Manager")]
     [HttpPost("{id:guid}/edit")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(Guid id, ContactChannelFormViewModel model)
@@ -144,6 +150,7 @@ public sealed class ContactChannelsController : Controller
         return RedirectToAction(nameof(Details), new { id = channel.Id });
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpGet("{id:guid}/delete")]
     public async Task<IActionResult> Delete(Guid id)
     {
@@ -163,6 +170,7 @@ public sealed class ContactChannelsController : Controller
         });
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost("{id:guid}/delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(Guid id, DeleteEntityViewModel model)

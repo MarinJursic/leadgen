@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 namespace leadgen.Controllers;
 
 // Expose evidence list and details pages.
+[Authorize]
 [Route("evidence")]
 public sealed class EvidencePointsController : Controller
 {
@@ -25,6 +26,7 @@ public sealed class EvidencePointsController : Controller
     }
 
     // Show all evidence points ordered by most recently captured first.
+    [AllowAnonymous]
     [HttpGet("")]
     public IActionResult Index()
     {
@@ -60,6 +62,7 @@ public sealed class EvidencePointsController : Controller
         });
     }
 
+    [Authorize(Roles = "Admin,Manager")]
     [HttpGet("new")]
     public IActionResult Create()
     {
@@ -70,6 +73,7 @@ public sealed class EvidencePointsController : Controller
         });
     }
 
+    [Authorize(Roles = "Admin,Manager")]
     [HttpPost("new")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(EvidencePointFormViewModel model)
@@ -101,6 +105,7 @@ public sealed class EvidencePointsController : Controller
         return RedirectToAction(nameof(Details), new { id = entity.Id });
     }
 
+    [Authorize(Roles = "Admin,Manager")]
     [HttpGet("{id:guid}/edit")]
     public async Task<IActionResult> Edit(Guid id)
     {
@@ -115,6 +120,7 @@ public sealed class EvidencePointsController : Controller
         return View(ToForm(evidence));
     }
 
+    [Authorize(Roles = "Admin,Manager")]
     [HttpPost("{id:guid}/edit")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(Guid id, EvidencePointFormViewModel model)
@@ -152,6 +158,7 @@ public sealed class EvidencePointsController : Controller
         return RedirectToAction(nameof(Details), new { id = evidence.Id });
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpGet("{id:guid}/delete")]
     public async Task<IActionResult> Delete(Guid id)
     {
@@ -171,6 +178,7 @@ public sealed class EvidencePointsController : Controller
         });
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost("{id:guid}/delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(Guid id, DeleteEntityViewModel model)

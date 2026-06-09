@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 namespace leadgen.Controllers;
 
 // Expose assignment list and details pages for swarm work allocation.
+[Authorize]
 [Route("assignments")]
 public sealed class MissionAgentAssignmentsController : Controller
 {
@@ -25,6 +26,7 @@ public sealed class MissionAgentAssignmentsController : Controller
     }
 
     // Show all assignments ordered by the latest assignment time.
+    [AllowAnonymous]
     [HttpGet("")]
     public IActionResult Index()
     {
@@ -60,6 +62,7 @@ public sealed class MissionAgentAssignmentsController : Controller
         });
     }
 
+    [Authorize(Roles = "Admin,Manager")]
     [HttpGet("new")]
     public IActionResult Create()
     {
@@ -71,6 +74,7 @@ public sealed class MissionAgentAssignmentsController : Controller
         });
     }
 
+    [Authorize(Roles = "Admin,Manager")]
     [HttpPost("new")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(MissionAgentAssignmentFormViewModel model)
@@ -98,6 +102,7 @@ public sealed class MissionAgentAssignmentsController : Controller
         return RedirectToAction(nameof(Details), new { id = entity.Id });
     }
 
+    [Authorize(Roles = "Admin,Manager")]
     [HttpGet("{id:guid}/edit")]
     public async Task<IActionResult> Edit(Guid id)
     {
@@ -113,6 +118,7 @@ public sealed class MissionAgentAssignmentsController : Controller
         return View(ToForm(assignment));
     }
 
+    [Authorize(Roles = "Admin,Manager")]
     [HttpPost("{id:guid}/edit")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(Guid id, MissionAgentAssignmentFormViewModel model)
@@ -146,6 +152,7 @@ public sealed class MissionAgentAssignmentsController : Controller
         return RedirectToAction(nameof(Details), new { id = assignment.Id });
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpGet("{id:guid}/delete")]
     public async Task<IActionResult> Delete(Guid id)
     {
@@ -165,6 +172,7 @@ public sealed class MissionAgentAssignmentsController : Controller
         });
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost("{id:guid}/delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(Guid id, DeleteEntityViewModel model)
