@@ -1,6 +1,12 @@
 @using Microsoft.AspNetCore.Identity
 @inject SignInManager<AppUser> SignInManager
 @inject UserManager<AppUser> UserManager
+@{
+    var externalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+    var googleProvider = externalLogins.FirstOrDefault(provider =>
+        string.Equals(provider.Name, "Google", StringComparison.OrdinalIgnoreCase));
+    var returnUrl = $"{Context.Request.PathBase}{Context.Request.Path}{Context.Request.QueryString}";
+}
 
 <div class="login-strip">
     @if (SignInManager.IsSignedIn(User))
@@ -14,5 +20,13 @@
     {
         <a asp-controller="Account" asp-action="Login" class="site-nav__link">Sign in</a>
         <a asp-controller="Account" asp-action="Register" class="site-nav__link">Register</a>
+        @if (googleProvider is not null)
+        {
+            <form asp-controller="Account" asp-action="ExternalLogin" method="post">
+                <input type="hidden" name="provider" value="@googleProvider.Name" />
+                <input type="hidden" name="returnUrl" value="@returnUrl" />
+                <button type="submit" class="site-nav__link site-nav__link--button site-nav__link--google">Google</button>
+            </form>
+        }
     }
 </div>
