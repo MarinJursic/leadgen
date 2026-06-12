@@ -43,10 +43,16 @@
         <div class="auth-provider-strip">
             @foreach (var provider in Model.ExternalLogins)
             {
-                <form asp-action="ExternalLogin" method="post">
+                var providerLabel = provider.DisplayName ?? provider.Name;
+                var isGoogle = string.Equals(provider.Name, "Google", StringComparison.OrdinalIgnoreCase);
+                var providerMark = isGoogle ? "G" : providerLabel.Substring(0, 1);
+                <form asp-action="ExternalLogin" method="post" class="auth-provider-form">
                     <input type="hidden" name="provider" value="@provider.Name" />
                     <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
-                    <button type="submit" class="button-link">@provider.DisplayName</button>
+                    <button type="submit" class="auth-provider-button @(isGoogle ? "auth-provider-button--google" : null)">
+                        <span class="auth-provider-button__mark" aria-hidden="true">@providerMark</span>
+                        <span>Continue with @providerLabel</span>
+                    </button>
                 </form>
             }
         </div>
