@@ -3,6 +3,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>4575fa8c-fb9b-440e-9092-5ec6e6ae7d24</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="leadgen.Tests/**" />
