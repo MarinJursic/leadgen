@@ -1,5 +1,44 @@
 # Lab 5 - Moguca pitanja i kratki odgovori
 
+## Najvaznije za obranu: upload i OAuth
+
+### Kako radi upload?
+
+Upload je vezan uz `BusinessDnaMission`, odnosno uz konkretnu misiju. Korisnik na edit stranici misije odabere datoteku, JavaScript salje `FormData` na controller, controller validira datoteku, sprema file na disk i sprema metadata zapis u bazu.
+
+Kroz koje fileove prolazi upload:
+
+| Datoteka | Uloga |
+| --- | --- |
+| `Views/Missions/Edit.cshtml` | Prikazuje upload formu i JavaScript koji salje AJAX upload |
+| `Controllers/MissionsController.cs` | `UploadAttachment` prima i sprema file, `DeleteAttachment` brise file |
+| `Domain/Entities/MissionAttachment.cs` | Entitet za metadata uploadane datoteke |
+| `Domain/Entities/BusinessDnaMission.cs` | Misija ima kolekciju attachmenta |
+| `Data/LeadgenDbContext.cs` | EF Core konfiguracija i `DbSet<MissionAttachment>` |
+| `Migrations/20260609071304_AddLab5IdentityAndMissionAttachments.cs` | Migracija za tablicu `MissionAttachments` |
+| `Views/Missions/_AttachmentList.cshtml` | Partial view za AJAX listu uploadanih datoteka |
+
+Kratak odgovor: file se fizicki sprema u `wwwroot/uploads/missions/{missionId}/`, a podaci o fileu se spremaju u tablicu `MissionAttachments`.
+
+### Kako radi Google OAuth?
+
+Google OAuth je external login preko ASP.NET Core Identity. Aplikacija ne cuva Google lozinku. Korisnik klikne Google button, aplikacija ga salje na Google, Google ga vraca na `/signin-google`, a aplikacija zatim prijavi ili kreira lokalnog `AppUser` korisnika.
+
+Kroz koje fileove prolazi OAuth:
+
+| Datoteka | Uloga |
+| --- | --- |
+| `leadgen.csproj` | Ima Google auth package i `UserSecretsId` |
+| `Program.cs` | Cita Google `ClientId`/`ClientSecret` i registrira `AddGoogle` |
+| `Views/Shared/_LoginPartial.cshtml` | Prikazuje Google login u navigaciji |
+| `Views/Account/Login.cshtml` | Prikazuje `Continue with Google` na login stranici |
+| `Views/Account/Register.cshtml` | Prikazuje `Continue with Google` na register stranici |
+| `Controllers/AccountController.cs` | `ExternalLogin`, `ExternalLoginCallback` i `ExternalLoginConfirmation` |
+| `Views/Account/ExternalLoginConfirmation.cshtml` | Dovrsavanje lokalnog profila nakon prve Google prijave |
+| `Models/Identity/AppUser.cs` | Lokalni korisnik koji se povezuje s Google loginom |
+
+Kratak odgovor: `Program.cs` registrira Google provider, login/register button salje korisnika u `AccountController.ExternalLogin`, Google vraca na `/signin-google`, a `AccountController` dovrsava prijavu kroz ASP.NET Core Identity.
+
 ## Sto je trebalo napraviti i status
 
 | Zahtjev | Status |

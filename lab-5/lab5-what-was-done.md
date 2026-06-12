@@ -1,5 +1,46 @@
 # Lab 5 - Sto je napravljeno
 
+## Najvaznije na vrhu: upload i Google OAuth
+
+### Kako radi upload datoteka
+
+Upload je vezan uz postojecu misiju (`BusinessDnaMission`). Korisnik mora biti prijavljen kao `Admin` ili `Manager`, otvara edit stranicu misije, odabire datoteku i klikne `Upload`. Stranica ne radi full refresh nego JavaScript salje datoteku preko `fetch` poziva i `FormData`.
+
+Upload tok:
+
+1. `Views/Missions/Edit.cshtml` prikazuje upload formu na edit stranici misije.
+2. JavaScript u `Views/Missions/Edit.cshtml` napravi `FormData` i salje `POST /missions/{missionId}/attachments`.
+3. `Controllers/MissionsController.cs` metoda `UploadAttachment` prima `IFormFile`, provjerava postoji li misija, validira velicinu i ekstenziju.
+4. Datoteka se sprema na disk u `wwwroot/uploads/missions/{missionId}/` pod generiranim sigurnijim imenom.
+5. `Domain/Entities/MissionAttachment.cs` definira metadata zapis: originalni naziv, storage naziv, content type, velicina, vrijeme uploada i korisnik.
+6. `Domain/Entities/BusinessDnaMission.cs` ima kolekciju `Attachments`, pa je svaka datoteka vezana uz konkretnu misiju.
+7. `Data/LeadgenDbContext.cs` ima `DbSet<MissionAttachment>` i konfigurira relaciju misija -> attachmenti.
+8. `Migrations/20260609071304_AddLab5IdentityAndMissionAttachments.cs` dodaje tablicu `MissionAttachments`.
+9. `Views/Missions/_AttachmentList.cshtml` renderira listu uploadanih datoteka koju frontend ponovno ucita AJAX-om.
+
+Brisanje uploadane datoteke ide slicno: `Delete` button u `_AttachmentList.cshtml` pokrene JavaScript u `Edit.cshtml`, on salje `POST /missions/attachments/{id}/delete`, a `MissionsController.DeleteAttachment` brise datoteku s diska i metadata zapis iz baze.
+
+### Kroz koje fileove prolazi Google OAuth login
+
+Google OAuth je external login preko ASP.NET Core Identity. Korisnik klikne Google button, aplikacija ga preusmjeri na Google, Google nakon odobrenja vrati korisnika na `/signin-google`, a aplikacija dovrsi lokalni Identity login.
+
+OAuth tok:
+
+1. `leadgen.csproj` ima package `Microsoft.AspNetCore.Authentication.Google` i `UserSecretsId` za lokalne tajne.
+2. `Program.cs` cita `Authentication:Google:ClientId` i `Authentication:Google:ClientSecret` iz konfiguracije.
+3. Ako su oba podatka postavljena, `Program.cs` registrira Google provider kroz `AddAuthentication().AddGoogle(...)`.
+4. `Views/Shared/_LoginPartial.cshtml` prikazuje Google button u navigaciji kada je Google provider konfiguriran.
+5. `Views/Account/Login.cshtml` i `Views/Account/Register.cshtml` prikazuju `Continue with Google` button.
+6. Klik na button salje `POST /account/external-login` na `Controllers/AccountController.cs`.
+7. `AccountController.ExternalLogin` zove `ConfigureExternalAuthenticationProperties` i vraca `Challenge`, sto salje korisnika na Google OAuth stranicu.
+8. Google vraca korisnika na default callback `/signin-google`.
+9. `AccountController.ExternalLoginCallback` cita external login info i pokusava prijaviti postojeceg korisnika.
+10. Ako korisnik prvi put dolazi preko Googlea, prikazuje se `Views/Account/ExternalLoginConfirmation.cshtml`.
+11. `AccountController.ExternalLoginConfirmation` kreira ili povezuje lokalnog `AppUser` korisnika, dodaje Google login zapis i potpisuje korisnika u aplikaciju.
+12. `Models/Identity/AppUser.cs` je lokalni Identity korisnik s dodatnim poljima `DisplayName`, `OIB` i `JMBG`.
+
+Google secret nije commitan u repository. Lokalno se sprema kroz `dotnet user-secrets`, a `appsettings.json` ostaje bez stvarnih vrijednosti.
+
 ## Sto je trebalo napraviti
 
 | Zahtjev iz Lab 5 | Je li napravljeno? | Gdje je pokriveno |
