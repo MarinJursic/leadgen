@@ -1,18 +1,24 @@
-@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap");
 
 :root {
-  --canvas: #f6f6f3;
-  --surface: rgba(255, 255, 255, 0.9);
-  --surface-strong: rgba(255, 255, 255, 0.98);
+  --canvas: #f3f1ea;
+  --paper: #f8f6ef;
+  --surface: #fffefa;
+  --surface-strong: #ffffff;
   --ink: #111111;
-  --ink-soft: #616161;
-  --border: rgba(17, 17, 17, 0.08);
-  --border-strong: rgba(17, 17, 17, 0.16);
-  --shadow: 0 28px 80px rgba(17, 17, 17, 0.05);
-  --radius-xl: 32px;
-  --radius-lg: 22px;
-  --radius-md: 16px;
-  --shell-width: 1200px;
+  --ink-soft: #5f625c;
+  --border: #dedad0;
+  --border-strong: #c6c1b6;
+  --accent: #0f766e;
+  --accent-soft: rgba(15, 118, 110, 0.1);
+  --warning: #b7791f;
+  --danger: #8f1d1d;
+  --shadow: 0 16px 42px rgba(30, 28, 24, 0.07);
+  --shadow-soft: 0 8px 22px rgba(30, 28, 24, 0.05);
+  --radius-xl: 12px;
+  --radius-lg: 10px;
+  --radius-md: 8px;
+  --shell-width: 1240px;
 }
 
 html {
@@ -25,11 +31,13 @@ body {
   min-height: 100vh;
   margin: 0;
   background:
-    radial-gradient(circle at top right, rgba(0, 0, 0, 0.04), transparent 24%),
-    radial-gradient(circle at left top, rgba(0, 0, 0, 0.02), transparent 20%),
-    linear-gradient(180deg, #fbfbf8 0%, var(--canvas) 100%);
+    linear-gradient(rgba(17, 17, 17, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(17, 17, 17, 0.025) 1px, transparent 1px),
+    linear-gradient(180deg, #fbfaf5 0%, var(--canvas) 100%);
+  background-size: 48px 48px, 48px 48px, auto;
   color: var(--ink);
-  font-family: "Space Grotesk", sans-serif;
+  font-family: "Inter", "Space Grotesk", sans-serif;
+  line-height: 1.5;
 }
 
 a {
@@ -56,19 +64,19 @@ a:hover {
   position: sticky;
   top: 0;
   z-index: 10;
-  padding: 1rem 0 0;
-  backdrop-filter: blur(18px);
+  padding: 0.75rem 0 0;
+  backdrop-filter: blur(14px);
 }
 
 .site-header__inner {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 1rem;
-  padding: 1rem 1.35rem;
+  gap: 1.15rem;
+  padding: 0.85rem;
   border: 1px solid var(--border);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.82);
+  border-radius: var(--radius-xl);
+  background: rgba(255, 254, 250, 0.94);
   box-shadow: var(--shadow);
 }
 
@@ -76,6 +84,8 @@ a:hover {
   display: inline-flex;
   align-items: center;
   gap: 0.85rem;
+  min-width: 14rem;
+  padding: 0.25rem 0.35rem 0.25rem 0;
 }
 
 .brandmark__body {
@@ -90,7 +100,7 @@ a:hover {
   justify-content: center;
   width: 2.35rem;
   height: 2.35rem;
-  border-radius: 999px;
+  border-radius: var(--radius-md);
   background: var(--ink);
   color: white;
   font-family: "IBM Plex Mono", monospace;
@@ -109,7 +119,7 @@ a:hover {
 .signal-item__meta {
   font-family: "IBM Plex Mono", monospace;
   font-size: 0.74rem;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
@@ -125,14 +135,35 @@ a:hover {
 .brandmark__title {
   font-size: 1rem;
   font-weight: 700;
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
 }
 
 .site-nav {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 0.45rem;
   flex-wrap: wrap;
+  min-width: 0;
+}
+
+.site-nav__cluster {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+  padding: 0.25rem;
+  border: 1px solid rgba(198, 193, 182, 0.62);
+  border-radius: var(--radius-lg);
+  background: rgba(248, 246, 239, 0.72);
+}
+
+.site-nav__cluster--entities {
+  max-width: 44rem;
+}
+
+.site-nav__cluster--account {
+  background: var(--surface);
 }
 
 .site-nav__link,
@@ -140,18 +171,25 @@ a:hover {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.75rem 1rem;
-  border-radius: 999px;
+  min-height: 2.3rem;
+  padding: 0.58rem 0.72rem;
+  border-radius: var(--radius-md);
   border: 1px solid transparent;
-  transition: transform 140ms ease, background-color 140ms ease, border-color 140ms ease;
-  font-size: 0.92rem;
+  transition: transform 140ms ease, background-color 140ms ease, border-color 140ms ease, color 140ms ease;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .site-nav__link:hover,
 .button-link:hover {
   transform: translateY(-1px);
-  background: rgba(255, 255, 255, 0.84);
-  border-color: var(--border);
+  background: var(--surface-strong);
+  border-color: var(--border-strong);
 }
 
 .site-nav__link--active {
@@ -168,7 +206,11 @@ a:hover {
 
 .site-nav__link--button {
   background: transparent;
-  font: inherit;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
   cursor: pointer;
 }
 
@@ -184,17 +226,20 @@ a:hover {
 }
 
 .login-strip__user {
-  max-width: 12rem;
+  max-width: 11rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   color: var(--ink-soft);
-  font-size: 0.88rem;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .site-main {
   flex: 1;
-  padding: 1.6rem 0 4rem;
+  padding: 1.25rem 0 4rem;
 }
 
 .site-footer {
@@ -206,7 +251,7 @@ a:hover {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 1.25rem 0 0;
+  padding: 1.05rem 0 0;
   border-top: 1px solid var(--border);
 }
 
@@ -251,10 +296,9 @@ a:hover {
   overflow: hidden;
   padding: clamp(1.5rem, 3.4vw, 2.8rem);
   border: 1px solid var(--border);
-  border-radius: calc(var(--radius-xl) + 8px);
+  border-radius: var(--radius-xl);
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.9)),
-    radial-gradient(circle at right top, rgba(0, 0, 0, 0.05), transparent 30%);
+    linear-gradient(180deg, rgba(255, 254, 250, 0.98), rgba(255, 254, 250, 0.9));
   box-shadow: var(--shadow);
 }
 
@@ -285,9 +329,9 @@ a:hover {
 
 .mission-stage__copy h1 {
   margin: 0;
-  font-size: clamp(4.4rem, 12vw, 8.5rem);
+  font-size: 6.75rem;
   line-height: 0.82;
-  letter-spacing: -0.08em;
+  letter-spacing: 0;
   text-transform: uppercase;
   max-width: 8ch;
 }
@@ -308,9 +352,9 @@ a:hover {
   margin-top: 1.85rem;
   padding: 0.8rem 0.9rem 0.8rem 1rem;
   border: 1px solid var(--border);
-  border-radius: 28px;
-  background: rgba(255, 255, 255, 0.94);
-  box-shadow: 0 18px 54px rgba(17, 17, 17, 0.06);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
 }
 
 .mission-console__icon {
@@ -319,8 +363,8 @@ a:hover {
   justify-content: center;
   width: 3rem;
   height: 3rem;
-  border-radius: 999px;
-  background: #f1f1ed;
+  border-radius: var(--radius-md);
+  background: var(--paper);
   color: var(--ink-soft);
   font-family: "IBM Plex Mono", monospace;
   font-size: 0.95rem;
@@ -335,7 +379,7 @@ a:hover {
 .mission-band__label {
   font-family: "IBM Plex Mono", monospace;
   font-size: 0.68rem;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--ink-soft);
 }
@@ -344,7 +388,7 @@ a:hover {
   margin-top: 0.2rem;
   font-size: 1.1rem;
   font-weight: 600;
-  letter-spacing: -0.04em;
+  letter-spacing: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -356,13 +400,13 @@ a:hover {
   justify-content: center;
   min-width: 8rem;
   padding: 1rem 1.35rem;
-  border-radius: 20px;
+  border-radius: var(--radius-md);
   background: var(--ink);
   color: white;
   font-family: "IBM Plex Mono", monospace;
   font-size: 0.7rem;
   font-weight: 500;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   transition: transform 140ms ease, background-color 140ms ease;
 }
@@ -381,9 +425,9 @@ a:hover {
 }
 
 .mission-stage__current-title {
-  font-size: clamp(1.55rem, 3vw, 2.4rem);
+  font-size: 2rem;
   font-weight: 700;
-  letter-spacing: -0.06em;
+  letter-spacing: 0;
   line-height: 0.95;
 }
 
@@ -399,9 +443,9 @@ a:hover {
   gap: 0.75rem;
   padding: 1.25rem;
   border: 1px solid var(--border);
-  border-radius: 28px;
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 18px 40px rgba(17, 17, 17, 0.04);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
 }
 
 .vault-card--dark {
@@ -421,7 +465,7 @@ a:hover {
   margin: 0;
   font-size: 2rem;
   font-weight: 700;
-  letter-spacing: -0.06em;
+  letter-spacing: 0;
   line-height: 0.92;
 }
 
@@ -433,9 +477,9 @@ a:hover {
 }
 
 .vault-card__metric {
-  font-size: clamp(2rem, 5vw, 3rem);
+  font-size: 2.6rem;
   font-weight: 700;
-  letter-spacing: -0.07em;
+  letter-spacing: 0;
   line-height: 0.95;
 }
 
@@ -466,14 +510,14 @@ a:hover {
   gap: 0.3rem;
   padding: 0.95rem 1rem;
   border: 1px solid var(--border);
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.72);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 254, 250, 0.82);
 }
 
 .mission-band__item strong {
   font-size: 1.9rem;
   font-weight: 700;
-  letter-spacing: -0.06em;
+  letter-spacing: 0;
 }
 
 .operations-shell,
@@ -495,8 +539,8 @@ a:hover {
 .operations-panel {
   padding: 1.25rem;
   border: 1px solid var(--border);
-  border-radius: calc(var(--radius-xl) + 2px);
-  background: rgba(255, 255, 255, 0.88);
+  border-radius: var(--radius-xl);
+  background: var(--surface);
   box-shadow: var(--shadow);
 }
 
@@ -509,7 +553,7 @@ a:hover {
 }
 
 .section-header__title--compact {
-  font-size: clamp(1.8rem, 4vw, 2.7rem);
+  font-size: 2.25rem;
 }
 
 .swarm-map {
@@ -517,9 +561,9 @@ a:hover {
   min-height: 34rem;
   overflow: hidden;
   border: 1px solid var(--border);
-  border-radius: 32px;
+  border-radius: var(--radius-xl);
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(247, 247, 244, 0.92));
+    linear-gradient(180deg, rgba(255, 254, 250, 0.94), rgba(248, 246, 239, 0.92));
 }
 
 .swarm-map__fabric {
@@ -562,8 +606,8 @@ a:hover {
   height: 4rem;
   border: 1px solid rgba(17, 17, 17, 0.12);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 16px 36px rgba(17, 17, 17, 0.08);
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
   font-family: "IBM Plex Mono", monospace;
   font-size: 0.8rem;
   letter-spacing: 0.1em;
@@ -574,7 +618,7 @@ a:hover {
 .swarm-node__label {
   font-size: 0.92rem;
   font-weight: 600;
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
 }
 
 .swarm-node__meta {
@@ -587,7 +631,7 @@ a:hover {
 
 .swarm-node:hover .swarm-node__orb {
   transform: translateY(-2px);
-  box-shadow: 0 20px 40px rgba(17, 17, 17, 0.12);
+  box-shadow: var(--shadow);
 }
 
 .swarm-node--active .swarm-node__orb {
@@ -609,7 +653,7 @@ a:hover {
   }
 
   50% {
-    box-shadow: 0 18px 40px rgba(59, 130, 246, 0.22);
+    box-shadow: 0 0 0 8px rgba(15, 118, 110, 0.12), var(--shadow);
   }
 }
 
@@ -625,8 +669,8 @@ a:hover {
 .signal-trace__item {
   padding: 1rem 1.05rem;
   border: 1px solid var(--border);
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.84);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 254, 250, 0.86);
 }
 
 .trace-item {
@@ -652,7 +696,7 @@ a:hover {
   margin: 0;
   font-size: 1.2rem;
   font-weight: 700;
-  letter-spacing: -0.05em;
+  letter-spacing: 0;
 }
 
 .trace-item__copy {
@@ -689,9 +733,7 @@ a:hover {
 .hero-panel,
 .detail-panel--hero {
   padding: clamp(1.5rem, 4vw, 3rem);
-  background:
-    linear-gradient(140deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.72)),
-    radial-gradient(circle at right top, rgba(0, 0, 0, 0.07), transparent 32%);
+  background: linear-gradient(140deg, rgba(255, 254, 250, 0.98), rgba(255, 254, 250, 0.78));
 }
 
 .hero-grid {
@@ -708,13 +750,13 @@ a:hover {
 .lead-card__title,
 .detail-panel__title {
   margin: 0;
-  letter-spacing: -0.05em;
+  letter-spacing: 0;
   line-height: 0.95;
 }
 
 .hero-copy h1 {
   max-width: 10ch;
-  font-size: clamp(3rem, 9vw, 6.8rem);
+  font-size: 4.8rem;
 }
 
 .hero-copy p,
@@ -743,13 +785,13 @@ a:hover {
   padding: 1.1rem 1.15rem;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 254, 250, 0.74);
 }
 
 .hero-highlight__title {
   font-size: 1.55rem;
   font-weight: 700;
-  letter-spacing: -0.04em;
+  letter-spacing: 0;
   line-height: 1;
 }
 
@@ -785,14 +827,14 @@ a:hover {
   padding: 1.25rem;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  background: rgba(255, 255, 255, 0.76);
+  background: rgba(255, 254, 250, 0.76);
 }
 
 .metric-value {
-  font-size: clamp(2rem, 5vw, 3rem);
+  font-size: 2.5rem;
   font-weight: 700;
   line-height: 1;
-  letter-spacing: -0.06em;
+  letter-spacing: 0;
 }
 
 .stats-grid,
@@ -835,7 +877,7 @@ a:hover {
   margin-top: 0.45rem;
   font-size: 2rem;
   font-weight: 700;
-  letter-spacing: -0.06em;
+  letter-spacing: 0;
 }
 
 .section-header {
@@ -848,7 +890,7 @@ a:hover {
 
 .section-header__title,
 .page-heading {
-  font-size: clamp(2rem, 5vw, 3.4rem);
+  font-size: 2.8rem;
 }
 
 .mission-card__meta,
@@ -881,15 +923,15 @@ a:hover {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.45rem 0.7rem;
-  border-radius: 999px;
+  padding: 0.42rem 0.62rem;
+  border-radius: 6px;
   border: 1px solid var(--border-strong);
-  background: rgba(255, 255, 255, 0.74);
+  background: rgba(255, 254, 250, 0.82);
   color: var(--ink);
 }
 
 .score-pill--high {
-  background: rgba(22, 22, 22, 0.92);
+  background: var(--ink);
   color: white;
 }
 
@@ -926,31 +968,39 @@ a:hover {
 .list-table {
   width: 100%;
   border-collapse: collapse;
+  min-width: 46rem;
 }
 
 .list-table th {
-  padding-bottom: 0.9rem;
+  padding: 0 0.8rem 0.7rem;
   font-family: "IBM Plex Mono", monospace;
   font-size: 0.72rem;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
+  text-align: left;
   text-transform: uppercase;
   color: var(--ink-soft);
+  border-bottom: 1px solid var(--border);
 }
 
 .list-table td {
-  padding: 1rem 0;
+  padding: 0.9rem 0.8rem;
   border-top: 1px solid var(--border);
   vertical-align: top;
 }
 
 .list-table tbody tr:hover td {
-  background: rgba(255, 255, 255, 0.36);
+  background: rgba(15, 118, 110, 0.045);
 }
 
 .page-header {
   display: grid;
   gap: 0.75rem;
   margin-bottom: 1.5rem;
+  padding: 1.2rem 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: rgba(255, 254, 250, 0.88);
+  box-shadow: var(--shadow-soft);
 }
 
 .breadcrumb {
@@ -1032,10 +1082,19 @@ a:hover {
     overflow-x: auto;
     flex-wrap: nowrap;
     padding-bottom: 0.2rem;
+    justify-content: flex-start;
+  }
+
+  .site-nav__cluster {
+    flex: 0 0 auto;
+  }
+
+  .site-nav__cluster--entities {
+    max-width: none;
   }
 
   .mission-stage__copy h1 {
-    font-size: clamp(3.8rem, 20vw, 5.6rem);
+    font-size: 4.4rem;
   }
 
   .mission-console {
@@ -1080,7 +1139,7 @@ a:hover {
 .immersive-page {
   position: relative;
   min-height: 100vh;
-  background: #f8f8f5;
+  background: var(--canvas);
   overflow: hidden;
 }
 
@@ -1088,10 +1147,9 @@ a:hover {
   position: absolute;
   inset: 0;
   background-image:
-    radial-gradient(circle, rgba(17, 17, 17, 0.03) 1px, transparent 1px),
     linear-gradient(rgba(17, 17, 17, 0.02) 1px, transparent 1px),
     linear-gradient(90deg, rgba(17, 17, 17, 0.02) 1px, transparent 1px);
-  background-size: 60px 60px, 120px 120px, 120px 120px;
+  background-size: 120px 120px, 120px 120px;
   opacity: 0.42;
   pointer-events: none;
 }
@@ -1120,7 +1178,7 @@ a:hover {
   justify-content: center;
   width: 2.5rem;
   height: 2.5rem;
-  border-radius: 999px;
+  border-radius: var(--radius-md);
   background: #101010;
   color: white;
   font-family: "IBM Plex Mono", monospace;
@@ -1154,9 +1212,9 @@ a:hover {
   justify-content: center;
   min-width: 5.5rem;
   padding: 0.85rem 1.2rem;
-  border: 1px solid rgba(17, 17, 17, 0.06);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: rgba(255, 254, 250, 0.92);
   color: var(--ink-soft);
   font-size: 0.68rem;
   transition: transform 140ms ease, box-shadow 140ms ease;
@@ -1164,7 +1222,7 @@ a:hover {
 
 .immersive-vault-trigger:hover {
   transform: translateY(-1px);
-  box-shadow: 0 18px 36px rgba(17, 17, 17, 0.08);
+  box-shadow: var(--shadow-soft);
 }
 
 .landing-stage {
@@ -1190,9 +1248,9 @@ a:hover {
 
 .landing-stage__title {
   margin: 0;
-  font-size: clamp(4.75rem, 14vw, 10.5rem);
+  font-size: 8rem;
   font-weight: 700;
-  letter-spacing: -0.09em;
+  letter-spacing: 0;
   line-height: 0.82;
   text-transform: uppercase;
 }
@@ -1217,10 +1275,10 @@ a:hover {
   width: min(100%, 33rem);
   margin-top: 3rem;
   padding: 0.7rem;
-  border: 1px solid rgba(17, 17, 17, 0.04);
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 24px 55px rgba(17, 17, 17, 0.08);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 254, 250, 0.96);
+  box-shadow: var(--shadow);
 }
 
 .landing-launch__icon {
@@ -1250,7 +1308,7 @@ a:hover {
   gap: 0.7rem;
   padding: 1.05rem 1.5rem;
   border: none;
-  border-radius: 18px;
+  border-radius: var(--radius-md);
   background: #0f0f0f;
   color: white;
   font-size: 0.68rem;
@@ -1310,9 +1368,9 @@ a:hover {
   height: 4.5rem;
   border: 1px solid rgba(17, 17, 17, 0.08);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.94);
+  background: rgba(255, 254, 250, 0.94);
   color: rgba(17, 17, 17, 0.28);
-  box-shadow: 0 12px 30px rgba(17, 17, 17, 0.04);
+  box-shadow: var(--shadow-soft);
   font-size: 0.95rem;
   font-weight: 600;
   letter-spacing: 0.12em;
@@ -1340,7 +1398,7 @@ a:hover {
 .mission-node__label {
   font-size: 0.86rem;
   font-weight: 600;
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
   color: rgba(17, 17, 17, 0.42);
 }
 
@@ -1355,9 +1413,9 @@ a:hover {
 }
 
 .mission-node.is-searching .mission-node__orb {
-  border-color: rgba(95, 211, 114, 0.92);
-  color: rgba(95, 211, 114, 0.96);
-  box-shadow: 0 0 0 10px rgba(95, 211, 114, 0.08);
+  border-color: rgba(15, 118, 110, 0.72);
+  color: var(--accent);
+  box-shadow: 0 0 0 8px rgba(15, 118, 110, 0.1), var(--shadow-soft);
 }
 
 .mission-node.is-searching .mission-node__badge,
@@ -1389,10 +1447,10 @@ a:hover {
   z-index: 12;
   width: min(100%, 17rem);
   padding: 1.5rem 1.6rem;
-  border: 1px solid rgba(17, 17, 17, 0.06);
-  border-radius: 28px;
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 22px 48px rgba(17, 17, 17, 0.08);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 254, 250, 0.96);
+  box-shadow: var(--shadow);
   transform: translateX(-50%);
 }
 
@@ -1412,7 +1470,7 @@ a:hover {
 .mission-hud__title {
   font-size: 1.45rem;
   font-weight: 700;
-  letter-spacing: -0.06em;
+  letter-spacing: 0;
   line-height: 0.92;
   text-transform: uppercase;
 }
@@ -1427,7 +1485,7 @@ a:hover {
 .mission-hud__value {
   font-size: 2.6rem;
   font-weight: 700;
-  letter-spacing: -0.08em;
+  letter-spacing: 0;
   line-height: 0.9;
 }
 
@@ -1467,8 +1525,8 @@ a:hover {
   width: 7px;
   height: 7px;
   border-radius: 999px;
-  background: #6f93ff;
-  box-shadow: 0 0 0 8px rgba(111, 147, 255, 0.08);
+  background: var(--accent);
+  box-shadow: 0 0 0 8px rgba(15, 118, 110, 0.1);
 }
 
 .mission-hud__abort {
@@ -1492,12 +1550,12 @@ a:hover {
   justify-content: center;
   width: 2.6rem;
   height: 2.6rem;
-  border: 1px solid rgba(17, 17, 17, 0.06);
+  border: 1px solid var(--border);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.98);
+  background: rgba(255, 254, 250, 0.98);
   color: #111;
   font-size: 1.1rem;
-  box-shadow: 0 14px 30px rgba(17, 17, 17, 0.05);
+  box-shadow: var(--shadow-soft);
 }
 
 .vault-overlay {
@@ -1530,7 +1588,7 @@ a:hover {
   width: min(100%, 28rem);
   height: 100vh;
   padding: 2rem;
-  background: rgba(255, 255, 255, 0.98);
+  background: rgba(255, 254, 250, 0.98);
   box-shadow: -18px 0 48px rgba(17, 17, 17, 0.08);
   transform: translateX(100%);
   transition: transform 220ms ease;
@@ -1552,7 +1610,7 @@ a:hover {
   margin: 0.15rem 0 0;
   font-size: 2rem;
   font-weight: 700;
-  letter-spacing: -0.06em;
+  letter-spacing: 0;
 }
 
 .vault-sheet__close {
@@ -1579,9 +1637,9 @@ a:hover {
   display: grid;
   gap: 0.55rem;
   padding: 1rem;
-  border: 1px solid rgba(17, 17, 17, 0.06);
-  border-radius: 22px;
-  background: rgba(250, 250, 247, 0.92);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: rgba(248, 246, 239, 0.92);
 }
 
 .vault-sheet__card--dark {
@@ -1598,7 +1656,7 @@ a:hover {
   margin: 0;
   font-size: 1.25rem;
   font-weight: 700;
-  letter-spacing: -0.05em;
+  letter-spacing: 0;
 }
 
 .vault-sheet__card-copy {
@@ -1618,17 +1676,17 @@ a:hover {
   justify-content: space-between;
   gap: 1rem;
   padding: 0.95rem 1rem;
-  border: 1px solid rgba(17, 17, 17, 0.06);
-  border-radius: 999px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
   background: rgba(250, 250, 247, 0.92);
   color: rgba(17, 17, 17, 0.65);
   font-size: 0.64rem;
 }
 
 .button-link--solid {
-  background: rgba(22, 22, 22, 0.9);
+  background: var(--ink);
   color: white;
-  border-color: rgba(22, 22, 22, 0.9);
+  border-color: var(--ink);
 }
 
 .button-link--solid:hover {
@@ -1638,15 +1696,15 @@ a:hover {
 }
 
 .button-link--danger {
-  color: #7b1f23;
-  background: rgba(123, 31, 35, 0.06);
-  border-color: rgba(123, 31, 35, 0.18);
+  color: var(--danger);
+  background: rgba(143, 29, 29, 0.06);
+  border-color: rgba(143, 29, 29, 0.22);
 }
 
 .button-link--danger:hover {
-  color: #5f171b;
-  background: rgba(123, 31, 35, 0.12);
-  border-color: rgba(123, 31, 35, 0.28);
+  color: #641414;
+  background: rgba(143, 29, 29, 0.12);
+  border-color: rgba(143, 29, 29, 0.36);
 }
 
 .page-actions {
@@ -1687,7 +1745,7 @@ a:hover {
 .form-label {
   font-family: "IBM Plex Mono", monospace;
   font-size: 0.74rem;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--ink-soft);
 }
@@ -1697,7 +1755,7 @@ a:hover {
   padding: 0.9rem 1rem;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--surface-strong);
   color: var(--ink);
   font: inherit;
 }
@@ -1708,7 +1766,8 @@ a:hover {
 }
 
 .form-input:focus {
-  outline: 2px solid rgba(17, 17, 17, 0.14);
+  border-color: rgba(15, 118, 110, 0.68);
+  outline: 3px solid rgba(15, 118, 110, 0.12);
   outline-offset: 1px;
 }
 
@@ -1743,7 +1802,7 @@ a:hover {
 
 .validation-summary,
 .field-validation {
-  color: #8f1d1d;
+  color: var(--danger);
   font-size: 0.92rem;
 }
 
@@ -1810,7 +1869,7 @@ a:hover {
   color: var(--ink-soft);
   font-family: "IBM Plex Mono", monospace;
   font-size: 0.72rem;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   white-space: nowrap;
 }
@@ -1857,8 +1916,8 @@ a:hover {
   display: none;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.98);
-  box-shadow: 0 22px 54px rgba(17, 17, 17, 0.12);
+  background: rgba(255, 254, 250, 0.98);
+  box-shadow: var(--shadow);
 }
 
 .autocomplete-menu.is-open,
@@ -1884,7 +1943,7 @@ a:hover {
 
 .autocomplete-menu__item:hover,
 .autocomplete-menu__item:focus {
-  background: rgba(17, 17, 17, 0.04);
+  background: rgba(15, 118, 110, 0.06);
 }
 
 .autocomplete-menu__item span,
@@ -1920,8 +1979,8 @@ a:hover {
 .date-picker__nav,
 .date-picker__day {
   border: 1px solid var(--border);
-  border-radius: 10px;
-  background: white;
+  border-radius: var(--radius-md);
+  background: var(--surface-strong);
   color: var(--ink);
 }
 
@@ -1968,7 +2027,7 @@ a:hover {
 }
 
 .date-control.has-date-error .form-input {
-  border-color: rgba(143, 29, 29, 0.55);
+  border-color: rgba(143, 29, 29, 0.62);
 }
 
 .delete-shell {
@@ -1978,9 +2037,9 @@ a:hover {
 
 .delete-warnings {
   padding: 1rem;
-  border: 1px solid rgba(123, 31, 35, 0.16);
+  border: 1px solid rgba(143, 29, 29, 0.2);
   border-radius: var(--radius-md);
-  background: rgba(123, 31, 35, 0.05);
+  background: rgba(143, 29, 29, 0.06);
 }
 
 .queue-search {
@@ -2021,7 +2080,7 @@ a:hover {
   }
 
   .landing-stage__title {
-    font-size: clamp(4rem, 18vw, 7rem);
+    font-size: 5rem;
   }
 
   .mission-stage-canvas {
@@ -2049,6 +2108,10 @@ a:hover {
 
   .landing-launch__submit {
     width: 100%;
+  }
+
+  .landing-stage__title {
+    font-size: 4rem;
   }
 
   .mission-node__label {

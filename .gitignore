@@ -32,6 +32,7 @@ leadgen-lab3.db-wal
 # Local markdown working docs
 *.md
 !/README.md
+!/DESIGN.md
 !/.agents/**/*.md
 !/lab-1/*.md
 !/lab-2/*.md
@@ -44,6 +45,8 @@ leadgen-lab3.db-wal
 !/lab-4/crud-matrix.md
 !/lab-5/
 !/lab-5/implementation-plan.md
+!/lab-5/lab5-what-was-done.md
+!/lab-5/lab5-pitanja-i-odgovori.md
 lab-3/lab3-*.md
 lab-4/lab4-*.md
 
