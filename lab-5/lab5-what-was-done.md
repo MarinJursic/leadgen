@@ -1,6 +1,6 @@
 # Lab 5 - Sto je napravljeno
 
-## Najvaznije na vrhu: upload i Google OAuth
+## Najvaznije na vrhu: upload, login/register i Google OAuth
 
 ### Kako radi upload datoteka
 
@@ -20,24 +20,43 @@ Upload tok:
 
 Brisanje uploadane datoteke ide slicno: `Delete` button u `_AttachmentList.cshtml` pokrene JavaScript u `Edit.cshtml`, on salje `POST /missions/attachments/{id}/delete`, a `MissionsController.DeleteAttachment` brise datoteku s diska i metadata zapis iz baze.
 
+### Kroz koje fileove prolazi login i register
+
+Lokalni login i register rade preko ASP.NET Core Identity. Forma ide u `AccountController`, controller koristi `UserManager` za kreiranje korisnika i `SignInManager` za prijavu. Lozinka se ne sprema kao tekst, nego Identity sprema hash u Identity tablice.
+
+| Korak | Datoteka | Sto radi |
+| --- | --- | --- |
+| 1 | `Program.cs` | Registrira ASP.NET Core Identity, cookie login path, access denied path i `UseAuthentication()` / `UseAuthorization()` |
+| 2 | `Models/Identity/AppUser.cs` | Definira lokalnog korisnika i dodatna polja `DisplayName`, `OIB` i `JMBG` |
+| 3 | `Models/Identity/LeadgenRoles.cs` | Definira role `Admin` i `Manager` |
+| 4 | `Data/LeadgenIdentitySeeder.cs` | Seeda role i demo korisnike `admin@leadgen.local` i `manager@leadgen.local` |
+| 5 | `ViewModels/Account/RegisterViewModel.cs` | Definira podatke koje register forma prima: email, password, display name, OIB i JMBG |
+| 6 | `Views/Account/Register.cshtml` | Prikazuje register formu i salje `POST /account/register` |
+| 7 | `Controllers/AccountController.cs` | `Register` akcija validira model, napravi `AppUser`, pozove `_userManager.CreateAsync(user, password)` i zatim `_signInManager.SignInAsync` |
+| 8 | `ViewModels/Account/LoginViewModel.cs` | Definira podatke koje login forma prima: email, password, remember me i return URL |
+| 9 | `Views/Account/Login.cshtml` | Prikazuje login formu i salje `POST /account/login` |
+| 10 | `Controllers/AccountController.cs` | `Login` akcija pozove `_signInManager.PasswordSignInAsync(...)`, provjeri lozinku i postavi auth cookie |
+| 11 | `Views/Shared/_LoginPartial.cshtml` | Prikazuje `Sign in`, `Register`, `Google` ili prijavljenog korisnika i `Sign out` u navigaciji |
+| 12 | `Views/Shared/_Layout.cshtml` | Ukljucuje `_LoginPartial` u zajednicki layout aplikacije |
+
 ### Kroz koje fileove prolazi Google OAuth login
 
 Google OAuth je external login preko ASP.NET Core Identity. Korisnik klikne Google button, aplikacija ga preusmjeri na Google, Google nakon odobrenja vrati korisnika na `/signin-google`, a aplikacija dovrsi lokalni Identity login.
 
-OAuth tok:
-
-1. `leadgen.csproj` ima package `Microsoft.AspNetCore.Authentication.Google` i `UserSecretsId` za lokalne tajne.
-2. `Program.cs` cita `Authentication:Google:ClientId` i `Authentication:Google:ClientSecret` iz konfiguracije.
-3. Ako su oba podatka postavljena, `Program.cs` registrira Google provider kroz `AddAuthentication().AddGoogle(...)`.
-4. `Views/Shared/_LoginPartial.cshtml` prikazuje Google button u navigaciji kada je Google provider konfiguriran.
-5. `Views/Account/Login.cshtml` i `Views/Account/Register.cshtml` prikazuju `Continue with Google` button.
-6. Klik na button salje `POST /account/external-login` na `Controllers/AccountController.cs`.
-7. `AccountController.ExternalLogin` zove `ConfigureExternalAuthenticationProperties` i vraca `Challenge`, sto salje korisnika na Google OAuth stranicu.
-8. Google vraca korisnika na default callback `/signin-google`.
-9. `AccountController.ExternalLoginCallback` cita external login info i pokusava prijaviti postojeceg korisnika.
-10. Ako korisnik prvi put dolazi preko Googlea, prikazuje se `Views/Account/ExternalLoginConfirmation.cshtml`.
-11. `AccountController.ExternalLoginConfirmation` kreira ili povezuje lokalnog `AppUser` korisnika, dodaje Google login zapis i potpisuje korisnika u aplikaciju.
-12. `Models/Identity/AppUser.cs` je lokalni Identity korisnik s dodatnim poljima `DisplayName`, `OIB` i `JMBG`.
+| Korak | Datoteka | Sto radi |
+| --- | --- | --- |
+| 1 | `leadgen.csproj` | Ima package `Microsoft.AspNetCore.Authentication.Google` i `UserSecretsId` za lokalne tajne |
+| 2 | `Program.cs` | Cita `Authentication:Google:ClientId` i `Authentication:Google:ClientSecret` iz konfiguracije |
+| 3 | `Program.cs` | Ako su vrijednosti postavljene, registrira Google provider kroz `AddAuthentication().AddGoogle(...)` |
+| 4 | `Views/Shared/_LoginPartial.cshtml` | Prikazuje Google login button u navigaciji kada je provider konfiguriran |
+| 5 | `Views/Account/Login.cshtml` | Prikazuje `Continue with Google` na login stranici |
+| 6 | `Views/Account/Register.cshtml` | Prikazuje `Continue with Google` na register stranici |
+| 7 | `Controllers/AccountController.cs` | `ExternalLogin` prima provider, pripremi redirect URL i vraca `Challenge` prema Googleu |
+| 8 | Google OAuth provider | Korisnik odobri login, a Google vraca aplikaciju na `/signin-google` |
+| 9 | `Controllers/AccountController.cs` | `ExternalLoginCallback` cita external login info i pokusava prijaviti postojeceg korisnika |
+| 10 | `Views/Account/ExternalLoginConfirmation.cshtml` | Ako je prvi Google login, korisnik dopunjava lokalni profil s `OIB` i `JMBG` |
+| 11 | `Controllers/AccountController.cs` | `ExternalLoginConfirmation` kreira ili povezuje `AppUser`, doda Google login i prijavi korisnika |
+| 12 | `Models/Identity/AppUser.cs` | Lokalni Identity korisnik koji se povezuje s Google accountom |
 
 Google secret nije commitan u repository. Lokalno se sprema kroz `dotnet user-secrets`, a `appsettings.json` ostaje bez stvarnih vrijednosti.
 

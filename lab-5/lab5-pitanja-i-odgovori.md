@@ -1,6 +1,6 @@
 # Lab 5 - Moguca pitanja i kratki odgovori
 
-## Najvaznije za obranu: upload i OAuth
+## Najvaznije za obranu: upload, login/register i OAuth
 
 ### Kako radi upload?
 
@@ -19,6 +19,29 @@ Kroz koje fileove prolazi upload:
 | `Views/Missions/_AttachmentList.cshtml` | Partial view za AJAX listu uploadanih datoteka |
 
 Kratak odgovor: file se fizicki sprema u `wwwroot/uploads/missions/{missionId}/`, a podaci o fileu se spremaju u tablicu `MissionAttachments`.
+
+### Kako rade login i register?
+
+Login i register rade preko ASP.NET Core Identity. Register kreira lokalnog `AppUser` korisnika, a login provjerava email i password hash te postavlja authentication cookie.
+
+Kroz koje fileove prolazi login/register:
+
+| Datoteka | Uloga |
+| --- | --- |
+| `Program.cs` | Registrira Identity, cookie login path, access denied path, authentication i authorization middleware |
+| `Models/Identity/AppUser.cs` | Lokalni korisnik s poljima `DisplayName`, `OIB` i `JMBG` |
+| `Models/Identity/LeadgenRoles.cs` | Definira role `Admin` i `Manager` |
+| `Data/LeadgenIdentitySeeder.cs` | Seeda role i demo korisnike za login |
+| `ViewModels/Account/RegisterViewModel.cs` | Model za register formu |
+| `Views/Account/Register.cshtml` | Register forma; salje `POST /account/register` |
+| `Controllers/AccountController.cs` | `Register` kreira korisnika preko `_userManager.CreateAsync` i prijavi ga preko `_signInManager.SignInAsync` |
+| `ViewModels/Account/LoginViewModel.cs` | Model za login formu |
+| `Views/Account/Login.cshtml` | Login forma; salje `POST /account/login` |
+| `Controllers/AccountController.cs` | `Login` provjerava podatke preko `_signInManager.PasswordSignInAsync` |
+| `Views/Shared/_LoginPartial.cshtml` | Prikazuje sign in/register/google/sign out linkove u navigaciji |
+| `Views/Shared/_Layout.cshtml` | Ukljucuje login partial u layout |
+
+Kratak odgovor: `Register` sprema novog korisnika u Identity tablice, a `Login` provjerava korisnika i postavlja cookie da je korisnik prijavljen.
 
 ### Kako radi Google OAuth?
 
