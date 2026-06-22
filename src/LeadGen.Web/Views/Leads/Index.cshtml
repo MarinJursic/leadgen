@@ -1,0 +1,153 @@
+@using System.Text.Json
+@model IReadOnlyList<Lead>
+@{
+    ViewData["Title"] = "Leads";
+}
+
+<section class="page-title">
+    <div>
+        <p class="metric mb-1">Leads</p>
+        <h1 class="h2 mb-0">Dossiers</h1>
+    </div>
+    <a class="btn btn-dark" asp-action="Create" asp-route-campaignId="@ViewBag.CampaignId">Add lead</a>
+</section>
+
+<div class="row g-3">
+    @foreach (var lead in Model)
+    {
+        var primaryContact = lead.Contacts
+            .OrderByDescending(ContactRank)
+            .ThenByDescending(contact => contact.ConfidenceScore)
+            .FirstOrDefault();
+        var summary = DossierSection(lead.DossierMarkdown, "What they do") ?? BestLeadSummary(lead);
+        var whyBuy = DossierSection(lead.DossierMarkdown, "Why they might buy") ?? FirstReason(lead.MatchReasonsJson);
+        var websiteOpportunity = DossierSection(lead.DossierMarkdown, "Website opportunity");
+
+        <div class="col-md-6 col-xl-4">
+            <div class="surface-panel h-100">
+                <div class="d-flex justify-content-between gap-3">
+                    <div>
+                        <h2 class="h5"><a asp-action="Details" asp-route-id="@lead.Id">@lead.CompanyName</a></h2>
+                        <div class="text-muted">@lead.Domain</div>
+                    </div>
+                    <span class="score">@lead.FitScore</span>
+                </div>
+                <div class="small mt-3">
+                    <div class="metric mb-1">What they do</div>
+                    <div>@summary</div>
+                </div>
+                <div class="small mt-3">
+                    <div class="metric mb-1">Why they might buy</div>
+                    <div>@whyBuy</div>
+                </div>
+                @if (!string.IsNullOrWhiteSpace(websiteOpportunity))
+                {
+                    <div class="small mt-3">
+                        <div class="metric mb-1">Website opportunity</div>
+                        <div>@websiteOpportunity</div>
+                    </div>
+                }
+                <dl class="row mt-3 mb-0 small">
+                    <dt class="col-5">Status</dt>
+                    <dd class="col-7">@lead.Status</dd>
+                    <dt class="col-5">Industry</dt>
+                    <dd class="col-7">@(lead.Industry ?? "Unknown")</dd>
+                    <dt class="col-5">Location</dt>
+                    <dd class="col-7">@(lead.Location ?? "Unknown")</dd>
+                    <dt class="col-5">Outreach</dt>
+                    <dd class="col-7">
+                        @if (primaryContact is null)
+                        {
+                            <span class="text-muted">None</span>
+                        }
+                        else if (primaryContact.Type == LeadContactType.Email)
+                        {
+                            <a href="mailto:@primaryContact.Value">@primaryContact.Value</a>
+                        }
+                        else if (Uri.TryCreate(primaryContact.Value, UriKind.Absolute, out _))
+                        {
+                            <a href="@primaryContact.Value" rel="nofollow">@primaryContact.Type</a>
+                        }
+                        else
+                        {
+                            <span>@primaryContact.Value</span>
+                        }
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    }
+</div>
+
+@functions {
+    private static int ContactRank(LeadContact contact)
+    {
+        return contact.Type switch
+        {
+            LeadContactType.Email => 50,
+            LeadContactType.ContactPage => 40,
+            LeadContactType.Phone => 30,
+            LeadContactType.Social => 20,
+            _ => 10
+        };
+    }
+
+    private static string BestLeadSummary(Lead lead)
+    {
+        try
+        {
+            using var document = JsonDocument.Parse(lead.EvidenceJson);
+            var summary = document.RootElement.EnumerateArray()
+                .Select(item => item.TryGetProperty("quoteOrSummary", out var value) ? value.GetString() : null)
+                .FirstOrDefault(item => !string.IsNullOrWhiteSpace(item));
+            if (!string.IsNullOrWhiteSpace(summary))
+            {
+                return Clip(summary, 160);
+            }
+        }
+        catch
+        {
+            // fall back to dossier text
+        }
+
+        return Clip(lead.DossierMarkdown, 160);
+    }
+
+    private static string FirstReason(string json)
+    {
+        try
+        {
+            return JsonSerializer.Deserialize<IReadOnlyList<string>>(json)?.FirstOrDefault()
+                ?? "Public evidence and contact route were found.";
+        }
+        catch
+        {
+            return "Public evidence and contact route were found.";
+        }
+    }
+
+    private static string? DossierSection(string dossier, string heading)
+    {
+        var prefix = heading + ":";
+        var lines = dossier.Replace("\r", "").Split('\n', StringSplitOptions.RemoveEmptyEntries);
+        for (var index = 0; index < lines.Length; index++)
+        {
+            var line = lines[index].Trim();
+            if (!line.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            var value = line[prefix.Length..].Trim();
+            return string.IsNullOrWhiteSpace(value) ? null : Clip(value, 190);
+        }
+
+        return null;
+    }
+
+    private static string Clip(string value, int length)
+    {
+        var clean = value.Replace("\r", " ").Replace("\n", " ").Trim();
+        return clean.Length <= length ? clean : clean[..length] + "...";
+    }
+}

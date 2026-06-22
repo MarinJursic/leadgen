@@ -1,0 +1,27 @@
+@model LeadNoteFormModel
+@{
+    ViewData["Title"] = "Edit note";
+}
+
+<section class="page-title">
+    <div>
+        <p class="metric mb-1">Note</p>
+        <h1 class="h2 mb-0">Edit note</h1>
+    </div>
+    <a class="btn btn-outline-dark" asp-controller="Leads" asp-action="Details" asp-route-id="@Model.LeadId">Back</a>
+</section>
+
+<div class="surface-panel">
+    <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="LeadId" />
+        <label asp-for="Body" class="form-label"></label>
+        <textarea asp-for="Body" class="form-control" rows="6"></textarea>
+        <span asp-validation-for="Body" class="text-danger"></span>
+        <button class="btn btn-dark mt-4" type="submit">Save note</button>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

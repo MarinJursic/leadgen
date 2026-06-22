@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - LeadGen</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <header class="border-bottom bg-white">
+        <nav class="navbar navbar-expand-lg">
+            <div class="container">
+                <a class="navbar-brand fw-semibold" asp-controller="Home" asp-action="Index">LeadGen</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div id="mainNav" class="collapse navbar-collapse">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item"><a class="nav-link" asp-controller="Campaigns" asp-action="Index">Campaigns</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Leads" asp-action="Index">Leads</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Admin" asp-action="Logs">Logs</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="About">About</a></li>
+                    </ul>
+                    <form class="d-flex gap-2 global-search" asp-controller="Search" asp-action="Index" method="get">
+                        <input class="form-control" type="search" name="q" value="@Context.Request.Query["q"]" placeholder="Search" aria-label="Search" />
+                        <button class="btn btn-dark" type="submit">Search</button>
+                    </form>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container py-4">
+        @if (TempData["StatusMessage"] is string message)
+        {
+            <div class="alert alert-info border-0 shadow-sm">@message</div>
+        }
+        @RenderBody()
+    </main>
+
+    <footer class="border-top py-3 text-muted">
+        <div class="container d-flex flex-column flex-sm-row justify-content-between gap-2">
+            <span>LeadGen MVP</span>
+            <span>Correlation-safe logs - Manual outreach only</span>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

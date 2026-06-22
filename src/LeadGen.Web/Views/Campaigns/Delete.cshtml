@@ -1,0 +1,19 @@
+@model Campaign
+@{
+    ViewData["Title"] = "Delete campaign";
+}
+
+<section class="page-title">
+    <div>
+        <p class="metric mb-1">Campaign</p>
+        <h1 class="h2 mb-0">Delete @Model.Name</h1>
+    </div>
+</section>
+
+<div class="surface-panel">
+    <p>Deleting this campaign removes related runs, leads, contacts, and notes.</p>
+    <form asp-action="Delete" asp-route-id="@Model.Id" method="post" class="d-flex gap-2">
+        <button class="btn btn-danger" type="submit">Delete</button>
+        <a class="btn btn-outline-dark" asp-action="Details" asp-route-id="@Model.Id">Cancel</a>
+    </form>
+</div>

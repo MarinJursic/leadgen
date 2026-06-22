@@ -1,0 +1,161 @@
+@using System.Text.Json
+@model Campaign
+@{
+    ViewData["Title"] = Model.Name;
+    var buyerTypes = ReadIcpList(Model.IcpJson, "buyerTypes");
+    var industries = ReadIcpList(Model.IcpJson, "targetIndustries");
+    var painPoints = ReadIcpList(Model.IcpJson, "painPoints");
+    var signals = ReadIcpList(Model.IcpJson, "positiveSignals");
+}
+
+<section class="page-title">
+    <div>
+        <p class="metric mb-1">Campaign</p>
+        <h1 class="h2 mb-0">@Model.Name</h1>
+        <div class="text-muted">@Model.BusinessName</div>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+        <a class="btn btn-outline-dark" asp-action="Edit" asp-route-id="@Model.Id">Edit</a>
+        <a class="btn btn-outline-dark" asp-controller="Leads" asp-action="Index" asp-route-campaignId="@Model.Id">Leads</a>
+    </div>
+</section>
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="surface-panel mb-4">
+            <h2 class="h5">Business profile</h2>
+            <p>@Model.BusinessDescription</p>
+            <dl class="row mb-0">
+                <dt class="col-sm-4">Website</dt>
+                <dd class="col-sm-8">@(Model.WebsiteUrl ?? "Not provided")</dd>
+                <dt class="col-sm-4">Target location</dt>
+                <dd class="col-sm-8">@(Model.TargetGeography ?? "Any")</dd>
+            </dl>
+        </div>
+
+        <div class="surface-panel">
+            <h2 class="h5 mb-3">AI-derived client profile</h2>
+            @if (string.IsNullOrWhiteSpace(Model.IcpJson))
+            {
+                <p class="text-muted mb-0">Profile pending. It appears after the first lead run.</p>
+            }
+            else
+            {
+                <div class="lead-brief-grid mb-3">
+                    <div class="lead-brief-item">
+                        <div class="metric mb-1">Likely buyers</div>
+                        <div class="small">@FormatList(buyerTypes)</div>
+                    </div>
+                    <div class="lead-brief-item">
+                        <div class="metric mb-1">Industries</div>
+                        <div class="small">@FormatList(industries)</div>
+                    </div>
+                    <div class="lead-brief-item">
+                        <div class="metric mb-1">Why they might buy</div>
+                        <div class="small">@FormatList(painPoints)</div>
+                    </div>
+                    <div class="lead-brief-item">
+                        <div class="metric mb-1">Public buying signals</div>
+                        <div class="small">@FormatList(signals)</div>
+                    </div>
+                </div>
+                <details>
+                    <summary class="metric">Raw ICP JSON</summary>
+                    <pre class="json-block mt-2">@Model.IcpJson</pre>
+                </details>
+            }
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="surface-panel mb-4">
+            <h2 class="h5">Find leads</h2>
+            <form asp-action="StartRun" asp-route-id="@Model.Id" method="post" class="row g-2">
+                <div class="col-7">
+                    <label class="form-label" for="requestedLeadCount">Lead count</label>
+                    <input class="form-control" id="requestedLeadCount" name="requestedLeadCount" type="number" min="1" max="25" value="5" />
+                </div>
+                <div class="col-5 d-flex align-items-end">
+                    <button class="btn btn-dark w-100" type="submit">Find Leads</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="surface-panel mb-4">
+            <h2 class="h5">Runs</h2>
+            @if (Model.Runs.Count == 0)
+            {
+                <p class="text-muted mb-0">No runs yet.</p>
+            }
+            else
+            {
+                <div class="list-group list-group-flush">
+                    @foreach (var run in Model.Runs.OrderByDescending(item => item.StartedAtUtc))
+                    {
+                        <a class="list-group-item list-group-item-action px-0" asp-controller="Runs" asp-action="Details" asp-route-id="@run.Id">
+                            <div class="d-flex justify-content-between">
+                                <span>@run.Status</span>
+                                <span>@run.RequestedLeadCount requested</span>
+                            </div>
+                            <div class="text-muted small">@run.StartedAtUtc?.ToLocalTime()</div>
+                        </a>
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="surface-panel">
+            <h2 class="h5">Top leads</h2>
+            @if (Model.Leads.Count == 0)
+            {
+                <p class="text-muted mb-0">No leads yet.</p>
+            }
+            else
+            {
+                <div class="list-group list-group-flush">
+                    @foreach (var lead in Model.Leads.OrderByDescending(item => item.FitScore).Take(8))
+                    {
+                        <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-0" asp-controller="Leads" asp-action="Details" asp-route-id="@lead.Id">
+                            <span>@lead.CompanyName</span>
+                            <span class="score">@lead.FitScore</span>
+                        </a>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@functions {
+    private static IReadOnlyList<string> ReadIcpList(string? json, string propertyName)
+    {
+        if (string.IsNullOrWhiteSpace(json))
+        {
+            return [];
+        }
+
+        try
+        {
+            using var document = JsonDocument.Parse(json);
+            if (!document.RootElement.TryGetProperty(propertyName, out var items) || items.ValueKind != JsonValueKind.Array)
+            {
+                return [];
+            }
+
+            return items.EnumerateArray()
+                .Select(item => item.GetString())
+                .Where(item => !string.IsNullOrWhiteSpace(item))
+                .Select(item => item!)
+                    .Take(20)
+                .ToList();
+        }
+        catch
+        {
+            return [];
+        }
+    }
+
+    private static string FormatList(IReadOnlyList<string> values)
+    {
+        return values.Count == 0 ? "Not generated yet." : string.Join("; ", values);
+    }
+}

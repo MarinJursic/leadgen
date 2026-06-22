@@ -1,0 +1,41 @@
+@model IReadOnlyList<Campaign>
+@{
+    ViewData["Title"] = "Campaigns";
+}
+
+<section class="page-title">
+    <div>
+        <p class="metric mb-1">Campaigns</p>
+        <h1 class="h2 mb-0">Business profiles</h1>
+    </div>
+    <a class="btn btn-dark" asp-action="Create">Create campaign</a>
+</section>
+
+<div class="surface-panel table-wrap">
+    <table class="table align-middle mb-0">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Business</th>
+            <th>Runs</th>
+            <th>Leads</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var campaign in Model)
+        {
+            <tr>
+                <td><a asp-action="Details" asp-route-id="@campaign.Id">@campaign.Name</a></td>
+                <td>@campaign.BusinessName</td>
+                <td>@campaign.Runs.Count</td>
+                <td>@campaign.Leads.Count</td>
+                <td class="text-end">
+                    <a class="btn btn-sm btn-outline-dark" asp-action="Edit" asp-route-id="@campaign.Id">Edit</a>
+                    <a class="btn btn-sm btn-outline-danger" asp-action="Delete" asp-route-id="@campaign.Id">Delete</a>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

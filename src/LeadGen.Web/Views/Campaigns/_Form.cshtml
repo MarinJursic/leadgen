@@ -1,0 +1,31 @@
+@model CampaignFormModel
+
+<input type="hidden" asp-for="Id" />
+<input type="hidden" asp-for="Name" />
+<input type="hidden" asp-for="TargetCustomers" value="" />
+<input type="hidden" asp-for="Exclusions" value="" />
+<input type="hidden" asp-for="IcpJson" />
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <label asp-for="BusinessName" class="form-label"></label>
+        <input asp-for="BusinessName" class="form-control" placeholder="Example: EventSpace" />
+        <span asp-validation-for="BusinessName" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="WebsiteUrl" class="form-label"></label>
+        <input asp-for="WebsiteUrl" class="form-control" placeholder="Optional, if the business has one" />
+        <span asp-validation-for="WebsiteUrl" class="text-danger"></span>
+    </div>
+    <div class="col-12">
+        <label asp-for="TargetGeography" class="form-label"></label>
+        <input asp-for="TargetGeography" class="form-control" placeholder="Example: Zagreb, Croatia or United States" />
+        <span asp-validation-for="TargetGeography" class="text-danger"></span>
+    </div>
+    <div class="col-12">
+        <label asp-for="BusinessDescription" class="form-label"></label>
+        <textarea asp-for="BusinessDescription" class="form-control" rows="6" placeholder="Describe the offer, who uses it, what problem it solves, and why people or companies would pay for it. The AI will infer the target clients from this."></textarea>
+        <span asp-validation-for="BusinessDescription" class="text-danger"></span>
+    </div>
+</div>

@@ -1,0 +1,49 @@
+@model LeadContactFormModel
+@{
+    ViewData["Title"] = "Edit contact";
+}
+
+<section class="page-title">
+    <div>
+        <p class="metric mb-1">Contact</p>
+        <h1 class="h2 mb-0">Edit contact</h1>
+    </div>
+    <a class="btn btn-outline-dark" asp-controller="Leads" asp-action="Details" asp-route-id="@Model.LeadId">Back</a>
+</section>
+
+<div class="surface-panel">
+    <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="LeadId" />
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="Type" class="form-label"></label>
+                <select asp-for="Type" class="form-select" asp-items="Html.GetEnumSelectList<LeadContactType>()"></select>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Value" class="form-label"></label>
+                <input asp-for="Value" class="form-control" />
+                <span asp-validation-for="Value" class="text-danger"></span>
+            </div>
+            <div class="col-md-8">
+                <label asp-for="SourceUrl" class="form-label"></label>
+                <input asp-for="SourceUrl" class="form-control" />
+            </div>
+            <div class="col-md-4">
+                <label asp-for="ConfidenceScore" class="form-label"></label>
+                <input asp-for="ConfidenceScore" class="form-control" type="number" min="0" max="100" />
+            </div>
+            <div class="col-12">
+                <div class="form-check">
+                    <input asp-for="IsVerified" class="form-check-input" />
+                    <label asp-for="IsVerified" class="form-check-label"></label>
+                </div>
+            </div>
+        </div>
+        <button class="btn btn-dark mt-4" type="submit">Save contact</button>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

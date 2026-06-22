@@ -1,0 +1,377 @@
+@using System.Text.Json
+@model LeadDetailsViewModel
+@{
+    ViewData["Title"] = Model.Lead.CompanyName;
+    var reasons = ReadReasons(Model.Lead.MatchReasonsJson);
+    var evidence = ReadEvidence(Model.Lead.EvidenceJson);
+    var primaryContact = Model.Lead.Contacts
+        .OrderByDescending(ContactRank)
+        .ThenByDescending(contact => contact.ConfidenceScore)
+        .FirstOrDefault();
+    var people = Model.Lead.Contacts
+        .Where(contact => contact.Type == LeadContactType.Other && contact.Value.StartsWith("Person:", StringComparison.OrdinalIgnoreCase))
+        .OrderByDescending(contact => contact.ConfidenceScore)
+        .ToList();
+    var whatTheyDo = DossierSection(Model.Lead.DossierMarkdown, "What they do") ?? BestSummary(evidence, Model.Lead.DossierMarkdown);
+    var whyBuy = DossierSection(Model.Lead.DossierMarkdown, "Why they might buy") ?? reasons.FirstOrDefault() ?? "A public buyer need was found.";
+    var whyFit = DossierSection(Model.Lead.DossierMarkdown, "Why they are a good fit") ?? reasons.FirstOrDefault() ?? "A direct public company site and outreach route were found.";
+    var websiteOpportunity = DossierSection(Model.Lead.DossierMarkdown, "Website opportunity") ?? "Not specified.";
+}
+
+<section class="page-title">
+    <div>
+        <p class="metric mb-1">Lead dossier</p>
+        <h1 class="h2 mb-0">@Model.Lead.CompanyName</h1>
+        <div class="text-muted">@Model.Lead.Domain</div>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+        <a class="btn btn-outline-dark" asp-action="Edit" asp-route-id="@Model.Lead.Id">Edit</a>
+        <a class="btn btn-outline-dark" asp-action="Index" asp-route-campaignId="@Model.Lead.CampaignId">Lead list</a>
+    </div>
+</section>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="surface-panel mb-4">
+            <div class="d-flex flex-wrap justify-content-between gap-3">
+                <div>
+                    <div class="metric">Fit score</div>
+                    <span class="score">@Model.Lead.FitScore</span>
+                </div>
+                <div>
+                    <div class="metric">Confidence</div>
+                    <span class="score">@Model.Lead.ConfidenceScore</span>
+                </div>
+                <div>
+                    <div class="metric">Status</div>
+                    <form asp-action="UpdateStatus" asp-route-id="@Model.Lead.Id" method="post" class="d-flex gap-2">
+                        <select class="form-select" name="status">
+                            @foreach (var status in Enum.GetValues<LeadStatus>())
+                            {
+                                <option value="@status" selected="@(status == Model.Lead.Status)">@status</option>
+                            }
+                        </select>
+                        <button class="btn btn-outline-dark" type="submit">Save</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="surface-panel mb-4">
+            <h2 class="h5">Lead brief</h2>
+            <div class="lead-brief-grid">
+                <div class="lead-brief-item">
+                    <div class="metric mb-1">Who they are</div>
+                    <div class="fw-semibold">@Model.Lead.CompanyName</div>
+                    <div class="text-muted small">@((Model.Lead.Domain ?? Model.Lead.WebsiteUrl) ?? "No website saved")</div>
+                    <div class="small mt-2">@((Model.Lead.Location ?? "Unknown location")) / @((Model.Lead.Industry ?? "Unknown industry"))</div>
+                </div>
+                <div class="lead-brief-item">
+                    <div class="metric mb-1">What they do</div>
+                    <div class="small">@whatTheyDo</div>
+                </div>
+                <div class="lead-brief-item">
+                    <div class="metric mb-1">Why they might buy</div>
+                    <div class="small">@whyBuy</div>
+                </div>
+                <div class="lead-brief-item">
+                    <div class="metric mb-1">Why they fit</div>
+                    <div class="small">@whyFit</div>
+                </div>
+                <div class="lead-brief-item">
+                    <div class="metric mb-1">Website opportunity</div>
+                    <div class="small">@websiteOpportunity</div>
+                </div>
+                <div class="lead-brief-item">
+                    <div class="metric mb-1">Best contact</div>
+                    @if (primaryContact is null)
+                    {
+                        <div class="text-muted small">No public contact saved.</div>
+                    }
+                    else
+                    {
+                        <div class="fw-semibold">@primaryContact.Type</div>
+                        @if (ContactHref(primaryContact) is string href)
+                        {
+                            <a class="contact-list-value" href="@href" rel="nofollow">@primaryContact.Value</a>
+                        }
+                        else
+                        {
+                            <div class="contact-list-value">@primaryContact.Value</div>
+                        }
+                        <div class="text-muted small">@primaryContact.SourceUrl</div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="surface-panel mb-4">
+            <h2 class="h5">Dossier</h2>
+            <p class="dossier-text mb-0">@Model.Lead.DossierMarkdown</p>
+        </div>
+
+        <div class="surface-panel mb-4">
+            <h2 class="h5">Reasons</h2>
+            <ul class="mb-0">
+                @foreach (var reason in reasons)
+                {
+                    <li>@reason</li>
+                }
+            </ul>
+        </div>
+
+        <div class="surface-panel mb-4">
+            <h2 class="h5">Evidence</h2>
+            @if (evidence.Count == 0)
+            {
+                <p class="text-muted mb-0">No public evidence stored yet.</p>
+            }
+            else
+            {
+                <div class="list-group list-group-flush">
+                    @foreach (var item in evidence)
+                    {
+                        <div class="list-group-item px-0">
+                            <div class="fw-semibold">@item.Title</div>
+                            <a href="@item.Url" rel="nofollow">@item.Url</a>
+                            <div class="text-muted small">@item.Summary</div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="surface-panel">
+            <h2 class="h5">Notes</h2>
+            <form asp-action="AddNote" method="post" class="mb-3">
+                <input type="hidden" name="LeadId" value="@Model.Lead.Id" />
+                <label class="form-label" for="noteBody">Note</label>
+                <textarea class="form-control" id="noteBody" name="Body" rows="3"></textarea>
+                <button class="btn btn-dark mt-2" type="submit">Add note</button>
+            </form>
+            @if (Model.Lead.Notes.Count == 0)
+            {
+                <p class="text-muted mb-0">No notes yet.</p>
+            }
+            else
+            {
+                <div class="list-group list-group-flush">
+                    @foreach (var note in Model.Lead.Notes.OrderByDescending(item => item.CreatedAtUtc))
+                    {
+                        <div class="list-group-item px-0">
+                            <div>@note.Body</div>
+                            <div class="d-flex gap-2 mt-2">
+                                <a class="btn btn-sm btn-outline-dark" asp-controller="Notes" asp-action="Edit" asp-route-id="@note.Id">Edit</a>
+                                <form asp-controller="Notes" asp-action="Delete" asp-route-id="@note.Id" method="post">
+                                    <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
+                                </form>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="surface-panel mb-4">
+            <h2 class="h5">Company</h2>
+            <dl class="mb-0">
+                <dt>Website</dt>
+                <dd>@(Model.Lead.WebsiteUrl ?? "Not provided")</dd>
+                <dt>Industry</dt>
+                <dd>@(Model.Lead.Industry ?? "Unknown")</dd>
+                <dt>Location</dt>
+                <dd>@(Model.Lead.Location ?? "Unknown")</dd>
+                <dt>Outreach angle</dt>
+                <dd>@(Model.Lead.SuggestedOutreachAngle ?? "Not set")</dd>
+            </dl>
+        </div>
+
+        @if (people.Count > 0)
+        {
+            <div class="surface-panel mb-4">
+                <h2 class="h5">Public people</h2>
+                <div class="list-group list-group-flush">
+                    @foreach (var person in people)
+                    {
+                        <div class="list-group-item px-0">
+                            <div class="fw-semibold">@person.Value.Replace("Person:", "", StringComparison.OrdinalIgnoreCase).Trim()</div>
+                            @if (!string.IsNullOrWhiteSpace(person.SourceUrl))
+                            {
+                                <a class="small" href="@person.SourceUrl" rel="nofollow">@person.SourceUrl</a>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <div class="surface-panel">
+            <h2 class="h5">Contacts</h2>
+            <form asp-action="AddContact" method="post" class="mb-3">
+                <input type="hidden" name="LeadId" value="@Model.Lead.Id" />
+                <div class="mb-2">
+                    <label class="form-label" for="contactType">Type</label>
+                    <select class="form-select" id="contactType" name="Type" asp-items="Html.GetEnumSelectList<LeadContactType>()"></select>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label" for="contactValue">Value</label>
+                    <input class="form-control" id="contactValue" name="Value" />
+                </div>
+                <div class="mb-2">
+                    <label class="form-label" for="sourceUrl">Source URL</label>
+                    <input class="form-control" id="sourceUrl" name="SourceUrl" />
+                </div>
+                <div class="mb-2">
+                    <label class="form-label" for="confidenceScore">Confidence</label>
+                    <input class="form-control" id="confidenceScore" name="ConfidenceScore" type="number" min="0" max="100" value="60" />
+                </div>
+                <button class="btn btn-dark" type="submit">Add contact</button>
+            </form>
+            @if (Model.Lead.Contacts.Count == 0)
+            {
+                <p class="text-muted mb-0">No public contact found yet.</p>
+            }
+            else
+            {
+                <div class="list-group list-group-flush">
+                    @foreach (var contact in Model.Lead.Contacts.OrderByDescending(item => item.ConfidenceScore))
+                    {
+                        <div class="list-group-item px-0">
+                            <div class="d-flex flex-wrap justify-content-between gap-2">
+                                <div class="fw-semibold">@contact.Type</div>
+                                <span class="badge rounded-pill text-bg-light text-dark border">@contact.ConfidenceScore</span>
+                            </div>
+                            @if (ContactHref(contact) is string href)
+                            {
+                                <a class="small contact-list-value" href="@href" rel="nofollow">@contact.Value</a>
+                            }
+                            else
+                            {
+                                <div class="small contact-list-value">@contact.Value</div>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(contact.SourceUrl))
+                            {
+                                <a class="text-muted small contact-list-value" href="@contact.SourceUrl" rel="nofollow">@contact.SourceUrl</a>
+                            }
+                            <div class="d-flex gap-2 mt-2">
+                                <a class="btn btn-sm btn-outline-dark" asp-controller="Contacts" asp-action="Edit" asp-route-id="@contact.Id">Edit</a>
+                                <form asp-controller="Contacts" asp-action="Delete" asp-route-id="@contact.Id" method="post">
+                                    <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
+                                </form>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@functions {
+    private static IReadOnlyList<string> ReadReasons(string json)
+    {
+        try
+        {
+            return JsonSerializer.Deserialize<IReadOnlyList<string>>(json) ?? [];
+        }
+        catch
+        {
+            return [];
+        }
+    }
+
+    private static IReadOnlyList<EvidenceLine> ReadEvidence(string json)
+    {
+        try
+        {
+            using var document = JsonDocument.Parse(json);
+            return document.RootElement.EnumerateArray()
+                .Select(item => new EvidenceLine(
+                    item.TryGetProperty("title", out var title) ? title.GetString() ?? "Evidence" : "Evidence",
+                    item.TryGetProperty("url", out var url) ? url.GetString() ?? "" : "",
+                    item.TryGetProperty("quoteOrSummary", out var summary) ? summary.GetString() ?? "" :
+                        item.TryGetProperty("summary", out var alt) ? alt.GetString() ?? "" : ""))
+                .ToList();
+        }
+        catch
+        {
+            return [];
+        }
+    }
+
+    private static int ContactRank(LeadContact contact)
+    {
+        return contact.Type switch
+        {
+            LeadContactType.Email => 50,
+            LeadContactType.ContactPage => 40,
+            LeadContactType.Phone => 30,
+            LeadContactType.Social => 20,
+            _ => 10
+        };
+    }
+
+    private static string BestSummary(IReadOnlyList<EvidenceLine> evidence, string dossier)
+    {
+        var evidenceSummary = evidence
+            .Select(item => item.Summary)
+            .FirstOrDefault(item => !string.IsNullOrWhiteSpace(item));
+        return Clip(FirstSentence(evidenceSummary ?? dossier), 240);
+    }
+
+    private static string? DossierSection(string dossier, string heading)
+    {
+        var prefix = heading + ":";
+        var lines = dossier.Replace("\r", "").Split('\n', StringSplitOptions.RemoveEmptyEntries);
+        foreach (var raw in lines)
+        {
+            var line = raw.Trim();
+            if (!line.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            var value = line[prefix.Length..].Trim();
+            return string.IsNullOrWhiteSpace(value) ? null : Clip(value, 320);
+        }
+
+        return null;
+    }
+
+    private static string FirstSentence(string value)
+    {
+        var clean = value.Replace("\r", " ").Replace("\n", " ").Trim();
+        if (string.IsNullOrWhiteSpace(clean))
+        {
+            return "No public description was saved.";
+        }
+
+        var end = clean.IndexOf('.');
+        return end > 24 ? clean[..(end + 1)] : clean;
+    }
+
+    private static string Clip(string value, int length)
+    {
+        return value.Length <= length ? value : value[..length] + "...";
+    }
+
+    private static string? ContactHref(LeadContact contact)
+    {
+        if (contact.Type == LeadContactType.Email)
+        {
+            return $"mailto:{contact.Value}";
+        }
+
+        if (contact.Type == LeadContactType.Phone)
+        {
+            var digits = new string(contact.Value.Where(item => char.IsDigit(item) || item == '+').ToArray());
+            return string.IsNullOrWhiteSpace(digits) ? null : $"tel:{digits}";
+        }
+
+        return Uri.TryCreate(contact.Value, UriKind.Absolute, out _) ? contact.Value : null;
+    }
+
+    private sealed record EvidenceLine(string Title, string Url, string Summary);
+}

@@ -1,0 +1,1023 @@
+@using System.Text.Json
+@model LeadSearchRun
+@{
+    ViewData["Title"] = "Run details";
+    var runPayload = new
+    {
+        id = Model.Id,
+        campaignName = Model.Campaign?.Name ?? "Campaign",
+        status = Model.Status.ToString(),
+        requestedLeadCount = Model.RequestedLeadCount,
+        leadCount = Model.Leads.Count,
+        searchQueriesJson = Model.SearchQueriesJson,
+        startedAtUtc = Model.StartedAtUtc,
+        completedAtUtc = Model.CompletedAtUtc,
+        errorMessage = Model.ErrorMessage,
+        estimatedCostUsd = Model.EstimatedCostUsd,
+        logsJson = Model.LogsJson
+    };
+}
+
+<section class="run-graph-stage" aria-labelledby="runGraphTitle">
+    <div class="run-map-nav">
+        <button class="run-map-icon-button" type="button" aria-label="Open run navigation">
+            <span></span><span></span><span></span>
+        </button>
+        <div class="run-map-nav-panel">
+            <a asp-controller="Campaigns" asp-action="Details" asp-route-id="@Model.CampaignId">Campaign</a>
+            <a asp-controller="Leads" asp-action="Index" asp-route-campaignId="@Model.CampaignId">Lead list</a>
+        </div>
+    </div>
+
+    <div class="run-map-status">
+        <span id="runRefreshState" class="run-map-status-pill">Waiting</span>
+        <span class="run-map-live-dot" aria-hidden="true"></span>
+    </div>
+
+    <div class="run-map-heading">
+        <p class="metric mb-1">Live discovery map</p>
+        <h1 id="runGraphTitle" class="h5 mb-1">Discovery graph</h1>
+        <div id="runGraphSummary" class="small text-muted">Building graph...</div>
+        <div class="run-map-flow-label">Base -> queries -> sites -> pages -> leads -> contacts</div>
+        <div id="runStatusHeading" class="visually-hidden">@Model.Status</div>
+    </div>
+
+    <aside class="run-overview-card" aria-label="Run overview">
+        <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
+            <div>
+                <div class="metric mb-1">Run overview</div>
+                <div class="fw-semibold">@Model.Campaign?.Name</div>
+            </div>
+            <span id="runOverviewStatus" class="run-overview-status">@Model.Status</span>
+        </div>
+        <div class="run-overview-grid">
+            <div>
+                <span>Requested</span>
+                <strong id="runOverviewRequested">@Model.RequestedLeadCount</strong>
+            </div>
+            <div>
+                <span>Saved</span>
+                <strong id="runOverviewLeads">@Model.Leads.Count</strong>
+            </div>
+            <div>
+                <span>Queries</span>
+                <strong id="runOverviewQueries">0</strong>
+            </div>
+            <div>
+                <span>Sites</span>
+                <strong id="runOverviewSites">0</strong>
+            </div>
+        </div>
+        <a class="run-overview-link" href="#runDetailsOverview">View details</a>
+    </aside>
+
+    <div class="run-graph-legend" aria-label="Node status legend">
+        <span><i class="legend-dot legend-done"></i>Done</span>
+        <span><i class="legend-dot legend-active"></i>In progress</span>
+        <span><i class="legend-dot legend-waiting"></i>Waiting</span>
+        <span><i class="legend-dot legend-failed"></i>Failed</span>
+    </div>
+
+    <div id="runGraphFrame" class="run-graph-frame" aria-label="Pan and zoom discovery workflow map">
+        <svg id="runGraphLinks" class="run-graph-links" aria-hidden="true"></svg>
+        <div id="runGraphNodes" class="run-graph-nodes"></div>
+    </div>
+
+    <aside id="runGraphInspector" class="run-graph-inspector">
+        <div class="metric mb-1">Selected node</div>
+        <div id="runGraphInspectorTitle" class="fw-semibold">Campaign base</div>
+        <div id="runGraphInspectorBody" class="small text-muted">Campaign start point.</div>
+    </aside>
+
+    <div class="run-map-controls" aria-label="Map controls">
+        <button id="runZoomOut" type="button" aria-label="Zoom out">-</button>
+        <span id="runZoomValue">100%</span>
+        <button id="runZoomIn" type="button" aria-label="Zoom in">+</button>
+        <button id="runZoomReset" type="button" aria-label="Center map">Center</button>
+    </div>
+</section>
+
+<div id="runDetailsOverview" class="row g-4 mt-1">
+    <div class="col-lg-4">
+        <div class="surface-panel">
+            <dl class="mb-0">
+                <dt>Status</dt>
+                <dd id="runStatusValue">@Model.Status</dd>
+                <dt>Requested</dt>
+                <dd id="runRequestedCount">@Model.RequestedLeadCount</dd>
+                <dt>Created leads</dt>
+                <dd id="runLeadCount">@Model.Leads.Count</dd>
+                <dt>Started</dt>
+                <dd id="runStartedAt">@(Model.StartedAtUtc?.ToLocalTime().ToString() ?? "Not started")</dd>
+                <dt>Completed</dt>
+                <dd id="runCompletedAt">@(Model.CompletedAtUtc?.ToLocalTime().ToString() ?? "Not completed")</dd>
+                <dt>Estimated cost</dt>
+                <dd id="runEstimatedCost">@Model.EstimatedCostUsd.ToString("0.0000") USD</dd>
+            </dl>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="surface-panel mb-4">
+            <h2 class="h5">Queries</h2>
+            <pre id="runQueries" class="json-block">@(Model.SearchQueriesJson ?? "[]")</pre>
+        </div>
+        <div id="runErrorPanel" class="surface-panel mb-4 border-danger @(string.IsNullOrWhiteSpace(Model.ErrorMessage) ? "d-none" : "")">
+            <h2 class="h5">Error</h2>
+            <p id="runErrorMessage" class="mb-0">@Model.ErrorMessage</p>
+        </div>
+        <div class="surface-panel mb-4">
+            <h2 class="h5">Run log</h2>
+            <pre id="runLog" class="json-block">@(Model.LogsJson ?? "[]")</pre>
+        </div>
+        <div class="surface-panel">
+            <h2 class="h5">Created leads</h2>
+            <div class="table-wrap">
+                <table class="table align-middle mb-0">
+                    <thead>
+                    <tr>
+                        <th>Company</th>
+                        <th>Score</th>
+                        <th>Status</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var lead in Model.Leads.OrderByDescending(item => item.FitScore))
+                    {
+                        <tr>
+                            <td><a asp-controller="Leads" asp-action="Details" asp-route-id="@lead.Id">@lead.CompanyName</a></td>
+                            <td><span class="score">@lead.FitScore</span></td>
+                            <td>@lead.Status</td>
+                        </tr>
+                    }
+                    @if (Model.Leads.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="3" class="text-muted">No leads have been saved for this run yet.</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script id="run-initial-data" type="application/json">@Html.Raw(JsonSerializer.Serialize(runPayload, new JsonSerializerOptions(JsonSerializerDefaults.Web)))</script>
+
+@section Scripts {
+    <script>
+        (() => {
+            const initial = JSON.parse(document.getElementById('run-initial-data').textContent);
+            const runId = initial.id;
+            let state = initial;
+            let wasActive = isActive(state.status);
+            let reloadScheduled = false;
+            let selectedNodeKey = null;
+            let animationFrame = 0;
+            let graphModel = { nodes: [], edges: [], nodeMap: new Map(), edgeMap: new Map(), width: 0, height: 0 };
+            const viewport = { x: 0, y: 0, scale: 1 };
+            const drag = { active: false, x: 0, y: 0, panX: 0, panY: 0 };
+
+            const elements = {
+                statusHeading: document.getElementById('runStatusHeading'),
+                statusValue: document.getElementById('runStatusValue'),
+                requestedCount: document.getElementById('runRequestedCount'),
+                leadCount: document.getElementById('runLeadCount'),
+                startedAt: document.getElementById('runStartedAt'),
+                completedAt: document.getElementById('runCompletedAt'),
+                estimatedCost: document.getElementById('runEstimatedCost'),
+                queries: document.getElementById('runQueries'),
+                log: document.getElementById('runLog'),
+                errorPanel: document.getElementById('runErrorPanel'),
+                errorMessage: document.getElementById('runErrorMessage'),
+                refreshState: document.getElementById('runRefreshState'),
+                graphSummary: document.getElementById('runGraphSummary'),
+                graphFrame: document.getElementById('runGraphFrame'),
+                graphLinks: document.getElementById('runGraphLinks'),
+                graphNodes: document.getElementById('runGraphNodes'),
+                inspectorTitle: document.getElementById('runGraphInspectorTitle'),
+                inspectorBody: document.getElementById('runGraphInspectorBody'),
+                overviewStatus: document.getElementById('runOverviewStatus'),
+                overviewRequested: document.getElementById('runOverviewRequested'),
+                overviewLeads: document.getElementById('runOverviewLeads'),
+                overviewQueries: document.getElementById('runOverviewQueries'),
+                overviewSites: document.getElementById('runOverviewSites'),
+                zoomOut: document.getElementById('runZoomOut'),
+                zoomIn: document.getElementById('runZoomIn'),
+                zoomReset: document.getElementById('runZoomReset'),
+                zoomValue: document.getElementById('runZoomValue')
+            };
+
+            bindMapEvents();
+            render(state);
+            window.addEventListener('resize', () => renderGraph(state));
+
+            if (isActive(state.status)) {
+                poll();
+                const intervalId = window.setInterval(async () => {
+                    if (!isActive(state.status)) {
+                        window.clearInterval(intervalId);
+                        return;
+                    }
+
+                    await poll();
+                }, 2500);
+            }
+
+            async function poll() {
+                setRefreshState('Updating', 'active');
+                try {
+                    const response = await fetch(`/api/runs/${runId}`, { headers: { 'Accept': 'application/json' } });
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+
+                    const next = await response.json();
+                    const changedToDone = wasActive && !isActive(next.status);
+                    state = { ...state, ...next };
+                    render(state);
+                    wasActive = isActive(state.status);
+
+                    if (changedToDone && !reloadScheduled) {
+                        reloadScheduled = true;
+                        window.setTimeout(() => window.location.reload(), 1200);
+                    }
+                } catch {
+                    setRefreshState('Poll failed', 'failed');
+                }
+            }
+
+            function render(run) {
+                elements.statusHeading.textContent = run.status;
+                elements.statusValue.textContent = run.status;
+                elements.requestedCount.textContent = run.requestedLeadCount ?? '';
+                elements.leadCount.textContent = run.leadCount ?? 0;
+                elements.overviewStatus.textContent = run.status;
+                elements.overviewRequested.textContent = run.requestedLeadCount ?? '';
+                elements.overviewLeads.textContent = run.leadCount ?? 0;
+                elements.startedAt.textContent = formatDate(run.startedAtUtc, 'Not started');
+                elements.completedAt.textContent = formatDate(run.completedAtUtc, 'Not completed');
+                elements.estimatedCost.textContent = `${Number(run.estimatedCostUsd ?? 0).toFixed(4)} USD`;
+                elements.queries.textContent = run.searchQueriesJson || '[]';
+                elements.log.textContent = run.logsJson || '[]';
+
+                if (run.errorMessage) {
+                    elements.errorPanel.classList.remove('d-none');
+                    elements.errorMessage.textContent = run.errorMessage;
+                } else {
+                    elements.errorPanel.classList.add('d-none');
+                    elements.errorMessage.textContent = '';
+                }
+
+                if (isActive(run.status)) {
+                    setRefreshState(run.status === 'Queued' ? 'Queued' : 'Live', 'active');
+                } else if (run.status === 'Completed') {
+                    setRefreshState('Completed', 'done');
+                } else if (run.status === 'Failed') {
+                    setRefreshState('Failed', 'failed');
+                } else {
+                    setRefreshState(run.status, 'waiting');
+                }
+
+                renderGraph(run);
+            }
+
+            function setRefreshState(label, status) {
+                elements.refreshState.textContent = label;
+                elements.refreshState.className = `run-map-status-pill run-map-status-${status}`;
+            }
+
+            function renderGraph(run) {
+                const next = buildGraph(run);
+                const frame = elements.graphFrame.getBoundingClientRect();
+                const priorNodes = graphModel.nodeMap || new Map();
+                const priorEdges = graphModel.edgeMap || new Map();
+                const width = Math.max(360, Math.floor(frame.width));
+                const height = Math.max(420, Math.floor(frame.height));
+
+                elements.graphLinks.setAttribute('viewBox', `0 0 ${width} ${height}`);
+                elements.graphLinks.setAttribute('width', `${width}`);
+                elements.graphLinks.setAttribute('height', `${height}`);
+
+                layoutGraph(next.nodes, next.edges);
+
+                const nextNodeKeys = new Set(next.nodes.map(node => node.key));
+                for (const [key, prior] of priorNodes.entries()) {
+                    if (!nextNodeKeys.has(key)) {
+                        prior.el?.remove();
+                    }
+                }
+
+                for (const node of next.nodes) {
+                    const prior = priorNodes.get(node.key);
+                    node.x = prior?.x ?? node.targetX;
+                    node.y = prior?.y ?? node.targetY;
+                    node.el = prior?.el || createNodeElement(node);
+                    updateNodeElement(node);
+                    if (!prior) {
+                        elements.graphNodes.appendChild(node.el);
+                    }
+                }
+
+                const nextEdgeKeys = new Set(next.edges.map(edge => edge.key));
+                for (const [key, prior] of priorEdges.entries()) {
+                    if (!nextEdgeKeys.has(key)) {
+                        prior.el?.remove();
+                    }
+                }
+
+                for (const edge of next.edges) {
+                    const prior = priorEdges.get(edge.key);
+                    edge.el = prior?.el || svgEl('path', { class: 'run-graph-edge' });
+                    if (!prior) {
+                        elements.graphLinks.appendChild(edge.el);
+                    }
+                }
+
+                graphModel = {
+                    nodes: next.nodes,
+                    edges: next.edges,
+                    nodeMap: new Map(next.nodes.map(node => [node.key, node])),
+                    edgeMap: new Map(next.edges.map(edge => [edge.key, edge])),
+                    width,
+                    height
+                };
+
+                if (!selectedNodeKey || !graphModel.nodeMap.has(selectedNodeKey)) {
+                    selectedNodeKey = next.nodes.find(node => node.type === 'Base')?.key ?? next.nodes[0]?.key ?? null;
+                }
+
+                updateInspector();
+                elements.graphSummary.textContent = `${next.nodes.length} nodes, ${next.edges.length} links, ${run.leadCount ?? 0} leads saved`;
+                elements.overviewQueries.textContent = next.nodes.filter(node => node.type === 'Query').length;
+                elements.overviewSites.textContent = next.nodes.filter(node => ['Result', 'Candidate', 'Extract', 'Page'].includes(node.type)).length;
+                requestAnimation();
+            }
+
+            function layoutGraph(nodes, edges) {
+                const nodeMap = new Map(nodes.map(node => [node.key, node]));
+                const childMap = new Map(nodes.map(node => [node.key, []]));
+                const parentMap = new Map();
+
+                for (const edge of edges) {
+                    if (!nodeMap.has(edge.from) || !nodeMap.has(edge.to) || parentMap.has(edge.to)) {
+                        continue;
+                    }
+
+                    childMap.get(edge.from)?.push(edge.to);
+                    parentMap.set(edge.to, edge.from);
+                }
+
+                const root = nodes.find(node => node.type === 'Base') ?? nodes[0];
+                if (!root) {
+                    return;
+                }
+
+                const horizontalGap = 360;
+                const leafGap = 168;
+                let cursor = 0;
+                const visited = new Set();
+
+                function place(key, depth) {
+                    const node = nodeMap.get(key);
+                    if (!node || visited.has(key)) {
+                        return 0;
+                    }
+
+                    visited.add(key);
+                    const children = (childMap.get(key) ?? [])
+                        .map(childKey => nodeMap.get(childKey))
+                        .filter(Boolean)
+                        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0) || a.label.localeCompare(b.label))
+                        .map(child => child.key);
+
+                    node.depth = depth;
+                    node.targetX = depth * horizontalGap;
+
+                    if (children.length === 0) {
+                        node.targetY = cursor * leafGap;
+                        cursor += 1;
+                        return node.targetY;
+                    }
+
+                    const childYs = children.map(childKey => place(childKey, depth + 1));
+                    node.targetY = childYs.reduce((sum, value) => sum + value, 0) / childYs.length;
+                    return node.targetY;
+                }
+
+                place(root.key, 0);
+
+                for (const node of nodes) {
+                    if (visited.has(node.key)) {
+                        continue;
+                    }
+
+                    node.depth = 1;
+                    node.targetX = horizontalGap;
+                    node.targetY = cursor * leafGap;
+                    cursor += 1;
+                }
+
+                const rootOffset = root.targetY || 0;
+                for (const node of nodes) {
+                    node.targetY -= rootOffset;
+                }
+            }
+
+            function animateGraph() {
+                animationFrame = 0;
+                let moving = false;
+                for (const node of graphModel.nodes) {
+                    const dx = node.targetX - node.x;
+                    const dy = node.targetY - node.y;
+                    if (Math.abs(dx) > 0.15 || Math.abs(dy) > 0.15) {
+                        moving = true;
+                    }
+                    node.x += dx * 0.13;
+                    node.y += dy * 0.13;
+                }
+
+                drawGraph();
+                if (moving) {
+                    requestAnimation();
+                }
+            }
+
+            function requestAnimation() {
+                if (!animationFrame) {
+                    animationFrame = window.requestAnimationFrame(animateGraph);
+                }
+            }
+
+            function drawGraph() {
+                elements.zoomValue.textContent = `${Math.round(viewport.scale * 100)}%`;
+                for (const node of graphModel.nodes) {
+                    const point = worldToScreen(node.x, node.y);
+                    node.el.style.transform = `translate(${point.x}px, ${point.y}px) translate(-50%, -50%) scale(${viewport.scale})`;
+                }
+
+                for (const edge of graphModel.edges) {
+                    const source = graphModel.nodeMap.get(edge.from);
+                    const target = graphModel.nodeMap.get(edge.to);
+                    if (!source || !target) {
+                        continue;
+                    }
+
+                    const a = worldToScreen(source.x, source.y);
+                    const b = worldToScreen(target.x, target.y);
+                    const curve = Math.max(40, Math.min(160, Math.abs(b.x - a.x) * 0.35));
+                    const c1x = a.x + Math.sign(b.x - a.x || 1) * curve;
+                    const c2x = b.x - Math.sign(b.x - a.x || 1) * curve;
+                    edge.el.setAttribute('d', `M ${a.x} ${a.y} C ${c1x} ${a.y}, ${c2x} ${b.y}, ${b.x} ${b.y}`);
+                }
+            }
+
+            function worldToScreen(x, y) {
+                return {
+                    x: graphModel.width / 2 + viewport.x + x * viewport.scale,
+                    y: graphModel.height / 2 + viewport.y + y * viewport.scale
+                };
+            }
+
+            function screenToWorld(x, y) {
+                const rect = elements.graphFrame.getBoundingClientRect();
+                return {
+                    x: (x - rect.left - graphModel.width / 2 - viewport.x) / viewport.scale,
+                    y: (y - rect.top - graphModel.height / 2 - viewport.y) / viewport.scale
+                };
+            }
+
+            function bindMapEvents() {
+                elements.graphFrame.addEventListener('pointerdown', event => {
+                    if (event.target.closest('.run-graph-node')) {
+                        return;
+                    }
+
+                    drag.active = true;
+                    drag.x = event.clientX;
+                    drag.y = event.clientY;
+                    drag.panX = viewport.x;
+                    drag.panY = viewport.y;
+                    elements.graphFrame.setPointerCapture(event.pointerId);
+                    elements.graphFrame.classList.add('is-dragging');
+                });
+
+                elements.graphFrame.addEventListener('pointermove', event => {
+                    if (!drag.active) {
+                        return;
+                    }
+
+                    viewport.x = drag.panX + event.clientX - drag.x;
+                    viewport.y = drag.panY + event.clientY - drag.y;
+                    drawGraph();
+                });
+
+                elements.graphFrame.addEventListener('pointerup', event => {
+                    drag.active = false;
+                    elements.graphFrame.releasePointerCapture(event.pointerId);
+                    elements.graphFrame.classList.remove('is-dragging');
+                });
+
+                elements.graphFrame.addEventListener('wheel', event => {
+                    event.preventDefault();
+                    const factor = event.deltaY > 0 ? 0.9 : 1.1;
+                    zoomAt(event.clientX, event.clientY, viewport.scale * factor);
+                }, { passive: false });
+
+                elements.zoomOut.addEventListener('click', () => zoomCentered(viewport.scale * 0.86));
+                elements.zoomIn.addEventListener('click', () => zoomCentered(viewport.scale * 1.16));
+                elements.zoomReset.addEventListener('click', () => {
+                    viewport.x = 0;
+                    viewport.y = 0;
+                    viewport.scale = 1;
+                    drawGraph();
+                });
+            }
+
+            function zoomCentered(scale) {
+                const rect = elements.graphFrame.getBoundingClientRect();
+                zoomAt(rect.left + rect.width / 2, rect.top + rect.height / 2, scale);
+            }
+
+            function zoomAt(clientX, clientY, scale) {
+                const before = screenToWorld(clientX, clientY);
+                viewport.scale = clamp(scale, 0.45, 1.85);
+                const rect = elements.graphFrame.getBoundingClientRect();
+                viewport.x = clientX - rect.left - graphModel.width / 2 - before.x * viewport.scale;
+                viewport.y = clientY - rect.top - graphModel.height / 2 - before.y * viewport.scale;
+                drawGraph();
+            }
+
+            function buildGraph(run) {
+                const nodes = [];
+                const edges = [];
+                const byKey = new Map();
+                const queryKeys = new Map();
+                const queryStats = new Map();
+                const domainStats = new Map();
+                const domainFirstQuery = new Map();
+                const leadKeys = new Map();
+                const siteKeys = new Map();
+                const contactCounts = new Map();
+                const logs = parseLogs(run.logsJson);
+                const baseKey = addNode('Base', `base:${run.id}`, run.campaignName || 'Campaign', 'Campaign start');
+                let lastGraphNode = baseKey;
+                let queryOrder = 0;
+                let leadOrder = 0;
+                let contactOrder = 0;
+                let skippedNoContact = 0;
+                let skippedDuplicates = 0;
+
+                for (const raw of logs) {
+                    if (typeof raw !== 'string') {
+                        continue;
+                    }
+
+                    if (!raw.startsWith('Graph|')) {
+                        continue;
+                    }
+
+                    const parts = raw.split('|').map(part => part.trim());
+                    const type = parts[1] || 'Step';
+
+                    if (type === 'Base') {
+                        addNode('Base', baseKey, parts[2] || run.campaignName || 'Campaign', 'Campaign start');
+                        lastGraphNode = baseKey;
+                        continue;
+                    }
+
+                    if (type === 'Query') {
+                        const query = parts[2] || 'Search query';
+                        const key = addQueryNode(query, parts[3]);
+                        queryKeys.set(query, key);
+                        lastGraphNode = key;
+                        continue;
+                    }
+
+                    if (type === 'Result') {
+                        const query = parts[2] || '';
+                        const domain = parts[3] || 'site';
+                        const stats = siteStats(domain);
+                        stats.results += 1;
+                        stats.title ||= parts[4] || friendlySiteLabel(domain);
+                        stats.url ||= parts[5] || '';
+                        stats.query ||= query;
+
+                        if (query) {
+                            domainFirstQuery.set(normalizeGraphDomain(domain), query);
+                            const queryKey = addQueryNode(query, 'Public web search');
+                            queryStats.get(query)?.sites.add(normalizeGraphDomain(domain));
+                            lastGraphNode = queryKey;
+                        } else {
+                            lastGraphNode = baseKey;
+                        }
+                        continue;
+                    }
+
+                    if (type === 'Candidate') {
+                        const domain = parts[2] || 'candidate';
+                        const stats = siteStats(domain);
+                        stats.candidateScore = parts[4] || parts[3] || stats.candidateScore;
+                        lastGraphNode = queryKeyForDomain(domain) || baseKey;
+                        continue;
+                    }
+
+                    if (type === 'Extract') {
+                        const domain = parts[2] || 'site';
+                        const url = parts[3] || 'extract';
+                        const stats = siteStats(domain);
+                        stats.extracts += 1;
+                        stats.lastRoute = pageRouteLabel(url);
+                        lastGraphNode = queryKeyForDomain(domain) || baseKey;
+                        continue;
+                    }
+
+                    if (type === 'Page') {
+                        const domain = parts[2] || 'page';
+                        const title = parts[3] || domain;
+                        const url = parts[4] || title;
+                        const stats = siteStats(domain);
+                        stats.pages += 1;
+                        stats.title ||= title;
+                        stats.url ||= url;
+                        stats.lastRoute = pageRouteLabel(url);
+                        lastGraphNode = queryKeyForDomain(domain) || baseKey;
+                        continue;
+                    }
+
+                    if (type === 'Lead') {
+                        const company = parts[2] || 'Lead';
+                        const domain = parts[3] || company;
+                        const siteKey = visibleSiteNode(domain, company);
+                        const key = addNode('Lead', `lead:${company.toLowerCase()}:${domain.toLowerCase()}`, company, parts[4] ? `Fit score ${parts[4]}` : 'Qualified lead saved', 'done', leadOrder++);
+                        leadKeys.set(company.toLowerCase(), key);
+                        addEdge(siteKey, key);
+                        const query = domainFirstQuery.get(normalizeGraphDomain(domain));
+                        if (queryStats.has(query)) {
+                            queryStats.get(query).leads += 1;
+                        }
+                        lastGraphNode = key;
+                        continue;
+                    }
+
+                    if (type === 'Contact') {
+                        const company = parts[2] || 'Lead';
+                        const contactType = parts[3] || 'Contact';
+                        const value = parts[4] || 'Contact';
+                        const source = parts[5] || value;
+                        const leadKey = leadKeys.get(company.toLowerCase()) || baseKey;
+                        const count = contactCounts.get(leadKey) ?? 0;
+                        if (count >= 3) {
+                            lastGraphNode = leadKey;
+                            continue;
+                        }
+
+                        contactCounts.set(leadKey, count + 1);
+                        const key = addNode('Contact', `contact:${company.toLowerCase()}:${value.toLowerCase()}`, `${contactType}: ${value}`, source, 'done', contactOrder++);
+                        addEdge(leadKey, key);
+                        lastGraphNode = key;
+                        continue;
+                    }
+
+                    if (type === 'NoContact') {
+                        const domain = parts[2] || 'site';
+                        skippedNoContact += 1;
+                        lastGraphNode = queryKeyForDomain(domain) || baseKey;
+                        continue;
+                    }
+
+                    if (type === 'Duplicate') {
+                        skippedDuplicates += 1;
+                        lastGraphNode = baseKey;
+                        continue;
+                    }
+
+                    if (type === 'Failure') {
+                        const key = addNode('Failure', `failure:${run.id}`, parts[2] || 'Failed', parts[2] || 'Failed', 'failed');
+                        addEdge(baseKey, key);
+                        lastGraphNode = key;
+                    }
+                }
+
+                for (const stats of queryStats.values()) {
+                    const node = byKey.get(stats.key);
+                    if (!node) {
+                        continue;
+                    }
+
+                    const siteCount = stats.sites.size;
+                    const leadCount = stats.leads;
+                    node.title = `${siteCount} sites scanned / ${leadCount} lead${leadCount === 1 ? '' : 's'} saved`;
+                }
+
+                markStatuses();
+                const visibleNodes = nodes.slice(0, 90);
+                const visibleKeys = new Set(visibleNodes.map(node => node.key));
+                return {
+                    nodes: visibleNodes,
+                    edges: edges.filter(edge => visibleKeys.has(edge.from) && visibleKeys.has(edge.to)).slice(0, 140)
+                };
+
+                function addNode(type, key, label, title, status = 'done', order = nodes.length) {
+                    if (!byKey.has(key)) {
+                        const node = { type, key, label: compact(label || type, 70), title: title || label || type, status, order };
+                        byKey.set(key, node);
+                        nodes.push(node);
+                    } else {
+                        const existing = byKey.get(key);
+                        existing.label = compact(label || existing.label, 70);
+                        existing.title = title || existing.title;
+                        existing.status = existing.status === 'failed' || existing.status === 'skipped' ? existing.status : status;
+                        existing.order = Math.min(existing.order ?? order, order);
+                    }
+
+                    return key;
+                }
+
+                function addQueryNode(query, purpose) {
+                    if (queryStats.has(query)) {
+                        return queryStats.get(query).key;
+                    }
+
+                    const key = addNode('Query', `query:${query.toLowerCase()}`, query, purpose || 'Public web search', 'done', queryOrder++);
+                    queryKeys.set(query, key);
+                    queryStats.set(query, { key, sites: new Set(), leads: 0 });
+                    addEdge(baseKey, key);
+                    return key;
+                }
+
+                function addEdge(from, to) {
+                    if (!from || !to || from === to) {
+                        return;
+                    }
+
+                    const key = `${from}->${to}`;
+                    if (!edges.some(edge => edge.key === key)) {
+                        edges.push({ key, from, to });
+                    }
+                }
+
+                function siteStats(domain) {
+                    const key = normalizeGraphDomain(domain);
+                    if (!domainStats.has(key)) {
+                        domainStats.set(key, {
+                            domain,
+                            results: 0,
+                            extracts: 0,
+                            pages: 0,
+                            title: '',
+                            url: '',
+                            query: '',
+                            candidateScore: '',
+                            lastRoute: ''
+                        });
+                    }
+
+                    return domainStats.get(key);
+                }
+
+                function queryKeyForDomain(domain) {
+                    const query = domainFirstQuery.get(normalizeGraphDomain(domain));
+                    return query ? queryKeys.get(query) : null;
+                }
+
+                function visibleSiteNode(domain, company) {
+                    const normalized = normalizeGraphDomain(domain);
+                    if (siteKeys.has(normalized)) {
+                        return siteKeys.get(normalized);
+                    }
+
+                    const stats = siteStats(domain);
+                    const queryKey = queryKeyForDomain(domain) || baseKey;
+                    const detailParts = [];
+                    if (stats.lastRoute) detailParts.push(stats.lastRoute);
+                    if (stats.pages > 0) detailParts.push(`${stats.pages} page${stats.pages === 1 ? '' : 's'} parsed`);
+                    if (stats.results > 0) detailParts.push(`${stats.results} search hit${stats.results === 1 ? '' : 's'}`);
+                    const detail = detailParts.length > 0
+                        ? `${company}: ${detailParts.join(' / ')}`
+                        : `${company}: source site for saved lead`;
+                    const key = addNode('Result', `result:${normalized}`, friendlySiteLabel(domain), detail, 'done', leadOrder);
+                    siteKeys.set(normalized, key);
+                    addEdge(queryKey, key);
+                    return key;
+                }
+
+                function normalizeGraphDomain(domain) {
+                    return String(domain || '')
+                        .replace(/^https?:\/\//i, '')
+                        .replace(/^www\./i, '')
+                        .split('/')[0]
+                        .toLowerCase();
+                }
+
+                function markStatuses() {
+                    if (run.status === 'Completed') {
+                        for (const node of nodes) {
+                            if (node.status !== 'skipped') {
+                                node.status = 'done';
+                            }
+                        }
+                        return;
+                    }
+
+                    if (run.status === 'Failed') {
+                        for (const node of nodes) {
+                            node.status = node.type === 'Failure' ? 'failed' : 'done';
+                        }
+                        return;
+                    }
+
+                    for (const node of nodes) {
+                        if (node.status !== 'skipped' && node.status !== 'failed') {
+                            node.status = 'done';
+                        }
+                    }
+
+                    const active = byKey.get(lastGraphNode);
+                    if (active && active.status === 'done') {
+                        active.status = 'active';
+                    }
+
+                    const waitingLabel = nextWaitingLabel(nodes);
+                    const waitingKey = addNode('Waiting', `waiting:${waitingLabel.toLowerCase()}`, waitingLabel, 'Next queued workflow step', 'waiting');
+                    addEdge(lastGraphNode || baseKey, waitingKey);
+                }
+            }
+
+            function createNodeElement(node) {
+                const card = document.createElement('button');
+                card.type = 'button';
+                card.className = `run-graph-node run-graph-node-${node.type.toLowerCase()} run-graph-status-${node.status}`;
+                card.setAttribute('aria-label', `${labelForType(node.type)} ${node.label}`);
+                const icon = document.createElement('span');
+                icon.className = 'run-graph-node-icon';
+                const body = document.createElement('span');
+                body.className = 'run-graph-node-body';
+                const eyebrow = document.createElement('span');
+                eyebrow.className = 'run-graph-eyebrow';
+                const label = document.createElement('span');
+                label.className = 'run-graph-label';
+                const detail = document.createElement('span');
+                detail.className = 'run-graph-node-detail';
+                body.append(eyebrow, label, detail);
+                card.append(icon, body);
+                card.addEventListener('click', () => selectNode(node.key));
+                card.addEventListener('keydown', event => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        selectNode(node.key);
+                    }
+                });
+                return card;
+            }
+
+            function updateNodeElement(node) {
+                node.el.className = `run-graph-node run-graph-node-${node.type.toLowerCase()} run-graph-status-${node.status}${node.key === selectedNodeKey ? ' is-selected' : ''}`;
+                node.el.querySelector('.run-graph-node-icon').textContent = iconForType(node.type);
+                node.el.querySelector('.run-graph-eyebrow').textContent = `${labelForType(node.type)} / ${node.status}`;
+                node.el.querySelector('.run-graph-label').textContent = node.label;
+                node.el.querySelector('.run-graph-node-detail').textContent = compact(node.title || '', node.type === 'Base' ? 88 : 62);
+            }
+
+            function selectNode(key) {
+                selectedNodeKey = key;
+                for (const node of graphModel.nodes) {
+                    updateNodeElement(node);
+                }
+                updateInspector();
+            }
+
+            function updateInspector() {
+                const node = graphModel.nodes.find(item => item.key === selectedNodeKey) ?? graphModel.nodes[0];
+                if (!node) {
+                    return;
+                }
+
+                elements.inspectorTitle.textContent = node.label;
+                elements.inspectorBody.textContent = `${labelForType(node.type)} node is ${node.status}. ${node.title || ''}`.trim();
+            }
+
+            function nextWaitingLabel(nodes) {
+                if (!nodes.some(node => node.type === 'Query')) return 'Planning queries';
+                if (!nodes.some(node => node.type === 'Lead')) return 'Finding qualified leads';
+                if (!nodes.some(node => node.type === 'Contact')) return 'Finding contacts';
+                return 'Saving dossiers';
+            }
+
+            function parseLogs(logsJson) {
+                if (!logsJson) {
+                    return [];
+                }
+
+                try {
+                    const parsed = JSON.parse(logsJson);
+                    return Array.isArray(parsed) ? parsed : [];
+                } catch {
+                    return [];
+                }
+            }
+
+            function svgEl(name, attributes = {}) {
+                const element = document.createElementNS('http://www.w3.org/2000/svg', name);
+                for (const [key, value] of Object.entries(attributes)) {
+                    element.setAttribute(key, String(value));
+                }
+
+                return element;
+            }
+
+            function iconForType(type) {
+                return {
+                    Base: 'RQ',
+                    Step: 'ST',
+                    Query: 'Q',
+                    Result: 'SITE',
+                    Candidate: 'CO',
+                    Extract: 'EX',
+                    Page: 'PG',
+                    Lead: 'LD',
+                    Contact: String.fromCharCode(64),
+                    NoContact: 'NO',
+                    Duplicate: 'DU',
+                    Waiting: '...',
+                    Failure: '!'
+                }[type] ?? 'N';
+            }
+
+            function labelForType(type) {
+                return {
+                    Base: 'root query',
+                    Step: 'workflow step',
+                    Query: 'web search',
+                    Result: 'lead source',
+                    Candidate: 'candidate site',
+                    Extract: 'extract page',
+                    Page: 'page parsed',
+                    Lead: 'lead identified',
+                    Contact: 'contact found',
+                    NoContact: 'no contact',
+                    Duplicate: 'duplicate skipped',
+                    Waiting: 'waiting',
+                    Failure: 'failed'
+                }[type] ?? type.toLowerCase();
+            }
+
+            function compact(text, length) {
+                const clean = String(text || '').replace(/\s+/g, ' ').trim();
+                return clean.length <= length ? clean : `${clean.slice(0, length - 1)}...`;
+            }
+
+            function trimUrl(url) {
+                try {
+                    const parsed = new URL(url);
+                    const path = parsed.pathname === '/' ? '' : parsed.pathname;
+                    return `${parsed.hostname}${path}`;
+                } catch {
+                    return url;
+                }
+            }
+
+            function friendlySiteLabel(value) {
+                const clean = String(value || 'site').replace(/^https?:\/\//i, '').replace(/^www\./i, '').split('/')[0];
+                const first = clean.split('.')[0] || clean;
+                return first
+                    .split(/[-_]/)
+                    .filter(Boolean)
+                    .map(part => part.length <= 2 ? part.toUpperCase() : `${part[0].toUpperCase()}${part.slice(1)}`)
+                    .join(' ') || clean;
+            }
+
+            function pageRouteLabel(url) {
+                try {
+                    const parsed = new URL(url);
+                    const path = parsed.pathname.toLowerCase();
+                    if (path === '/' || path === '') return friendlySiteLabel(parsed.hostname);
+                    if (path.includes('contact') || path.includes('kontakt')) return 'Contact page';
+                    if (path.includes('about') || path.includes('o-nama')) return 'About page';
+                    if (path.includes('team') || path.includes('staff') || path.includes('tim')) return 'Team page';
+                    if (path.includes('booking') || path.includes('reservation')) return 'Booking page';
+                    return trimUrl(url);
+                } catch {
+                    return url;
+                }
+            }
+
+            function formatDate(value, fallback) {
+                if (!value) {
+                    return fallback;
+                }
+
+                const date = new Date(value);
+                return Number.isNaN(date.getTime()) ? fallback : date.toLocaleString();
+            }
+
+            function clamp(value, min, max) {
+                return Math.max(min, Math.min(max, value));
+            }
+
+            function isActive(status) {
+                return status === 'Queued' || status === 'Running';
+            }
+        })();
+    </script>
+}

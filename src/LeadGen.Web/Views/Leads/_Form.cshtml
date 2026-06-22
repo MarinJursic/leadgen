@@ -1,0 +1,72 @@
+@model LeadFormModel
+@{
+    var campaigns = ViewBag.Campaigns as IReadOnlyList<Campaign> ?? [];
+}
+
+<input type="hidden" asp-for="Id" />
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <label asp-for="CampaignId" class="form-label"></label>
+        <select asp-for="CampaignId" class="form-select">
+            @foreach (var campaign in campaigns)
+            {
+                <option value="@campaign.Id">@campaign.Name</option>
+            }
+        </select>
+        <span asp-validation-for="CampaignId" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="CompanyName" class="form-label"></label>
+        <input asp-for="CompanyName" class="form-control" />
+        <span asp-validation-for="CompanyName" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Domain" class="form-label"></label>
+        <input asp-for="Domain" class="form-control" />
+        <span asp-validation-for="Domain" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="WebsiteUrl" class="form-label"></label>
+        <input asp-for="WebsiteUrl" class="form-control" />
+        <span asp-validation-for="WebsiteUrl" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Industry" class="form-label"></label>
+        <input asp-for="Industry" class="form-control" />
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Location" class="form-label"></label>
+        <input asp-for="Location" class="form-control" />
+    </div>
+    <div class="col-md-4">
+        <label asp-for="FitScore" class="form-label"></label>
+        <input asp-for="FitScore" class="form-control" type="number" min="0" max="100" />
+    </div>
+    <div class="col-md-4">
+        <label asp-for="ConfidenceScore" class="form-label"></label>
+        <input asp-for="ConfidenceScore" class="form-control" type="number" min="0" max="100" />
+    </div>
+    <div class="col-md-4">
+        <label asp-for="Status" class="form-label"></label>
+        <select asp-for="Status" class="form-select" asp-items="Html.GetEnumSelectList<LeadStatus>()"></select>
+    </div>
+    <div class="col-12">
+        <label asp-for="SuggestedOutreachAngle" class="form-label"></label>
+        <textarea asp-for="SuggestedOutreachAngle" class="form-control" rows="2"></textarea>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="MatchReasonsJson" class="form-label"></label>
+        <textarea asp-for="MatchReasonsJson" class="form-control font-monospace" rows="5"></textarea>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="EvidenceJson" class="form-label"></label>
+        <textarea asp-for="EvidenceJson" class="form-control font-monospace" rows="5"></textarea>
+    </div>
+    <div class="col-12">
+        <label asp-for="DossierMarkdown" class="form-label"></label>
+        <textarea asp-for="DossierMarkdown" class="form-control" rows="8"></textarea>
+        <span asp-validation-for="DossierMarkdown" class="text-danger"></span>
+    </div>
+</div>

@@ -1,0 +1,81 @@
+@model DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<section class="page-title">
+    <div>
+        <p class="metric mb-1">Dashboard</p>
+        <h1 class="h2 mb-0">Lead discovery desk</h1>
+    </div>
+    <a class="btn btn-dark" asp-controller="Campaigns" asp-action="Create">New campaign</a>
+</section>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="surface-panel h-100">
+            <div class="metric">Campaigns</div>
+            <div class="display-6">@Model.RecentCampaigns.Count</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="surface-panel h-100">
+            <div class="metric">Recent runs</div>
+            <div class="display-6">@Model.RecentRuns.Count</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="surface-panel h-100">
+            <div class="metric">Recent leads</div>
+            <div class="display-6">@Model.RecentLeads.Count</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="surface-panel">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h5 mb-0">Campaigns</h2>
+                <a asp-controller="Campaigns" asp-action="Index">View all</a>
+            </div>
+            @if (Model.RecentCampaigns.Count == 0)
+            {
+                <p class="text-muted mb-0">No campaigns yet.</p>
+            }
+            else
+            {
+                <div class="list-group list-group-flush">
+                    @foreach (var campaign in Model.RecentCampaigns)
+                    {
+                        <a class="list-group-item list-group-item-action px-0" asp-controller="Campaigns" asp-action="Details" asp-route-id="@campaign.Id">
+                            <div class="fw-semibold">@campaign.Name</div>
+                            <div class="text-muted small">@campaign.BusinessName</div>
+                        </a>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="surface-panel">
+            <h2 class="h5">Leads</h2>
+            @if (Model.RecentLeads.Count == 0)
+            {
+                <p class="text-muted mb-0">No generated leads yet.</p>
+            }
+            else
+            {
+                <div class="list-group list-group-flush">
+                    @foreach (var lead in Model.RecentLeads)
+                    {
+                        <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-0" asp-controller="Leads" asp-action="Details" asp-route-id="@lead.Id">
+                            <span>@lead.CompanyName</span>
+                            <span class="score">@lead.FitScore</span>
+                        </a>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>

@@ -1,0 +1,58 @@
+@model SearchPageViewModel
+@{
+    ViewData["Title"] = "Search";
+    var groups = Model.Results.GroupBy(item => item.Type).OrderBy(group => group.Key).ToList();
+}
+
+<section class="page-title">
+    <div>
+        <p class="metric mb-1">Search</p>
+        <h1 class="h2 mb-0">Global search</h1>
+    </div>
+</section>
+
+<div class="surface-panel mb-4">
+    <form method="get" class="row g-2" asp-action="Index">
+        <div class="col-md-10">
+            <input class="form-control" type="search" name="q" value="@Model.Query" placeholder="Search campaigns, leads, contacts, notes" />
+        </div>
+        <div class="col-md-2">
+            <button class="btn btn-dark w-100" type="submit">Search</button>
+        </div>
+    </form>
+</div>
+
+@if (string.IsNullOrWhiteSpace(Model.Query))
+{
+    <div class="surface-panel">
+        <p class="mb-0 text-muted">Enter a query to search menu items and records.</p>
+    </div>
+}
+else if (Model.Results.Count == 0)
+{
+    <div class="surface-panel">
+        <p class="mb-0 text-muted">No results.</p>
+    </div>
+}
+else
+{
+    <div class="row g-4">
+        @foreach (var group in groups)
+        {
+            <div class="col-lg-6">
+                <div class="surface-panel h-100">
+                    <h2 class="h5">@group.Key</h2>
+                    <div class="list-group list-group-flush">
+                        @foreach (var result in group)
+                        {
+                            <a class="list-group-item list-group-item-action px-0" href="@result.Url">
+                                <div class="fw-semibold">@result.Title</div>
+                                <div class="text-muted small">@result.Subtitle</div>
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
