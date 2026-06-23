@@ -1,18 +1,6 @@
 # macOS
 .DS_Store
 
-# Local workspace data
-.co?ex/*
-!/.codex/config.toml
-!/.codex/hooks.json
-!/.codex/hooks/
-.co?ex/hooks/*
-!/.codex/hooks/log_hook.py
-
-# Local hook logs
-.github/hooks/agent_log.txt
-.github/hooks/agent_log.jsonl
-
 # Build outputs
 bin/
 obj/
@@ -20,9 +8,6 @@ obj/
 **/obj/
 App_Data/
 **/App_Data/
-leadgen-lab3.db
-leadgen-lab3.db-shm
-leadgen-lab3.db-wal
 
 # Local environment files and secrets
 .env
@@ -39,27 +24,5 @@ leadgen-lab3.db-wal
 # Local markdown working docs
 *.md
 !/README.md
-!/DESIGN.md
 !/docs/
 !/docs/LeadGen_MVP_PRD.md
-!/.agents/**/*.md
-!/lab-1/*.md
-!/lab-2/*.md
-!/lab-3/implementation-plan.md
-!/lab-3/semantic-model.md
-!/lab-3/sitemap.md
-!/lab-4/
-!/lab-4/implementation-plan.md
-!/lab-4/completion-report.md
-!/lab-4/crud-matrix.md
-!/lab-5/
-!/lab-5/implementation-plan.md
-!/lab-5/lab5-what-was-done.md
-!/lab-5/lab5-pitanja-i-odgovori.md
-lab-3/lab3-*.md
-lab-4/lab4-*.md
-
-# Generated hook captures
-lab-2/hook-capture/agent_log.txt
-lab-2/hook-capture/agent_log.jsonl
-lab-2/hook-capture/rollout-*.jsonl

@@ -462,7 +462,7 @@ public sealed class LeadDiscoveryWorkflow : ILeadDiscoveryWorkflow
         var websiteStatus = candidate.IsOwnedWebsite
             ? "Owned website/contact page found"
             : "No owned website verified; saved from a public profile or contact source";
-        var whyBuy = BuildWhyBuyReason(campaign, companyName, whatTheyDo, !candidate.IsOwnedWebsite);
+        var whyBuy = BuildWhyBuyReason(campaign, companyName, !candidate.IsOwnedWebsite);
         var evidence = pages.Take(2).Select(page => new
         {
             title = string.IsNullOrWhiteSpace(page.Title) ? companyName : CleanPageTitle(page.Title, page.Url),
@@ -762,7 +762,7 @@ public sealed class LeadDiscoveryWorkflow : ILeadDiscoveryWorkflow
         var contactSummary = contacts.Count == 0
             ? "No public contact route was saved."
             : string.Join("; ", contacts.Select(FormatContactForDossier));
-        var whyBuy = BuildWhyBuyReason(campaign, lead.CompanyName, publicDescription, !ownedWebsiteFound);
+        var whyBuy = BuildWhyBuyReason(campaign, lead.CompanyName, !ownedWebsiteFound);
         var whyFit = $"Fits the AI-derived target profile of {AudienceSummary(campaign)} in {lead.Location ?? FirstUsefulPhrase(campaign.TargetGeography, "the selected location")}. The lead scored {lead.FitScore} from public evidence, buyer-category signals, and outreach availability.";
         var websiteOpportunity = ownedWebsiteFound
             ? "Owned website or contact page found. Use the outreach to improve booking flow, inquiry capture, local visibility, and follow-up."
@@ -815,7 +815,7 @@ public sealed class LeadDiscoveryWorkflow : ILeadDiscoveryWorkflow
         return CleanEvidenceSummary(source.Text, 280);
     }
 
-    private static string BuildWhyBuyReason(Campaign campaign, string companyName, string whatTheyDo, bool websiteGap)
+    private static string BuildWhyBuyReason(Campaign campaign, string companyName, bool websiteGap)
     {
         var offer = ProductOfferSummary(campaign);
         var painPoint = ReadIcpValues(campaign.IcpJson, "painPoints").FirstOrDefault();
