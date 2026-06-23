@@ -10,7 +10,7 @@ public sealed class CampaignFormModel
 
     [StringLength(160)]
     [Display(Name = "Campaign name")]
-    public string Name { get; set; } = string.Empty;
+    public string? Name { get; set; }
 
     [Required, StringLength(160)]
     [Display(Name = "Business name")]
@@ -135,6 +135,16 @@ public sealed record LeadDetailsViewModel(
     Lead Lead,
     LeadContactFormModel ContactForm,
     LeadNoteFormModel NoteForm);
+
+public sealed record LeadIndexViewModel(
+    Guid? SelectedCampaignId,
+    int TotalLeadCount,
+    IReadOnlyList<Campaign> Campaigns,
+    IReadOnlyList<LeadCampaignGroupViewModel> CampaignGroups);
+
+public sealed record LeadCampaignGroupViewModel(
+    Campaign Campaign,
+    IReadOnlyList<Lead> Leads);
 
 public sealed record SearchPageViewModel(
     string? Query,

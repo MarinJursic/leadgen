@@ -32,12 +32,21 @@
     </header>
 
     <main class="container py-4">
-        @if (TempData["StatusMessage"] is string message)
-        {
-            <div class="alert alert-info border-0 shadow-sm">@message</div>
-        }
         @RenderBody()
     </main>
+
+    @if (TempData["StatusMessage"] is string message)
+    {
+        <div class="toast-container position-fixed top-0 end-0 p-3 app-toast-container">
+            <div class="toast app-status-toast border-0 shadow" role="status" aria-live="polite" aria-atomic="true" data-bs-autohide="true" data-bs-delay="4500">
+                <div class="toast-body d-flex align-items-start gap-3">
+                    <span class="toast-status-dot" aria-hidden="true"></span>
+                    <div class="me-auto">@message</div>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    }
 
     <footer class="border-top py-3 text-muted">
         <div class="container d-flex flex-column flex-sm-row justify-content-between gap-2">

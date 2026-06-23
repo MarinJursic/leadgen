@@ -146,6 +146,7 @@ public sealed class LeadGenApiController : ControllerBase
     public async Task<ActionResult<IReadOnlyList<LeadDto>>> ListLeads([FromQuery] Guid? campaignId, CancellationToken ct)
     {
         var query = _db.Leads.AsNoTracking()
+            .Include(lead => lead.Campaign)
             .Include(lead => lead.Contacts)
             .Include(lead => lead.Notes)
             .AsQueryable();
@@ -156,7 +157,9 @@ public sealed class LeadGenApiController : ControllerBase
         }
 
         var leads = await query
-            .OrderByDescending(lead => lead.FitScore)
+            .OrderBy(lead => lead.Campaign!.Name)
+            .ThenByDescending(lead => lead.FitScore)
+            .ThenBy(lead => lead.CompanyName)
             .Select(lead => ToDto(lead))
             .ToListAsync(ct);
         return Ok(leads);

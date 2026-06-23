@@ -12,10 +12,25 @@
 </section>
 
 <div class="surface-panel">
-    <form asp-action="Create" method="post">
+    <form asp-action="Create" method="post" data-submit-progress data-submit-progress-target="#campaignCreateProgress" data-submit-progress-min-ms="850">
         <partial name="_Form" model="Model" />
         <div class="d-flex flex-wrap gap-2 mt-4">
-            <button class="btn btn-dark" type="submit">Create campaign</button>
+            <button class="btn btn-dark submit-progress-button" type="submit" data-submit-button>
+                <span data-submit-ready>Create campaign</span>
+                <span class="d-none align-items-center gap-2" data-submit-loading>
+                    <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                    <span>Creating...</span>
+                </span>
+            </button>
+        </div>
+        <div id="campaignCreateProgress" class="submit-progress-panel d-none" role="status" aria-live="polite">
+            <div class="d-flex justify-content-between gap-3">
+                <span>Creating campaign</span>
+                <span class="text-muted">Saving business profile...</span>
+            </div>
+            <div class="submit-progress-track" aria-hidden="true">
+                <div class="submit-progress-bar"></div>
+            </div>
         </div>
     </form>
 </div>

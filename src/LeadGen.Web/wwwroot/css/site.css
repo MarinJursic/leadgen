@@ -33,6 +33,70 @@ a {
   padding: 1.25rem;
 }
 
+.submit-progress-button {
+  min-width: 10.5rem;
+}
+
+.submit-progress-panel {
+  background: #f8f8f4;
+  border: 1px solid #e6e3db;
+  border-radius: 8px;
+  color: #181817;
+  font-size: .92rem;
+  margin-top: 1rem;
+  padding: .85rem;
+}
+
+.submit-progress-track {
+  background: #e5e1d8;
+  border-radius: 999px;
+  height: .38rem;
+  margin-top: .7rem;
+  overflow: hidden;
+  position: relative;
+}
+
+.submit-progress-bar {
+  animation: submit-progress-slide 1.1s ease-in-out infinite;
+  background: #1d4f45;
+  border-radius: inherit;
+  height: 100%;
+  left: -42%;
+  position: absolute;
+  width: 42%;
+}
+
+@keyframes submit-progress-slide {
+  0% {
+    left: -42%;
+  }
+
+  100% {
+    left: 100%;
+  }
+}
+
+.app-toast-container {
+  z-index: 1080;
+}
+
+.app-status-toast {
+  background: rgba(255, 255, 255, .96);
+  border: 1px solid #d9dbe5 !important;
+  border-radius: 8px;
+  color: #111827;
+  max-width: min(380px, calc(100vw - 2rem));
+}
+
+.toast-status-dot {
+  background: #174e45;
+  border-radius: 999px;
+  flex: 0 0 auto;
+  height: .6rem;
+  margin-top: .45rem;
+  width: .6rem;
+}
+
 .metric {
   color: #6a6254;
   font-size: .85rem;
@@ -209,73 +273,6 @@ a {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
   font-size: .72rem;
   margin-top: .2rem;
-}
-
-.run-overview-card {
-  background: rgba(255, 255, 255, .94);
-  border: 1px solid #d9dbe5;
-  border-radius: 8px;
-  box-shadow: 0 14px 30px rgba(20, 24, 40, .12);
-  left: 1.35rem;
-  max-width: min(340px, calc(100vw - 2.7rem));
-  padding: 1rem;
-  position: absolute;
-  top: 8.4rem;
-  z-index: 8;
-}
-
-.run-overview-card > .d-flex {
-  align-items: flex-start;
-  flex-wrap: wrap;
-}
-
-.run-overview-card > .d-flex > div {
-  min-width: 0;
-}
-
-.run-overview-status {
-  background: #f1f3f9;
-  border: 1px solid #dce0ea;
-  border-radius: 999px;
-  color: #111827;
-  flex: 0 0 auto;
-  font-size: .75rem;
-  font-weight: 800;
-  padding: .25rem .55rem;
-}
-
-.run-overview-grid {
-  display: grid;
-  gap: .65rem;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.run-overview-grid div {
-  border-top: 1px solid #eceef5;
-  padding-top: .55rem;
-}
-
-.run-overview-grid span {
-  color: #6b7280;
-  display: block;
-  font-size: .72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-.run-overview-grid strong {
-  color: #111827;
-  display: block;
-  font-size: 1.35rem;
-  line-height: 1.1;
-}
-
-.run-overview-link {
-  color: #174e45;
-  display: inline-block;
-  font-size: .85rem;
-  font-weight: 700;
-  margin-top: .85rem;
 }
 
 .run-graph-legend {
@@ -588,6 +585,69 @@ a {
   padding: 1rem;
 }
 
+.lead-campaign-context {
+  border-top: 1px solid #ece8de;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding-top: 1rem;
+}
+
+.lead-campaign-stack {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.lead-campaign-section {
+  background: rgba(255, 255, 255, .72);
+  border: 1px solid #e6e3db;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.lead-campaign-header {
+  align-items: flex-start;
+  border-bottom: 1px solid #ece8de;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+}
+
+.lead-campaign-stats {
+  display: flex;
+  gap: .75rem;
+}
+
+.lead-campaign-stats div {
+  background: #f8f8f4;
+  border: 1px solid #e6e3db;
+  border-radius: 8px;
+  min-width: 5.25rem;
+  padding: .65rem .8rem;
+}
+
+.lead-campaign-stats span {
+  color: #6a6254;
+  display: block;
+  font-size: .72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.lead-campaign-stats strong {
+  color: #181817;
+  display: block;
+  font-size: 1.35rem;
+  line-height: 1.1;
+}
+
+.lead-card {
+  box-shadow: none;
+}
+
 .contact-list-value {
   overflow-wrap: anywhere;
 }
@@ -626,6 +686,22 @@ a {
     width: 100%;
   }
 
+  .lead-campaign-context {
+    grid-template-columns: 1fr;
+  }
+
+  .lead-campaign-header {
+    align-items: stretch;
+  }
+
+  .lead-campaign-stats {
+    width: 100%;
+  }
+
+  .lead-campaign-stats div {
+    flex: 1 1 0;
+  }
+
   .run-graph-stage {
     margin-top: -1rem;
     min-height: calc(100vh - 70px);
@@ -638,13 +714,6 @@ a {
     text-align: left;
     top: 5.25rem;
     transform: none;
-  }
-
-  .run-overview-card {
-    left: .75rem;
-    max-width: calc(100% - 1.5rem);
-    right: .75rem;
-    top: 14rem;
   }
 
   .run-graph-legend {

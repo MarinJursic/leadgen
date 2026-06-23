@@ -42,35 +42,6 @@
         <div id="runStatusHeading" class="visually-hidden">@Model.Status</div>
     </div>
 
-    <aside class="run-overview-card" aria-label="Run overview">
-        <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
-            <div>
-                <div class="metric mb-1">Run overview</div>
-                <div class="fw-semibold">@Model.Campaign?.Name</div>
-            </div>
-            <span id="runOverviewStatus" class="run-overview-status">@Model.Status</span>
-        </div>
-        <div class="run-overview-grid">
-            <div>
-                <span>Requested</span>
-                <strong id="runOverviewRequested">@Model.RequestedLeadCount</strong>
-            </div>
-            <div>
-                <span>Saved</span>
-                <strong id="runOverviewLeads">@Model.Leads.Count</strong>
-            </div>
-            <div>
-                <span>Queries</span>
-                <strong id="runOverviewQueries">0</strong>
-            </div>
-            <div>
-                <span>Sites</span>
-                <strong id="runOverviewSites">0</strong>
-            </div>
-        </div>
-        <a class="run-overview-link" href="#runDetailsOverview">View details</a>
-    </aside>
-
     <div class="run-graph-legend" aria-label="Node status legend">
         <span><i class="legend-dot legend-done"></i>Done</span>
         <span><i class="legend-dot legend-active"></i>In progress</span>
@@ -197,11 +168,6 @@
                 graphNodes: document.getElementById('runGraphNodes'),
                 inspectorTitle: document.getElementById('runGraphInspectorTitle'),
                 inspectorBody: document.getElementById('runGraphInspectorBody'),
-                overviewStatus: document.getElementById('runOverviewStatus'),
-                overviewRequested: document.getElementById('runOverviewRequested'),
-                overviewLeads: document.getElementById('runOverviewLeads'),
-                overviewQueries: document.getElementById('runOverviewQueries'),
-                overviewSites: document.getElementById('runOverviewSites'),
                 zoomOut: document.getElementById('runZoomOut'),
                 zoomIn: document.getElementById('runZoomIn'),
                 zoomReset: document.getElementById('runZoomReset'),
@@ -252,9 +218,6 @@
                 elements.statusValue.textContent = run.status;
                 elements.requestedCount.textContent = run.requestedLeadCount ?? '';
                 elements.leadCount.textContent = run.leadCount ?? 0;
-                elements.overviewStatus.textContent = run.status;
-                elements.overviewRequested.textContent = run.requestedLeadCount ?? '';
-                elements.overviewLeads.textContent = run.leadCount ?? 0;
                 elements.startedAt.textContent = formatDate(run.startedAtUtc, 'Not started');
                 elements.completedAt.textContent = formatDate(run.completedAtUtc, 'Not completed');
                 elements.estimatedCost.textContent = `${Number(run.estimatedCostUsd ?? 0).toFixed(4)} USD`;
@@ -349,8 +312,6 @@
 
                 updateInspector();
                 elements.graphSummary.textContent = `${next.nodes.length} nodes, ${next.edges.length} links, ${run.leadCount ?? 0} leads saved`;
-                elements.overviewQueries.textContent = next.nodes.filter(node => node.type === 'Query').length;
-                elements.overviewSites.textContent = next.nodes.filter(node => ['Result', 'Candidate', 'Extract', 'Page'].includes(node.type)).length;
                 requestAnimation();
             }
 

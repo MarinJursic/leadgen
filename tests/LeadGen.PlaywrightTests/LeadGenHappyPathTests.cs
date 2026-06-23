@@ -44,7 +44,7 @@ public sealed class LeadGenHappyPathTests
 
         await page.GetByRole(AriaRole.Link, new() { Name = "Lead list" }).ClickAsync();
         await ExpectTextAsync(page, "Dossiers");
-        var firstLeadLink = page.Locator(".surface-panel h2 a").First;
+        var firstLeadLink = page.Locator(".lead-card h3 a").First;
         var leadName = await firstLeadLink.InnerTextAsync();
 
         await page.Locator("form.global-search input[name='q']").FillAsync(leadName);
@@ -98,6 +98,81 @@ public sealed class LeadGenHappyPathTests
     }
 
     [Fact]
+    public async Task LeadsIndex_GroupsLeadsByCampaign()
+    {
+        await using var app = await TestWebApp.StartAsync();
+        await CreateManualLeadAsync(
+            app.BaseUrl,
+            "Dental Alpha",
+            "Clinic Website Campaign",
+            "Clinic Sites Studio",
+            fitScore: 82);
+        await CreateManualLeadAsync(
+            app.BaseUrl,
+            "Event Hall Beta",
+            "Venue Booking Campaign",
+            "Venue Booking Studio",
+            fitScore: 91);
+
+        using var playwright = await Playwright.CreateAsync();
+        await using var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
+        {
+            Headless = true,
+            ExecutablePath = BrowserPaths.FindChromiumExecutable()
+        });
+        var page = await browser.NewPageAsync();
+
+        await page.GotoAsync($"{app.BaseUrl}/Leads");
+        await ExpectTextAsync(page, "Dossiers by campaign");
+        await ExpectTextAsync(page, "Clinic Website Campaign");
+        await ExpectTextAsync(page, "Venue Booking Campaign");
+        await ExpectTextAsync(page, "Dental Alpha");
+        await ExpectTextAsync(page, "Event Hall Beta");
+        Assert.Equal(2, await page.Locator(".lead-campaign-section").CountAsync());
+
+        var bodyText = await page.Locator("body").InnerTextAsync();
+        Assert.True(bodyText.IndexOf("Clinic Website Campaign", StringComparison.Ordinal) < bodyText.IndexOf("Dental Alpha", StringComparison.Ordinal));
+        Assert.True(bodyText.IndexOf("Venue Booking Campaign", StringComparison.Ordinal) < bodyText.IndexOf("Event Hall Beta", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task CampaignCreate_ShowsLoadingStateWhileSubmitting()
+    {
+        await using var app = await TestWebApp.StartAsync();
+        using var playwright = await Playwright.CreateAsync();
+        await using var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
+        {
+            Headless = true,
+            ExecutablePath = BrowserPaths.FindChromiumExecutable()
+        });
+        var page = await browser.NewPageAsync();
+
+        await page.GotoAsync($"{app.BaseUrl}/Campaigns/Create");
+
+        await page.GetByLabel("Business name").FillAsync("Loading State Studio");
+        await page.GetByLabel("Website URL").FillAsync("https://loading-state.example");
+        await page.GetByLabel("Business location").FillAsync("Croatia");
+        await page.GetByLabel("What the business does").FillAsync("We build booking websites for local event venues and service providers.");
+
+        var submitButton = page.Locator("[data-submit-button]");
+        var stopwatch = Stopwatch.StartNew();
+        await submitButton.EvaluateAsync("button => button.click()");
+
+        await ExpectTextAsync(page, "Creating...");
+        await ExpectTextAsync(page, "Saving business profile...");
+        await Assertions.Expect(page.Locator("#campaignCreateProgress")).ToBeVisibleAsync();
+        await Assertions.Expect(submitButton).ToBeDisabledAsync();
+        await page.WaitForURLAsync(new Regex("/Campaigns/Details/[0-9a-fA-F-]+$"));
+        stopwatch.Stop();
+
+        Assert.True(stopwatch.ElapsedMilliseconds >= 750, $"Expected submit delay to be visible, but it was {stopwatch.ElapsedMilliseconds} ms.");
+        await ExpectTextAsync(page, "Loading State Studio lead search");
+        await ExpectTextAsync(page, "Campaign saved.");
+        await Assertions.Expect(page.Locator(".app-status-toast")).ToBeVisibleAsync();
+        Assert.Equal(0, await page.Locator(".alert-info").CountAsync());
+    }
+
+    [Fact]
     public async Task RunDetailsGraph_RendersFromProgressLogs()
     {
         await using var app = await TestWebApp.StartAsync();
@@ -121,6 +196,7 @@ public sealed class LeadGenHappyPathTests
         await ExpectTextAsync(page, "info@clinic-alpha.example");
         await ExpectTextAsync(page, "2 sites scanned / 1 lead saved");
         await ExpectVisibleAsync(page.Locator(".run-map-controls"));
+        Assert.Equal(0, await page.Locator(".run-overview-card").CountAsync());
         await page.WaitForTimeoutAsync(1_000);
 
         Assert.True(await page.Locator(".run-graph-node").CountAsync() >= 6);
@@ -204,7 +280,7 @@ public sealed class LeadGenHappyPathTests
             """
             () => {
                 const frame = document.querySelector('.run-graph-frame').getBoundingClientRect();
-                const blockers = [...document.querySelectorAll('.run-graph-node, .run-overview-card, .run-map-controls, .run-graph-inspector, .run-map-heading, .run-map-nav, .run-map-status, .run-graph-legend')]
+                const blockers = [...document.querySelectorAll('.run-graph-node, .run-map-controls, .run-graph-inspector, .run-map-heading, .run-map-nav, .run-map-status, .run-graph-legend')]
                     .map(element => element.getBoundingClientRect());
                 for (const y of [frame.top + frame.height * 0.72, frame.top + frame.height * 0.55, frame.top + frame.height * 0.35]) {
                     for (const x of [frame.left + 80, frame.left + frame.width - 90, frame.left + frame.width * 0.22, frame.left + frame.width * 0.78]) {
@@ -228,13 +304,18 @@ public sealed class LeadGenHappyPathTests
         await ExpectNoHorizontalOverflowAsync(page);
     }
 
-    private static async Task<string> CreateManualLeadAsync(string baseUrl, string companyName)
+    private static async Task<string> CreateManualLeadAsync(
+        string baseUrl,
+        string companyName,
+        string campaignName = "Mobile Smoke Campaign",
+        string businessName = "Mobile Smoke Studio",
+        int fitScore = 76)
     {
         using var client = new HttpClient { BaseAddress = new Uri(baseUrl) };
         var campaignResponse = await client.PostAsJsonAsync("/api/campaigns", new
         {
-            name = "Mobile Smoke Campaign",
-            businessName = "Mobile Smoke Studio",
+            name = campaignName,
+            businessName,
             websiteUrl = "https://mobile-smoke.example",
             businessDescription = "Manual campaign for mobile smoke verification.",
             targetGeography = "Croatia",
@@ -253,7 +334,7 @@ public sealed class LeadGenHappyPathTests
             websiteUrl = "https://mobile-smoke.example",
             industry = "Manual verification",
             location = "Zagreb, Croatia",
-            fitScore = 76,
+            fitScore,
             confidenceScore = 70,
             status = "New",
             matchReasonsJson = "[\"Manual smoke reason\"]",

@@ -17,19 +17,41 @@ public sealed class LeadsController : Controller
 
     public async Task<IActionResult> Index(Guid? campaignId, CancellationToken ct)
     {
-        ViewBag.CampaignId = campaignId;
-        var query = _db.Leads.AsNoTracking()
-            .Include(lead => lead.Campaign)
-            .Include(lead => lead.Contacts)
+        var campaigns = await _db.Campaigns
+            .AsNoTracking()
+            .OrderByDescending(campaign => campaign.UpdatedAtUtc)
+            .ThenBy(campaign => campaign.Name)
+            .ToListAsync(ct);
+
+        var campaignQuery = _db.Campaigns
+            .AsNoTracking()
+            .Include(campaign => campaign.Leads)
+            .ThenInclude(lead => lead.Contacts)
             .AsQueryable();
 
         if (campaignId.HasValue)
         {
-            query = query.Where(lead => lead.CampaignId == campaignId.Value);
+            campaignQuery = campaignQuery.Where(campaign => campaign.Id == campaignId.Value);
         }
 
-        var leads = await query.OrderByDescending(lead => lead.FitScore).ToListAsync(ct);
-        return View(leads);
+        var groups = (await campaignQuery
+                .OrderByDescending(campaign => campaign.UpdatedAtUtc)
+                .ThenBy(campaign => campaign.Name)
+                .ToListAsync(ct))
+            .Where(campaign => campaign.Leads.Count > 0)
+            .Select(campaign => new LeadCampaignGroupViewModel(
+                campaign,
+                campaign.Leads
+                    .OrderByDescending(lead => lead.FitScore)
+                    .ThenBy(lead => lead.CompanyName)
+                    .ToList()))
+            .ToList();
+
+        return View(new LeadIndexViewModel(
+            campaignId,
+            groups.Sum(group => group.Leads.Count),
+            campaigns,
+            groups));
     }
 
     public async Task<IActionResult> Details(Guid id, CancellationToken ct)

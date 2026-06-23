@@ -1,83 +1,166 @@
 @using System.Text.Json
-@model IReadOnlyList<Lead>
+@model LeadIndexViewModel
 @{
     ViewData["Title"] = "Leads";
+    var selectedCampaign = Model.Campaigns.FirstOrDefault(campaign => campaign.Id == Model.SelectedCampaignId);
 }
 
 <section class="page-title">
     <div>
         <p class="metric mb-1">Leads</p>
-        <h1 class="h2 mb-0">Dossiers</h1>
+        <h1 class="h2 mb-0">Dossiers by campaign</h1>
+        <div class="text-muted">Keep each lead list tied to the business purpose that generated it.</div>
     </div>
-    <a class="btn btn-dark" asp-action="Create" asp-route-campaignId="@ViewBag.CampaignId">Add lead</a>
+    <a class="btn btn-dark" asp-action="Create" asp-route-campaignId="@Model.SelectedCampaignId">Add lead</a>
 </section>
 
-<div class="row g-3">
-    @foreach (var lead in Model)
-    {
-        var primaryContact = lead.Contacts
-            .OrderByDescending(ContactRank)
-            .ThenByDescending(contact => contact.ConfidenceScore)
-            .FirstOrDefault();
-        var summary = DossierSection(lead.DossierMarkdown, "What they do") ?? BestLeadSummary(lead);
-        var whyBuy = DossierSection(lead.DossierMarkdown, "Why they might buy") ?? FirstReason(lead.MatchReasonsJson);
-        var websiteOpportunity = DossierSection(lead.DossierMarkdown, "Website opportunity");
-
-        <div class="col-md-6 col-xl-4">
-            <div class="surface-panel h-100">
-                <div class="d-flex justify-content-between gap-3">
-                    <div>
-                        <h2 class="h5"><a asp-action="Details" asp-route-id="@lead.Id">@lead.CompanyName</a></h2>
-                        <div class="text-muted">@lead.Domain</div>
-                    </div>
-                    <span class="score">@lead.FitScore</span>
-                </div>
-                <div class="small mt-3">
-                    <div class="metric mb-1">What they do</div>
-                    <div>@summary</div>
-                </div>
-                <div class="small mt-3">
-                    <div class="metric mb-1">Why they might buy</div>
-                    <div>@whyBuy</div>
-                </div>
-                @if (!string.IsNullOrWhiteSpace(websiteOpportunity))
+<div class="surface-panel mb-4">
+    <form class="row g-3 align-items-end" asp-action="Index" method="get">
+        <div class="col-lg-7">
+            <label class="form-label" for="campaignId">Campaign</label>
+            <select id="campaignId" name="campaignId" class="form-select">
+                <option value="">All campaigns</option>
+                @foreach (var campaign in Model.Campaigns)
                 {
-                    <div class="small mt-3">
-                        <div class="metric mb-1">Website opportunity</div>
-                        <div>@websiteOpportunity</div>
-                    </div>
+                    <option value="@campaign.Id" selected="@(campaign.Id == Model.SelectedCampaignId)">
+                        @campaign.Name
+                    </option>
                 }
-                <dl class="row mt-3 mb-0 small">
-                    <dt class="col-5">Status</dt>
-                    <dd class="col-7">@lead.Status</dd>
-                    <dt class="col-5">Industry</dt>
-                    <dd class="col-7">@(lead.Industry ?? "Unknown")</dd>
-                    <dt class="col-5">Location</dt>
-                    <dd class="col-7">@(lead.Location ?? "Unknown")</dd>
-                    <dt class="col-5">Outreach</dt>
-                    <dd class="col-7">
-                        @if (primaryContact is null)
-                        {
-                            <span class="text-muted">None</span>
-                        }
-                        else if (primaryContact.Type == LeadContactType.Email)
-                        {
-                            <a href="mailto:@primaryContact.Value">@primaryContact.Value</a>
-                        }
-                        else if (Uri.TryCreate(primaryContact.Value, UriKind.Absolute, out _))
-                        {
-                            <a href="@primaryContact.Value" rel="nofollow">@primaryContact.Type</a>
-                        }
-                        else
-                        {
-                            <span>@primaryContact.Value</span>
-                        }
-                    </dd>
-                </dl>
+            </select>
+        </div>
+        <div class="col-lg-3">
+            <div class="metric mb-1">Showing</div>
+            <div class="h4 mb-0">@Model.TotalLeadCount leads</div>
+        </div>
+        <div class="col-lg-2 d-grid">
+            <button class="btn btn-outline-dark" type="submit">Apply</button>
+        </div>
+    </form>
+    @if (selectedCampaign is not null)
+    {
+        <div class="lead-campaign-context mt-3">
+            <div>
+                <div class="metric mb-1">Business</div>
+                <div>@selectedCampaign.BusinessName</div>
+            </div>
+            <div>
+                <div class="metric mb-1">Location</div>
+                <div>@(selectedCampaign.TargetGeography ?? "Any")</div>
+            </div>
+            <div>
+                <div class="metric mb-1">Profile</div>
+                <div>@Clip(selectedCampaign.BusinessDescription, 140)</div>
             </div>
         </div>
     }
 </div>
+
+@if (Model.CampaignGroups.Count == 0)
+{
+    <div class="surface-panel">
+        <h2 class="h5">No leads yet</h2>
+        <p class="text-muted mb-0">Run lead discovery from a campaign, or add a lead manually for the selected campaign.</p>
+    </div>
+}
+else
+{
+    <div class="lead-campaign-stack">
+        @foreach (var group in Model.CampaignGroups)
+        {
+            var campaign = group.Campaign;
+            var topScore = group.Leads.Count == 0 ? 0 : group.Leads.Max(lead => lead.FitScore);
+
+            <section class="lead-campaign-section" aria-labelledby="campaign-@campaign.Id">
+                <div class="lead-campaign-header">
+                    <div>
+                        <div class="metric mb-1">Campaign</div>
+                        <h2 id="campaign-@campaign.Id" class="h4 mb-1">
+                            <a asp-controller="Campaigns" asp-action="Details" asp-route-id="@campaign.Id">@campaign.Name</a>
+                        </h2>
+                        <div class="text-muted">@campaign.BusinessName - @(campaign.TargetGeography ?? "Any location")</div>
+                    </div>
+                    <div class="lead-campaign-stats">
+                        <div>
+                            <span>Leads</span>
+                            <strong>@group.Leads.Count</strong>
+                        </div>
+                        <div>
+                            <span>Top fit</span>
+                            <strong>@topScore</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    @foreach (var lead in group.Leads)
+                    {
+                        var primaryContact = lead.Contacts
+                            .OrderByDescending(ContactRank)
+                            .ThenByDescending(contact => contact.ConfidenceScore)
+                            .FirstOrDefault();
+                        var summary = DossierSection(lead.DossierMarkdown, "What they do") ?? BestLeadSummary(lead);
+                        var whyBuy = DossierSection(lead.DossierMarkdown, "Why they might buy") ?? FirstReason(lead.MatchReasonsJson);
+                        var websiteOpportunity = DossierSection(lead.DossierMarkdown, "Website opportunity");
+
+                        <div class="col-md-6 col-xl-4">
+                            <article class="surface-panel lead-card h-100">
+                                <div class="d-flex justify-content-between gap-3">
+                                    <div>
+                                        <h3 class="h5"><a asp-action="Details" asp-route-id="@lead.Id">@lead.CompanyName</a></h3>
+                                        <div class="text-muted">@DisplayDomain(lead)</div>
+                                    </div>
+                                    <span class="score">@lead.FitScore</span>
+                                </div>
+                                <div class="small mt-3">
+                                    <div class="metric mb-1">What they do</div>
+                                    <div>@summary</div>
+                                </div>
+                                <div class="small mt-3">
+                                    <div class="metric mb-1">Why they might buy</div>
+                                    <div>@whyBuy</div>
+                                </div>
+                                @if (!string.IsNullOrWhiteSpace(websiteOpportunity))
+                                {
+                                    <div class="small mt-3">
+                                        <div class="metric mb-1">Website opportunity</div>
+                                        <div>@websiteOpportunity</div>
+                                    </div>
+                                }
+                                <dl class="row mt-3 mb-0 small">
+                                    <dt class="col-5">Status</dt>
+                                    <dd class="col-7">@lead.Status</dd>
+                                    <dt class="col-5">Industry</dt>
+                                    <dd class="col-7">@(lead.Industry ?? "Unknown")</dd>
+                                    <dt class="col-5">Location</dt>
+                                    <dd class="col-7">@(lead.Location ?? "Unknown")</dd>
+                                    <dt class="col-5">Outreach</dt>
+                                    <dd class="col-7">
+                                        @if (primaryContact is null)
+                                        {
+                                            <span class="text-muted">None</span>
+                                        }
+                                        else if (primaryContact.Type == LeadContactType.Email)
+                                        {
+                                            <a href="mailto:@primaryContact.Value">@primaryContact.Value</a>
+                                        }
+                                        else if (Uri.TryCreate(primaryContact.Value, UriKind.Absolute, out _))
+                                        {
+                                            <a href="@primaryContact.Value" rel="nofollow">@primaryContact.Type</a>
+                                        }
+                                        else
+                                        {
+                                            <span>@primaryContact.Value</span>
+                                        }
+                                    </dd>
+                                </dl>
+                            </article>
+                        </div>
+                    }
+                </div>
+            </section>
+        }
+    </div>
+}
 
 @functions {
     private static int ContactRank(LeadContact contact)
@@ -107,7 +190,6 @@
         }
         catch
         {
-            // fall back to dossier text
         }
 
         return Clip(lead.DossierMarkdown, 160);
@@ -143,6 +225,21 @@
         }
 
         return null;
+    }
+
+    private static string DisplayDomain(Lead lead)
+    {
+        if (!string.IsNullOrWhiteSpace(lead.Domain))
+        {
+            return lead.Domain;
+        }
+
+        if (!string.IsNullOrWhiteSpace(lead.WebsiteUrl) && Uri.TryCreate(lead.WebsiteUrl, UriKind.Absolute, out var uri))
+        {
+            return uri.Host;
+        }
+
+        return "No website recorded";
     }
 
     private static string Clip(string value, int length)

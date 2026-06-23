@@ -155,6 +155,14 @@ Tools exposed:
 
 The default deploy target is Azure App Service `F1 Free`. This is enough for a school/demo URL and avoids hosting charges, but it has limited CPU/storage and no production SLA. Use a paid tier such as `B1` only if the free tier is too slow for the demo.
 
+Useful deployment links:
+
+- Azure App Service pricing, including `F1 Free`: https://azure.microsoft.com/en-us/pricing/details/app-service/windows/
+- Microsoft Learn quickstart for ASP.NET Core on App Service: https://learn.microsoft.com/en-us/azure/app-service/quickstart-dotnetcore
+- ASP.NET Core Azure App Service hosting guidance: https://learn.microsoft.com/en-us/aspnet/core/host-and-deploy/azure-apps/
+- GitHub Actions deploy to Azure App Service: https://learn.microsoft.com/en-us/azure/app-service/deploy-github-actions
+- Azure CLI App Service commands: https://learn.microsoft.com/en-us/cli/azure/webapp
+
 ```bash
 dotnet publish src/LeadGen.Web/LeadGen.Web.csproj -c Release -o publish
 az group create -n leadgen-rg -l westeurope

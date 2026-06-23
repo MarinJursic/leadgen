@@ -51,6 +51,14 @@ public sealed class CampaignsController : Controller
         _db.Campaigns.Add(campaign);
         await _db.SaveChangesAsync(ct);
         TempData["StatusMessage"] = "Campaign saved.";
+        if (WantsJsonRedirect(Request))
+        {
+            return Json(new
+            {
+                redirectUrl = Url.Action(nameof(Details), new { id = campaign.Id })
+            });
+        }
+
         return RedirectToAction(nameof(Details), new { id = campaign.Id });
     }
 
@@ -175,4 +183,10 @@ public sealed class CampaignsController : Controller
     }
 
     private static string? NullIfWhiteSpace(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+
+    private static bool WantsJsonRedirect(HttpRequest request)
+    {
+        return request.Headers.TryGetValue("X-Requested-With", out var requestedWith)
+            && string.Equals(requestedWith.ToString(), "XMLHttpRequest", StringComparison.OrdinalIgnoreCase);
+    }
 }
