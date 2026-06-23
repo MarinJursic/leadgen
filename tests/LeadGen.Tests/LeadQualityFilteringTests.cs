@@ -71,6 +71,36 @@ public sealed class LeadQualityFilteringTests
     }
 
     [Fact]
+    public void BuildCandidate_RejectsResearchPublicationResults()
+    {
+        var campaign = NewCampaign();
+        var result = new SearchResultDto(
+            "(PDF) Use of email in a family practice setting - ResearchGate",
+            "https://www.researchgate.net/publication/123-use-of-email-in-a-family-practice-setting",
+            "A research publication page with an abstract and PDF reference.",
+            "researchgate.net");
+
+        var candidate = LeadDiscoveryWorkflow.BuildCandidate(campaign, result);
+
+        Assert.Null(candidate);
+    }
+
+    [Fact]
+    public void BuildCandidate_RejectsPdfDocumentResults()
+    {
+        var campaign = NewCampaign();
+        var result = new SearchResultDto(
+            "Clinic directory PDF",
+            "https://example.com/files/private-clinic-directory.pdf",
+            "PDF document with a list of clinics.",
+            "example.com");
+
+        var candidate = LeadDiscoveryWorkflow.BuildCandidate(campaign, result);
+
+        Assert.Null(candidate);
+    }
+
+    [Fact]
     public void BuildCandidate_AcceptsExactPublicProfileAsWebsiteGap()
     {
         var campaign = NewEventCampaign();

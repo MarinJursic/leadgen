@@ -42,6 +42,7 @@ public sealed class LeadGenHappyPathTests
         await ExpectTextAsync(page, "Discovery graph");
         await ExpectRunCompletedWithLeadsAsync(page);
 
+        await page.GetByRole(AriaRole.Button, new() { Name = "Open run navigation" }).ClickAsync();
         await page.GetByRole(AriaRole.Link, new() { Name = "Lead list" }).ClickAsync();
         await ExpectTextAsync(page, "Dossiers");
         var firstLeadLink = page.Locator(".lead-card h3 a").First;

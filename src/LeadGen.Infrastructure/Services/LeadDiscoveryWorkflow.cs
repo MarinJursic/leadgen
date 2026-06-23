@@ -53,10 +53,18 @@ public sealed class LeadDiscoveryWorkflow : ILeadDiscoveryWorkflow
         "wikipedia.org", "wikidata.org", "worldbank.org", "oecd.org"
     ];
 
+    private static readonly string[] ResearchOrPublicationDomains =
+    [
+        "researchgate.net", "academia.edu", "semanticscholar.org", "pubmed.", "ncbi.nlm.nih.gov",
+        "springer.com", "sciencedirect.com", "elsevier.com", "mdpi.com", "wiley.com",
+        "tandfonline.com", "jstor.org", "arxiv.org", "doi.org", "frontiersin.org", "plos.org"
+    ];
+
     private static readonly string[] PublisherOrDirectoryPathTerms =
     [
         "/blog", "/news", "/article", "/articles", "/post", "/posts", "/magazine",
-        "/category", "/tag/", "/author/", "/press", "/top-", "/best-", "/list", "/guide"
+        "/category", "/tag/", "/author/", "/press", "/top-", "/best-", "/list", "/guide",
+        "/publication", "/publications", "/paper", "/papers", "/abstract", "/doi", "/journal"
     ];
 
     private static readonly string[] ServiceProviderTerms =
@@ -315,7 +323,7 @@ public sealed class LeadDiscoveryWorkflow : ILeadDiscoveryWorkflow
                     .Take(5)
                     .ToList();
 
-                if (!rankedContacts.Any(IsUsableContact) && !HasEnoughPublicEvidence(relatedPages))
+                if (!rankedContacts.Any(IsUsableContact))
                 {
                     skippedWithoutContact++;
                     logs.Add(GraphEvent("NoContact", domain, lead.CompanyName));
@@ -383,7 +391,7 @@ public sealed class LeadDiscoveryWorkflow : ILeadDiscoveryWorkflow
 
             if (skippedWithoutContact > 0)
             {
-                logs.Add($"Skipped {skippedWithoutContact} likely companies without enough public evidence or contact route");
+                logs.Add($"Skipped {skippedWithoutContact} likely companies without a usable public contact route");
             }
 
             logs.Add($"Completed with {created} new leads out of {run.RequestedLeadCount} requested");
@@ -553,7 +561,11 @@ public sealed class LeadDiscoveryWorkflow : ILeadDiscoveryWorkflow
     internal static LeadCandidate? BuildCandidate(Campaign campaign, SearchResultDto result)
     {
         var domain = NormalizeDomain(result.Domain, result.Url);
-        if (string.IsNullOrWhiteSpace(domain) || IsBlockedUrl(result.Url) || IsInstitutionalNonLeadDomain(domain))
+        if (string.IsNullOrWhiteSpace(domain)
+            || IsBlockedUrl(result.Url)
+            || IsInstitutionalNonLeadDomain(domain)
+            || IsResearchOrPublicationDomain(domain)
+            || LooksLikeDocumentUrl(result.Url))
         {
             return null;
         }
@@ -566,7 +578,9 @@ public sealed class LeadDiscoveryWorkflow : ILeadDiscoveryWorkflow
             return null;
         }
 
-        if (IsPublisherOrDirectoryPath(result.Url) || LooksLikeArticleOrDirectory(haystack, isPublicProfile))
+        if (IsPublisherOrDirectoryPath(result.Url)
+            || LooksLikeArticleOrDirectory(haystack, isPublicProfile)
+            || LooksLikeResearchOrPublicationResult(haystack, result.Url))
         {
             return null;
         }
@@ -726,11 +740,6 @@ public sealed class LeadDiscoveryWorkflow : ILeadDiscoveryWorkflow
         {
             yield return nameKey;
         }
-    }
-
-    private static bool HasEnoughPublicEvidence(IReadOnlyList<ExtractedPageDto> pages)
-    {
-        return pages.Any(page => CleanEvidenceSummary(page.Text, 180).Length >= 80);
     }
 
     private static bool IsUsableContact(ContactCandidate contact)
@@ -958,6 +967,11 @@ public sealed class LeadDiscoveryWorkflow : ILeadDiscoveryWorkflow
         return InstitutionalNonLeadDomains.Any(term => domain.Contains(term, StringComparison.OrdinalIgnoreCase));
     }
 
+    private static bool IsResearchOrPublicationDomain(string domain)
+    {
+        return ResearchOrPublicationDomains.Any(term => domain.Contains(term, StringComparison.OrdinalIgnoreCase));
+    }
+
     private static bool IsPublisherOrDirectoryPath(string url)
     {
         if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
@@ -977,6 +991,34 @@ public sealed class LeadDiscoveryWorkflow : ILeadDiscoveryWorkflow
             || (!allowPublicProfile && text.Contains("listing", StringComparison.OrdinalIgnoreCase))
             || text.Contains("marketplace", StringComparison.OrdinalIgnoreCase)
             || text.Contains("compare ", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool LooksLikeResearchOrPublicationResult(string text, string url)
+    {
+        return LooksLikeDocumentUrl(url)
+            || text.Contains("(pdf)", StringComparison.OrdinalIgnoreCase)
+            || text.Contains("researchgate", StringComparison.OrdinalIgnoreCase)
+            || text.Contains("journal article", StringComparison.OrdinalIgnoreCase)
+            || text.Contains("scientific article", StringComparison.OrdinalIgnoreCase)
+            || text.Contains("research paper", StringComparison.OrdinalIgnoreCase)
+            || text.Contains("case report", StringComparison.OrdinalIgnoreCase)
+            || text.Contains("systematic review", StringComparison.OrdinalIgnoreCase)
+            || text.Contains("abstract", StringComparison.OrdinalIgnoreCase)
+            || text.Contains("doi:", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool LooksLikeDocumentUrl(string url)
+    {
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
+        {
+            return false;
+        }
+
+        var path = uri.AbsolutePath.ToLowerInvariant();
+        return path.EndsWith(".pdf", StringComparison.Ordinal)
+            || path.EndsWith(".doc", StringComparison.Ordinal)
+            || path.EndsWith(".docx", StringComparison.Ordinal)
+            || path.Contains("/pdf", StringComparison.Ordinal);
     }
 
     private static bool LooksLikePublicProfilePath(string url)
