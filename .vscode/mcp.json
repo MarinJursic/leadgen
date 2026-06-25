@@ -1,0 +1,10 @@
+{
+  "servers": {
+    "leadgen": {
+      "type": "stdio",
+      "command": "/bin/bash",
+      "args": ["${workspaceFolder}/mcp.sh"],
+      "cwd": "${workspaceFolder}"
+    }
+  }
+}

@@ -144,14 +144,16 @@ Direct CLI checks:
 `mcp.sh` loads `.env.local` and defaults `ConnectionStrings__DefaultConnection` to
 `src/LeadGen.Web/App_Data/leadgen.db`, so MCP sees the same local SQLite data as the web app.
 
-IDE config example:
+VS Code workspace config example in `.vscode/mcp.json`:
 
 ```json
 {
-  "mcpServers": {
+  "servers": {
     "leadgen": {
-      "command": "dotnet",
-      "args": ["run", "--project", "src/LeadGen.Mcp"]
+      "type": "stdio",
+      "command": "/bin/bash",
+      "args": ["${workspaceFolder}/mcp.sh"],
+      "cwd": "${workspaceFolder}"
     }
   }
 }

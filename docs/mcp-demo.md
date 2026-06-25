@@ -47,20 +47,22 @@ Expected behavior:
 - `status` returns the updated status.
 - The note and status are visible in the web UI on the lead dossier page.
 
-## Agentic IDE config
+## VS Code config
 
 ```json
 {
-  "mcpServers": {
+  "servers": {
     "leadgen": {
-      "command": "./mcp.sh",
-      "args": []
+      "type": "stdio",
+      "command": "/bin/bash",
+      "args": ["${workspaceFolder}/mcp.sh"],
+      "cwd": "${workspaceFolder}"
     }
   }
 }
 ```
 
-`mcp.sh` loads `.env.local` and defaults `ConnectionStrings__DefaultConnection` to `src/LeadGen.Web/App_Data/leadgen.db`, so MCP and the web app use the same local database.
+After saving `.vscode/mcp.json`, run `MCP: List Servers` in the VS Code Command Palette, select `leadgen`, and start or restart the server. `mcp.sh` loads `.env.local` and defaults `ConnectionStrings__DefaultConnection` to `src/LeadGen.Web/App_Data/leadgen.db`, so MCP and the web app use the same local database.
 
 ## Automated proof
 

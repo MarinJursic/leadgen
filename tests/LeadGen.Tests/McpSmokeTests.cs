@@ -55,14 +55,90 @@ public sealed class McpSmokeTests
         }
         finally
         {
-            foreach (var suffix in new[] { "", "-wal", "-shm" })
+            DeleteDatabaseFiles(databasePath);
+        }
+    }
+
+    [Fact]
+    public async Task McpStdio_InitializesAndExposesToolsForIdeClients()
+    {
+        var databasePath = Path.Combine(Path.GetTempPath(), $"leadgen-mcp-stdio-{Guid.NewGuid():N}.db");
+        Process? process = null;
+        try
+        {
+            var campaignId = Guid.NewGuid();
+            var leadId = Guid.NewGuid();
+            await SeedDatabaseAsync(databasePath, campaignId, leadId);
+            process = StartMcpServer(databasePath);
+
+            await WriteRpcAsync(process, new
             {
-                var path = databasePath + suffix;
-                if (File.Exists(path))
+                jsonrpc = "2.0",
+                id = 1,
+                method = "initialize",
+                @params = new
                 {
-                    File.Delete(path);
+                    protocolVersion = "2025-06-18",
+                    capabilities = new { },
+                    clientInfo = new
+                    {
+                        name = "LeadGen.Tests",
+                        version = "1.0.0"
+                    }
                 }
+            });
+
+            using var initialize = await ReadRpcAsync(process);
+            Assert.Equal(1, initialize.RootElement.GetProperty("id").GetInt32());
+            Assert.Equal("leadgen", initialize.RootElement
+                .GetProperty("result")
+                .GetProperty("serverInfo")
+                .GetProperty("name")
+                .GetString());
+
+            await WriteRpcAsync(process, new
+            {
+                jsonrpc = "2.0",
+                method = "notifications/initialized"
+            });
+            await WriteRpcAsync(process, new
+            {
+                jsonrpc = "2.0",
+                id = 2,
+                method = "tools/list"
+            });
+
+            using var tools = await ReadRpcAsync(process);
+            var toolList = tools.RootElement.GetProperty("result").GetProperty("tools").EnumerateArray();
+            Assert.Contains(toolList, tool => tool.GetProperty("name").GetString() == "list_campaigns");
+
+            await WriteRpcAsync(process, new
+            {
+                jsonrpc = "2.0",
+                id = 3,
+                method = "tools/call",
+                @params = new
+                {
+                    name = "list_campaigns",
+                    arguments = new { }
+                }
+            });
+
+            using var call = await ReadRpcAsync(process);
+            var result = call.RootElement.GetProperty("result");
+            Assert.False(result.GetProperty("isError").GetBoolean());
+            var text = result.GetProperty("content")[0].GetProperty("text").GetString();
+            using var campaigns = JsonDocument.Parse(text!);
+            Assert.Contains(campaigns.RootElement.EnumerateArray(), item => item.GetProperty("id").GetGuid() == campaignId);
+        }
+        finally
+        {
+            if (process is not null)
+            {
+                await StopMcpServerAsync(process);
             }
+
+            DeleteDatabaseFiles(databasePath);
         }
     }
 
@@ -150,6 +226,81 @@ public sealed class McpSmokeTests
         }
 
         return JsonDocument.Parse(output);
+    }
+
+    private static Process StartMcpServer(string databasePath)
+    {
+        var root = FindRepositoryRoot();
+        var mcpDll = FindMcpDll(root);
+        var startInfo = new ProcessStartInfo("dotnet")
+        {
+            WorkingDirectory = root,
+            RedirectStandardInput = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false
+        };
+
+        startInfo.ArgumentList.Add(mcpDll);
+        startInfo.Environment["ConnectionStrings__DefaultConnection"] = $"Data Source={databasePath}";
+
+        return Process.Start(startInfo)
+            ?? throw new InvalidOperationException("Could not start LeadGen.Mcp.");
+    }
+
+    private static async Task WriteRpcAsync(Process process, object request)
+    {
+        await process.StandardInput.WriteLineAsync(JsonSerializer.Serialize(request));
+        await process.StandardInput.FlushAsync();
+    }
+
+    private static async Task<JsonDocument> ReadRpcAsync(Process process)
+    {
+        var line = await process.StandardOutput.ReadLineAsync().WaitAsync(TimeSpan.FromSeconds(10));
+        if (line is null)
+        {
+            throw new InvalidOperationException("MCP server closed stdout before returning a response.");
+        }
+
+        return JsonDocument.Parse(line);
+    }
+
+    private static async Task StopMcpServerAsync(Process process)
+    {
+        try
+        {
+            process.StandardInput.Close();
+        }
+        catch (InvalidOperationException)
+        {
+        }
+
+        if (!process.HasExited)
+        {
+            try
+            {
+                await process.WaitForExitAsync().WaitAsync(TimeSpan.FromSeconds(2));
+            }
+            catch (TimeoutException)
+            {
+                process.Kill(entireProcessTree: true);
+                await process.WaitForExitAsync();
+            }
+        }
+
+        process.Dispose();
+    }
+
+    private static void DeleteDatabaseFiles(string databasePath)
+    {
+        foreach (var suffix in new[] { "", "-wal", "-shm" })
+        {
+            var path = databasePath + suffix;
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+        }
     }
 
     private static string FindRepositoryRoot()

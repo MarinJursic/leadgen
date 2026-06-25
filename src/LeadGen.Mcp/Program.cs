@@ -48,42 +48,7 @@ if (args.Length > 0)
     return;
 }
 
-Console.Error.WriteLine("LeadGen MCP stdio server ready.");
-string? line;
-while ((line = await Console.In.ReadLineAsync()) is not null)
-{
-    if (string.IsNullOrWhiteSpace(line))
-    {
-        continue;
-    }
-
-    try
-    {
-        using var document = JsonDocument.Parse(line);
-        var root = document.RootElement;
-        var id = root.TryGetProperty("id", out var idElement) ? idElement.Clone() : default;
-        var tool = root.TryGetProperty("tool", out var toolElement)
-            ? toolElement.GetString()
-            : root.TryGetProperty("method", out var methodElement)
-                ? methodElement.GetString()
-                : null;
-        var arguments = root.TryGetProperty("arguments", out var argsElement)
-            ? ToDictionary(argsElement)
-            : new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
-
-        if (string.IsNullOrWhiteSpace(tool))
-        {
-            throw new InvalidOperationException("Tool name is required.");
-        }
-
-        var result = await RunToolAsync(provider, tool, arguments);
-        Console.WriteLine(JsonSerializer.Serialize(new { id, result }, jsonOptions));
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine(JsonSerializer.Serialize(new { error = new { message = ex.Message } }, jsonOptions));
-    }
-}
+await RunStdioServerAsync(provider, jsonOptions);
 
 static Dictionary<string, string?> ParseArgs(IEnumerable<string> args)
 {
@@ -106,6 +71,330 @@ static Dictionary<string, string?> ParseArgs(IEnumerable<string> args)
     }
 
     return values;
+}
+
+static async Task RunStdioServerAsync(IServiceProvider provider, JsonSerializerOptions jsonOptions)
+{
+    Console.Error.WriteLine("LeadGen MCP stdio server ready.");
+    string? line;
+    while ((line = await Console.In.ReadLineAsync()) is not null)
+    {
+        if (string.IsNullOrWhiteSpace(line))
+        {
+            continue;
+        }
+
+        await HandleRpcMessageAsync(provider, jsonOptions, line);
+    }
+}
+
+static async Task HandleRpcMessageAsync(IServiceProvider provider, JsonSerializerOptions jsonOptions, string line)
+{
+    try
+    {
+        using var document = JsonDocument.Parse(line);
+        var root = document.RootElement;
+        var hasId = root.TryGetProperty("id", out var idElement);
+        var id = hasId ? idElement.Clone() : (JsonElement?)null;
+
+        if (!root.TryGetProperty("method", out var methodElement) || methodElement.ValueKind != JsonValueKind.String)
+        {
+            if (hasId)
+            {
+                await WriteJsonRpcErrorAsync(jsonOptions, id, -32600, "Invalid Request");
+            }
+
+            return;
+        }
+
+        var method = methodElement.GetString();
+        switch (method)
+        {
+            case "initialize":
+                if (hasId)
+                {
+                    await WriteJsonRpcResultAsync(jsonOptions, id, BuildInitializeResult(root));
+                }
+                break;
+            case "notifications/initialized":
+            case "notifications/cancelled":
+                break;
+            case "ping":
+                if (hasId)
+                {
+                    await WriteJsonRpcResultAsync(jsonOptions, id, new { });
+                }
+                break;
+            case "tools/list":
+                if (hasId)
+                {
+                    await WriteJsonRpcResultAsync(jsonOptions, id, new { tools = GetToolDefinitions() });
+                }
+                break;
+            case "tools/call":
+                if (hasId)
+                {
+                    await WriteJsonRpcResultAsync(jsonOptions, id, await CallMcpToolAsync(provider, jsonOptions, root));
+                }
+                break;
+            case "resources/list":
+                if (hasId)
+                {
+                    await WriteJsonRpcResultAsync(jsonOptions, id, new { resources = Array.Empty<object>() });
+                }
+                break;
+            case "resources/templates/list":
+                if (hasId)
+                {
+                    await WriteJsonRpcResultAsync(jsonOptions, id, new { resourceTemplates = Array.Empty<object>() });
+                }
+                break;
+            case "prompts/list":
+                if (hasId)
+                {
+                    await WriteJsonRpcResultAsync(jsonOptions, id, new { prompts = Array.Empty<object>() });
+                }
+                break;
+            default:
+                if (hasId)
+                {
+                    await WriteJsonRpcErrorAsync(jsonOptions, id, -32601, "Method not found");
+                }
+                break;
+        }
+    }
+    catch (JsonException ex)
+    {
+        await WriteJsonRpcErrorAsync(jsonOptions, null, -32700, "Parse error", ex.Message);
+    }
+    catch (Exception ex)
+    {
+        await WriteJsonRpcErrorAsync(jsonOptions, null, -32603, "Internal error", ex.Message);
+    }
+}
+
+static object BuildInitializeResult(JsonElement root)
+{
+    var protocolVersion = "2025-06-18";
+    if (root.TryGetProperty("params", out var paramsElement)
+        && paramsElement.TryGetProperty("protocolVersion", out var protocolElement)
+        && protocolElement.ValueKind == JsonValueKind.String)
+    {
+        protocolVersion = protocolElement.GetString() ?? protocolVersion;
+    }
+
+    return new
+    {
+        protocolVersion,
+        capabilities = new
+        {
+            tools = new
+            {
+                listChanged = false
+            }
+        },
+        serverInfo = new
+        {
+            name = "leadgen",
+            version = "1.0.0"
+        },
+        instructions = "Use LeadGen tools to inspect campaigns, search leads, read lead dossiers, add notes, and update lead status."
+    };
+}
+
+static async Task<object> CallMcpToolAsync(IServiceProvider provider, JsonSerializerOptions jsonOptions, JsonElement root)
+{
+    if (!root.TryGetProperty("params", out var paramsElement))
+    {
+        throw new InvalidOperationException("Tool call params are required.");
+    }
+
+    var tool = RequiredJsonString(paramsElement, "name");
+    var arguments = paramsElement.TryGetProperty("arguments", out var argsElement) && argsElement.ValueKind == JsonValueKind.Object
+        ? ToDictionary(argsElement)
+        : new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
+
+    try
+    {
+        var result = await RunToolAsync(provider, tool, arguments);
+        return new
+        {
+            content = new[]
+            {
+                new
+                {
+                    type = "text",
+                    text = JsonSerializer.Serialize(result, jsonOptions)
+                }
+            },
+            isError = false
+        };
+    }
+    catch (Exception ex)
+    {
+        return new
+        {
+            content = new[]
+            {
+                new
+                {
+                    type = "text",
+                    text = ex.Message
+                }
+            },
+            isError = true
+        };
+    }
+}
+
+static string RequiredJsonString(JsonElement element, string propertyName)
+{
+    return element.TryGetProperty(propertyName, out var property)
+        && property.ValueKind == JsonValueKind.String
+        && !string.IsNullOrWhiteSpace(property.GetString())
+            ? property.GetString()!
+            : throw new InvalidOperationException($"{propertyName} is required.");
+}
+
+static async Task WriteJsonRpcResultAsync(JsonSerializerOptions jsonOptions, JsonElement? id, object result)
+{
+    var response = new Dictionary<string, object?>
+    {
+        ["jsonrpc"] = "2.0",
+        ["id"] = id.HasValue ? id.Value : null,
+        ["result"] = result
+    };
+    await Console.Out.WriteLineAsync(JsonSerializer.Serialize(response, jsonOptions));
+    await Console.Out.FlushAsync();
+}
+
+static async Task WriteJsonRpcErrorAsync(
+    JsonSerializerOptions jsonOptions,
+    JsonElement? id,
+    int code,
+    string message,
+    string? data = null)
+{
+    var error = data is null
+        ? new Dictionary<string, object?>
+        {
+            ["code"] = code,
+            ["message"] = message
+        }
+        : new Dictionary<string, object?>
+        {
+            ["code"] = code,
+            ["message"] = message,
+            ["data"] = data
+        };
+    var response = new Dictionary<string, object?>
+    {
+        ["jsonrpc"] = "2.0",
+        ["id"] = id.HasValue ? id.Value : null,
+        ["error"] = error
+    };
+    await Console.Out.WriteLineAsync(JsonSerializer.Serialize(response, jsonOptions));
+    await Console.Out.FlushAsync();
+}
+
+static object[] GetToolDefinitions()
+{
+    return new[]
+    {
+        Tool("leadgen_health", "Check whether the LeadGen MCP server is available."),
+        Tool("list_campaigns", "List recent LeadGen campaigns.", new()
+        {
+            ["search"] = StringProperty("Optional campaign name or business name filter.")
+        }),
+        Tool("get_campaign", "Read a campaign summary by id.", new()
+        {
+            ["campaignId"] = StringProperty("Campaign GUID.")
+        }, "campaignId"),
+        Tool("create_campaign", "Create a LeadGen campaign.", new()
+        {
+            ["name"] = StringProperty("Campaign name."),
+            ["businessName"] = StringProperty("Business name."),
+            ["businessDescription"] = StringProperty("Description of what the business does."),
+            ["websiteUrl"] = StringProperty("Optional business website URL."),
+            ["targetGeography"] = StringProperty("Optional target geography."),
+            ["targetCustomers"] = StringProperty("Optional target customer description."),
+            ["exclusions"] = StringProperty("Optional exclusions.")
+        }, "name", "businessName", "businessDescription"),
+        Tool("start_lead_run", "Start the real provider lead discovery workflow for a campaign.", new()
+        {
+            ["campaignId"] = StringProperty("Campaign GUID."),
+            ["leadCount"] = IntegerProperty("Requested lead count. Defaults to 5.")
+        }, "campaignId"),
+        Tool("get_run", "Read a lead discovery run by id.", new()
+        {
+            ["runId"] = StringProperty("Run GUID.")
+        }, "runId"),
+        Tool("search_leads", "Search lead summaries by company, domain, or dossier text.", new()
+        {
+            ["query"] = StringProperty("Search query.")
+        }),
+        Tool("get_lead_dossier", "Read the full dossier, evidence, and contacts for a lead.", new()
+        {
+            ["leadId"] = StringProperty("Lead GUID.")
+        }, "leadId"),
+        Tool("update_lead_status", "Update a lead review status.", new()
+        {
+            ["leadId"] = StringProperty("Lead GUID."),
+            ["status"] = StatusProperty()
+        }, "leadId", "status"),
+        Tool("add_lead_note", "Add a note to a lead dossier.", new()
+        {
+            ["leadId"] = StringProperty("Lead GUID."),
+            ["body"] = StringProperty("Note body.")
+        }, "leadId", "body")
+    };
+}
+
+static object Tool(
+    string name,
+    string description,
+    Dictionary<string, object?>? properties = null,
+    params string[] required)
+{
+    return new
+    {
+        name,
+        description,
+        inputSchema = new
+        {
+            type = "object",
+            properties = properties ?? new Dictionary<string, object?>(),
+            required
+        }
+    };
+}
+
+static object StringProperty(string description)
+{
+    return new
+    {
+        type = "string",
+        description
+    };
+}
+
+static object IntegerProperty(string description)
+{
+    return new
+    {
+        type = "integer",
+        description
+    };
+}
+
+static object StatusProperty()
+{
+    return new
+    {
+        type = "string",
+        description = "Lead status.",
+        @enum = new[] { "New", "Reviewed", "Qualified", "Rejected", "Archived" }
+    };
 }
 
 static Dictionary<string, string?> ToDictionary(JsonElement element)
