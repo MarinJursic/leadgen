@@ -76,6 +76,8 @@ The workflow uses DeepSeek for ICP/query planning and Tavily for public web sear
 dotnet test LeadGen.sln
 ```
 
+The default test suite does not require external provider keys and is expected to run without skipped tests.
+
 Targeted runs:
 
 ```bash
@@ -83,7 +85,13 @@ dotnet test tests/LeadGen.Tests/LeadGen.Tests.csproj
 dotnet test tests/LeadGen.PlaywrightTests/LeadGen.PlaywrightTests.csproj
 ```
 
-CRUD, search, logging, error, and mobile smoke tests run without provider calls. Tests that call DeepSeek/Tavily are marked as real-provider tests and run only when `DEEPSEEK_API_KEY` and `TAVILY_API_KEY` are set in the test process environment.
+CRUD, search, logging, error, mobile smoke, MCP smoke, and the default browser happy path run without provider calls.
+
+Optional real-provider tests can be compiled in and run only when `DEEPSEEK_API_KEY` and `TAVILY_API_KEY` are set in the test process environment:
+
+```bash
+dotnet test LeadGen.sln -p:DefineConstants=REAL_PROVIDER_TESTS
+```
 
 ## JSON API
 
@@ -152,6 +160,8 @@ IDE config example:
 Tools exposed:
 
 `leadgen_health`, `list_campaigns`, `get_campaign`, `create_campaign`, `start_lead_run`, `get_run`, `search_leads`, `get_lead_dossier`, `update_lead_status`, `add_lead_note`.
+
+See `docs/mcp-demo.md` for the MCP demo checklist and automated smoke test details.
 
 ## Azure App Service Deploy
 

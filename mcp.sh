@@ -16,6 +16,22 @@ export ConnectionStrings__DefaultConnection="${ConnectionStrings__DefaultConnect
 
 PROJECT="src/LeadGen.Mcp/LeadGen.Mcp.csproj"
 
+ensure_built() {
+  local build_log
+  build_log="$(mktemp)"
+  if ! dotnet build "$PROJECT" --nologo --verbosity quiet >"$build_log" 2>&1; then
+    cat "$build_log" >&2
+    rm -f "$build_log"
+    return 1
+  fi
+  rm -f "$build_log"
+}
+
+run_mcp() {
+  ensure_built
+  dotnet run --no-build --project "$PROJECT"
+}
+
 usage() {
   cat <<'EOF'
 Usage:
@@ -37,14 +53,15 @@ EOF
 }
 
 run_tool() {
-  dotnet run --project "$PROJECT" -- --tool "$@"
+  ensure_built
+  dotnet run --no-build --project "$PROJECT" -- --tool "$@"
 }
 
 if [[ $# -eq 0 ]]; then
-  echo "Starting LeadGen.Mcp"
-  echo "Database: ${ConnectionStrings__DefaultConnection#Data Source=}"
-  echo "Press Ctrl+C to stop."
-  dotnet run --project "$PROJECT"
+  echo "Starting LeadGen.Mcp" >&2
+  echo "Database: ${ConnectionStrings__DefaultConnection#Data Source=}" >&2
+  echo "Press Ctrl+C to stop." >&2
+  run_mcp
   exit 0
 fi
 

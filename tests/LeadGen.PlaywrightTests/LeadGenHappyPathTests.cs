@@ -11,8 +11,57 @@ namespace LeadGen.PlaywrightTests;
 
 public sealed class LeadGenHappyPathTests
 {
-    [RealProviderFact]
+    [Fact]
     public async Task LeadGenHappyPath_10Steps()
+    {
+        await using var app = await TestWebApp.StartAsync();
+        using var playwright = await Playwright.CreateAsync();
+        await using var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
+        {
+            Headless = true,
+            ExecutablePath = BrowserPaths.FindChromiumExecutable()
+        });
+        var page = await browser.NewPageAsync();
+
+        await page.GotoAsync(app.BaseUrl);
+        await ExpectTextAsync(page, "Lead discovery desk");
+
+        await page.GetByRole(AriaRole.Link, new() { Name = "Campaigns" }).ClickAsync();
+        await ExpectTextAsync(page, "Business profiles");
+
+        await page.GetByRole(AriaRole.Link, new() { Name = "Create campaign" }).ClickAsync();
+        await page.GetByLabel("Business name").FillAsync("Playwright Studio");
+        await page.GetByLabel("Website URL").FillAsync("https://playwright-studio.example");
+        await page.GetByLabel("Business location").FillAsync("Croatia");
+        await page.GetByLabel("What the business does").FillAsync("We build conversion-focused websites for private clinics in Croatia. The AI should infer likely buyers such as dental clinics, private practices, and healthcare service businesses from this offer.");
+
+        await page.GetByRole(AriaRole.Button, new() { Name = "Create campaign" }).ClickAsync();
+        await page.WaitForURLAsync(new Regex("/Campaigns/Details/[0-9a-fA-F-]+$"));
+        await ExpectTextAsync(page, "Playwright Studio lead search");
+
+        var campaignId = ExtractCampaignId(page.Url);
+        var leadName = await CreateManualLeadAsync(app.BaseUrl, "Playwright Happy Path Lead", campaignId: campaignId);
+        await page.GotoAsync($"{app.BaseUrl}/Campaigns/Details/{campaignId}");
+        await ExpectTextAsync(page, leadName);
+
+        await page.Locator($"a[href='/Leads?campaignId={campaignId}']").ClickAsync();
+        await ExpectTextAsync(page, "Dossiers");
+
+        await page.Locator("form.global-search input[name='q']").FillAsync(leadName);
+        await page.Locator("form.global-search button").ClickAsync();
+        await ExpectTextAsync(page, "Global search");
+
+        await page.GetByRole(AriaRole.Link, new() { NameRegex = new Regex(Regex.Escape(leadName)) }).First.ClickAsync();
+        await ExpectTextAsync(page, "Lead dossier");
+
+        await page.Locator("#noteBody").FillAsync("Playwright happy path note");
+        await page.GetByRole(AriaRole.Button, new() { Name = "Add note" }).ClickAsync();
+        await ExpectTextAsync(page, "Playwright happy path note");
+    }
+
+#if REAL_PROVIDER_TESTS
+    [RealProviderFact]
+    public async Task RealProviderLeadGenHappyPath_10Steps()
     {
         await using var app = await TestWebApp.StartAsync();
         using var playwright = await Playwright.CreateAsync();
@@ -59,6 +108,7 @@ public sealed class LeadGenHappyPathTests
         await page.GetByRole(AriaRole.Button, new() { Name = "Add note" }).ClickAsync();
         await ExpectTextAsync(page, "Playwright happy path note");
     }
+#endif
 
     [Fact]
     public async Task MobileSmoke_390px_MainPagesDoNotOverflow()
@@ -310,26 +360,30 @@ public sealed class LeadGenHappyPathTests
         string companyName,
         string campaignName = "Mobile Smoke Campaign",
         string businessName = "Mobile Smoke Studio",
-        int fitScore = 76)
+        int fitScore = 76,
+        Guid? campaignId = null)
     {
         using var client = new HttpClient { BaseAddress = new Uri(baseUrl) };
-        var campaignResponse = await client.PostAsJsonAsync("/api/campaigns", new
+        if (!campaignId.HasValue)
         {
-            name = campaignName,
-            businessName,
-            websiteUrl = "https://mobile-smoke.example",
-            businessDescription = "Manual campaign for mobile smoke verification.",
-            targetGeography = "Croatia",
-            targetCustomers = "Manual verification businesses",
-            exclusions = "No login-gated sites"
-        });
-        campaignResponse.EnsureSuccessStatusCode();
-        using var campaignDocument = await JsonDocument.ParseAsync(await campaignResponse.Content.ReadAsStreamAsync());
-        var campaignId = campaignDocument.RootElement.GetProperty("id").GetGuid();
+            var campaignResponse = await client.PostAsJsonAsync("/api/campaigns", new
+            {
+                name = campaignName,
+                businessName,
+                websiteUrl = "https://mobile-smoke.example",
+                businessDescription = "Manual campaign for mobile smoke verification.",
+                targetGeography = "Croatia",
+                targetCustomers = "Manual verification businesses",
+                exclusions = "No login-gated sites"
+            });
+            campaignResponse.EnsureSuccessStatusCode();
+            using var campaignDocument = await JsonDocument.ParseAsync(await campaignResponse.Content.ReadAsStreamAsync());
+            campaignId = campaignDocument.RootElement.GetProperty("id").GetGuid();
+        }
 
         var leadResponse = await client.PostAsJsonAsync("/api/leads", new
         {
-            campaignId,
+            campaignId = campaignId.Value,
             companyName,
             domain = "mobile-smoke.example",
             websiteUrl = "https://mobile-smoke.example",
@@ -345,6 +399,13 @@ public sealed class LeadGenHappyPathTests
         });
         leadResponse.EnsureSuccessStatusCode();
         return companyName;
+    }
+
+    private static Guid ExtractCampaignId(string url)
+    {
+        var match = Regex.Match(url, @"/Campaigns/Details/([0-9a-fA-F-]+)$");
+        Assert.True(match.Success, $"Could not extract campaign id from URL '{url}'.");
+        return Guid.Parse(match.Groups[1].Value);
     }
 
     private static async Task<Guid> CreateGraphRunAsync(string databasePath)

@@ -52,6 +52,7 @@ public sealed class LeadGenApiEndpointTests
         Assert.Equal(HttpStatusCode.NotFound, missing.StatusCode);
     }
 
+#if REAL_PROVIDER_TESTS
     [RealProviderFact]
     public async Task GenerateIcp_WithRealProvider_ReturnsJson()
     {
@@ -105,6 +106,7 @@ public sealed class LeadGenApiEndpointTests
         Assert.Equal("Completed", run.RootElement.GetProperty("status").GetString());
         Assert.True(run.RootElement.GetProperty("leadCount").GetInt32() >= 1);
     }
+#endif
 
     [Fact]
     public async Task Leads_Crud_Works()
