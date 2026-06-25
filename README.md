@@ -120,19 +120,21 @@ Errors return:
 Run the local MCP server with the same environment variables as the web app:
 
 ```bash
-set -a
-source .env.local
-set +a
-dotnet run --project src/LeadGen.Mcp
+./mcp.sh
 ```
 
 Direct CLI checks:
 
 ```bash
-dotnet run --project src/LeadGen.Mcp -- --tool leadgen_health
-dotnet run --project src/LeadGen.Mcp -- --tool list_campaigns
-dotnet run --project src/LeadGen.Mcp -- --tool search_leads --query CRM
+./mcp.sh health
+./mcp.sh campaigns
+./mcp.sh search CRM
+./mcp.sh dossier <lead-id>
+./mcp.sh note <lead-id> "MCP demo note"
 ```
+
+`mcp.sh` loads `.env.local` and defaults `ConnectionStrings__DefaultConnection` to
+`src/LeadGen.Web/App_Data/leadgen.db`, so MCP sees the same local SQLite data as the web app.
 
 IDE config example:
 
